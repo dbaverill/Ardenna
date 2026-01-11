@@ -319,4 +319,323 @@
                 const legMiles = parseFloat(t.miles) || 0;
                 runningTotal += legMiles;
                 t.calculatedTotal = runningTotal;
-                L.circleMarker
+                L.circleMarker(t.startCoords, {radius: 3, color: '#888', fillColor: '#ccc', fillOpacity:1, weight:1}).addTo(map);
+                L.polyline([t.startCoords, t.endCoords], {color: '#999', weight: 2, opacity: 0.4, dashArray: '5,5'}).addTo(map);
+                allCoords.push(t.startCoords, t.endCoords);
+            });
+
+            if(allCoords.length > 0) map.fitBounds(allCoords);
+
+            const displayTrips = [...trips].sort((a, b) => new Date(b.date) - new Date(a.date));
+            const groups = {};
+            displayTrips.forEach(t => {
+                const k = new Date(t.date).toLocaleString('default', { month: 'long', year: 'numeric' });
+                if(!groups[k]) groups[k] = [];
+                groups[k].push(t);
+            });
+
+            Object.keys(groups).forEach(month => {
+                const header = document.createElement('div');
+                header.innerHTML = `<strong>${month}</strong>`;
+                header.style.cssText = "padding:10px; background:#eee; font-weight:bold; border-bottom:1px solid #ddd;";
+                container.appendChild(header);
+
+                groups[month].forEach(trip => {
+                    const el = document.createElement('div');
+                    el.className = 'log-entry';
+                    el.id = `entry-${trip.date}-${trip.title.replace(/\s/g,'')}`;
+                    const safeTitle = trip.title.replace(/'/g, "\\'");
+                    const milesDisplay = trip.miles ? `<div class="log-stats">Dist: ${trip.miles} nm | Total: ${trip.calculatedTotal.toFixed(1)} nm</div>` : '';
+
+                    el.innerHTML = `
+                        <span class="action-btn delete-btn admin-only" onclick="event.stopPropagation(); deleteTrip('${trip.date}', '${safeTitle}')">✕</span>
+                        <span class="action-btn edit-btn admin-only" onclick="event.stopPropagation(); editTrip('${trip.date}', '${safeTitle}')">✎</span>
+                        <div style="font-size:0.8em; color:#888; font-weight:bold">${trip.date}</div>
+                        <h3 style="margin:5px 0">${trip.title}</h3>
+                        ${milesDisplay}
+                        <p>${trip.text}</p>
+                        ${trip.image ? `<img src="${getImgUrl(trip.image)}" class="log-img">` : ''}
+                    `;
+                    el.onclick = () => highlightTripOnMap(trip, el.id);
+                    container.appendChild(el);
+                });
+            });
+            checkAdmin();
+        }
+
+        function highlightTripOnMap(trip, elemId) {
+            activeLayerGroup.clearLayers();
+            document.querySelectorAll('.log-entry').forEach(e => e.classList.remove('active-trip'));
+            const el = document.getElementById(elemId);
+            if(el) el.classList.add('active-trip');
+            L.marker(trip.startCoords).addTo(activeLayerGroup).bindPopup(`<b>${trip.title}</b><br>Start`).openPopup();
+            L.marker(trip.endCoords).addTo(activeLayerGroup).bindPopup('End');
+            L.polyline([trip.startCoords, trip.endCoords], {color: 'navy', weight: 4}).addTo(activeLayerGroup);
+            map.flyToBounds([trip.startCoords, trip.endCoords], {padding: [50,50], maxZoom: 9});
+        }
+
+        function resetMap() {
+            activeLayerGroup.clearLayers();
+            document.querySelectorAll('.log-entry').forEach(e => e.classList.remove('active-trip'));
+            const allCoords = trips.flatMap(t => [t.startCoords, t.endCoords]);
+            if(allCoords.length > 0) map.flyToBounds(allCoords);
+        }
+
+        function renderManifest() {
+            quillBoat.root.innerHTML = manifest.boat || "Enter details...";
+            quillTech.root.innerHTML = manifest.tech || "Enter details...";
+            quillCrew.root.innerHTML = manifest.crew || "Enter details...";
+        }
+
+        function renderMaint() {
+            const tbody = document.getElementById('maint-body');
+            tbody.innerHTML = '';
+            maintLog.sort((a, b) => new Date(b.date) - new Date(a.date));
+            maintLog.forEach(item => {
+                const tr = document.createElement('tr');
+                const safeItem = item.item.replace(/'/g, "\\'");
+                tr.innerHTML = `
+                    <td>${item.date}</td>
+                    <td><strong>${item.item}</strong></td>
+                    <td>${item.notes}</td>
+                    <td class="${item.status === 'Done' ? 'status-done' : 'status-pending'}">${item.status}</td>
+                    <td>${item.image ? `<a href="${getImgUrl(item.image)}" target="_blank"><img src="${getImgUrl(item.image)}" class="maint-thumb"></a>` : ''}</td>
+                    <td><span class="action-btn delete-btn admin-only" style="position:static; display:none;" onclick="deleteMaint('${item.date}', '${safeItem}')">✕</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+            checkAdmin();
+        }
+
+        // ==========================================
+        // 4. ADMIN ACTIONS
+        // ==========================================
+        function promptAdmin() {
+            // Logout Logic
+            if (GH_TOKEN) {
+                if(confirm("Logout?")) {
+                    localStorage.removeItem('gh_token');
+                    GH_TOKEN = null;
+                    checkAdmin();
+                    alert("Logged out.");
+                }
+                return;
+            }
+
+            // Login Logic
+            const token = prompt("Enter GitHub Personal Access Token:");
+            if (token && token.startsWith('ghp_')) {
+                GH_TOKEN = token;
+                localStorage.setItem('gh_token', token); // Save permanently
+                checkAdmin();
+                alert("Admin Mode Enabled");
+            } else {
+                alert("Invalid Token");
+            }
+        }
+
+        function checkAdmin() {
+            const isAdmin = !!GH_TOKEN;
+            document.querySelector('.admin-lock').classList.toggle('admin-active', isAdmin);
+            const logHeader = document.getElementById('log-header');
+            if (logHeader) logHeader.style.display = isAdmin ? 'block' : 'none';
+            
+            document.querySelectorAll('.admin-only').forEach(el => {
+                if(el.tagName === 'SPAN') el.style.display = isAdmin ? 'block' : 'none';
+                else el.style.display = isAdmin ? 'inline-block' : 'none';
+            });
+
+            quillBoat.enable(isAdmin);
+            quillTech.enable(isAdmin);
+            quillCrew.enable(isAdmin);
+        }
+
+        // --- EDIT/DELETE LOGIC ---
+        function editTrip(date, title) {
+            const trip = trips.find(t => t.date === date && t.title === title);
+            if (!trip) return;
+
+            editingTrip = trip; 
+
+            // Fill Form
+            document.getElementById('title').value = trip.title;
+            document.getElementById('date').value = trip.date;
+            document.getElementById('miles').value = trip.miles || '';
+            document.getElementById('narrative').value = trip.text;
+            
+            // Handle Coords
+            const startStr = `${trip.startCoords[0].toFixed(4)}, ${trip.startCoords[1].toFixed(4)}`;
+            const endStr = `${trip.endCoords[0].toFixed(4)}, ${trip.endCoords[1].toFixed(4)}`;
+            
+            const startInput = document.getElementById('startCoord');
+            startInput.value = startStr;
+            startInput.dataset.raw = JSON.stringify(trip.startCoords);
+            
+            const endInput = document.getElementById('endCoord');
+            endInput.value = endStr;
+            endInput.dataset.raw = JSON.stringify(trip.endCoords);
+
+            // UI Changes
+            document.getElementById('form-title').innerText = "Edit Entry";
+            document.getElementById('entry-form').style.display = 'block';
+            window.scrollTo(0,0);
+        }
+
+        async function saveEntryToGitHub() {
+            const title = document.getElementById('title').value;
+            const date = document.getElementById('date').value;
+            const text = document.getElementById('narrative').value;
+            const miles = document.getElementById('miles').value;
+            const startRaw = document.getElementById('startCoord').dataset.raw;
+            const endRaw = document.getElementById('endCoord').dataset.raw;
+            const fileInput = document.getElementById('photoInput');
+
+            if (!title || !date || !startRaw) return alert("Missing Fields");
+
+            let imagePath = null;
+            
+            if (editingTrip && !fileInput.files[0]) {
+                imagePath = editingTrip.image;
+            } 
+            else if (fileInput.files[0]) {
+                imagePath = await ghUploadImage(fileInput.files[0]);
+                if (!imagePath) return alert("Image Upload Failed");
+            }
+
+            const current = await ghGet('trips.json');
+            let updatedList = current ? current.content : [];
+
+            if (editingTrip) {
+                updatedList = updatedList.filter(t => !(t.date === editingTrip.date && t.title === editingTrip.title));
+            }
+
+            const newEntry = { 
+                title, date, text, miles, 
+                image: imagePath, 
+                startCoords: JSON.parse(startRaw), 
+                endCoords: JSON.parse(endRaw) 
+            };
+            
+            updatedList.push(newEntry);
+
+            const msg = editingTrip ? `Update trip: ${title}` : `Add trip: ${title}`;
+            const success = await ghPut('trips.json', JSON.stringify(updatedList, null, 2), msg, current ? current.sha : null);
+            
+            if (success) { 
+                alert("Saved!"); 
+                document.getElementById('entry-form').style.display = 'none';
+                document.getElementById('title').value = '';
+                document.getElementById('narrative').value = '';
+                document.getElementById('miles').value = '';
+                document.getElementById('form-title').innerText = "New Entry";
+                editingTrip = null; 
+                loadData(); 
+            }
+        }
+
+        async function deleteTrip(date, title) {
+            if(!confirm("Delete this entry?")) return;
+            const current = await ghGet('trips.json');
+            if(!current) return alert("Sync Error");
+            const updatedList = current.content.filter(t => !(t.date === date && t.title === title));
+            const success = await ghPut('trips.json', JSON.stringify(updatedList, null, 2), `Delete: ${title}`, current.sha);
+            if(success) { alert("Deleted."); loadData(); }
+        }
+
+        async function deleteMaint(date, item) {
+            if(!confirm("Delete this record?")) return;
+            const current = await ghGet('maintenance.json');
+            if(!current) return alert("Sync Error");
+            const updatedList = current.content.filter(m => !(m.date === date && m.item === item));
+            const success = await ghPut('maintenance.json', JSON.stringify(updatedList, null, 2), `Delete Maint: ${item}`, current.sha);
+            if(success) { alert("Deleted."); loadData(); }
+        }
+
+        async function saveMaintenanceToGitHub() {
+            const date = document.getElementById('m-date').value;
+            const item = document.getElementById('m-item').value;
+            const notes = document.getElementById('m-notes').value;
+            const status = document.getElementById('m-status').value;
+            const fileInput = document.getElementById('m-photo');
+            if (!date || !item) return alert("Missing Fields");
+
+            let imagePath = null;
+            if (fileInput.files[0]) {
+                imagePath = await ghUploadImage(fileInput.files[0]);
+                if (!imagePath) return alert("Image Upload Failed");
+            }
+            const current = await ghGet('maintenance.json');
+            const updatedList = current ? [...current.content, { date, item, notes, status, image: imagePath }] 
+                                        : [{ date, item, notes, status, image: imagePath }];
+            const success = await ghPut('maintenance.json', JSON.stringify(updatedList, null, 2), `Maint: ${item}`, current ? current.sha : null);
+            if (success) { alert("Saved!"); toggleForm('maint-form'); loadData(); }
+        }
+
+        async function saveManifestToGitHub() {
+            const newManifest = {
+                boat: quillBoat.root.innerHTML,
+                tech: quillTech.root.innerHTML,
+                crew: quillCrew.root.innerHTML
+            };
+            const current = await ghGet('manifest.json');
+            const success = await ghPut('manifest.json', JSON.stringify(newManifest, null, 2), "Update Manifest", current ? current.sha : null);
+            if (success) alert("Manifest Updated!");
+        }
+
+        // ==========================================
+        // 5. UI HANDLERS
+        // ==========================================
+        function toggleForm(id) {
+            const f = document.getElementById(id);
+            if (id === 'entry-form' && f.style.display === 'none') {
+                 if (!editingTrip) {
+                    document.getElementById('title').value = '';
+                    document.getElementById('narrative').value = '';
+                    document.getElementById('miles').value = '';
+                    document.getElementById('date').value = new Date().toISOString().split('T')[0];
+                    document.getElementById('form-title').innerText = "New Entry";
+                 }
+            }
+            f.style.display = f.style.display === 'grid' || f.style.display === 'block' ? 'none' : (id === 'maint-form' ? 'grid' : 'block');
+            if (id === 'entry-form' && f.style.display === 'none') editingTrip = null;
+            map.invalidateSize();
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.view-container').forEach(e => e.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(e => e.classList.remove('active'));
+            if(tab === 'logbook') {
+                document.getElementById('view-logbook').classList.add('active');
+                document.querySelectorAll('.tab')[0].classList.add('active');
+                map.invalidateSize();
+            } else {
+                document.getElementById('view-manifest').classList.add('active');
+                document.querySelectorAll('.tab')[1].classList.add('active');
+            }
+        }
+
+        function showLoading(show) { document.getElementById('loading').style.display = show ? 'flex' : 'none'; }
+
+        map.on('click', function(e) {
+            if (document.getElementById('entry-form').style.display === 'block') {
+                const c = `${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`;
+                const raw = JSON.stringify([e.latlng.lat, e.latlng.lng]);
+                if (pickingStart) {
+                    document.getElementById('startCoord').value = c;
+                    document.getElementById('startCoord').dataset.raw = raw;
+                    L.popup().setLatLng(e.latlng).setContent("Start Set").openOn(map);
+                    pickingStart = false;
+                } else {
+                    document.getElementById('endCoord').value = c;
+                    document.getElementById('endCoord').dataset.raw = raw;
+                    L.popup().setLatLng(e.latlng).setContent("End Set").openOn(map);
+                    pickingStart = true;
+                }
+            }
+        });
+
+        // INIT
+        loadData();
+    </script>
+</body>
+</html>
