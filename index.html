@@ -188,9 +188,17 @@
         // 2. GITHUB API HELPERS
         // ==========================================
         async function ghGet(path) {
-            const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}?ref=${CONFIG.branch}`;
+            // We add "&t=" + Date.now() to force the browser to get a fresh version
+            const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}?ref=${CONFIG.branch}&t=${Date.now()}`;
+            
             const headers = GH_TOKEN ? { "Authorization": `token ${GH_TOKEN}` } : {};
-            const res = await fetch(url, { headers });
+            
+            // We also tell the fetch command explicitly to not use cache
+            const res = await fetch(url, { 
+                headers, 
+                cache: "no-store" 
+            });
+            
             if (!res.ok) return null;
             const data = await res.json();
             return {
