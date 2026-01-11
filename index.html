@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>s/v Ardenna Log</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <style>
         body { font-family: -apple-system, system-ui, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; background: #f4f4f9; }
         
@@ -34,7 +35,7 @@
         .map-reset-btn:hover { background: #f4f4f4; }
 
         /* Common Elements */
-        .sidebar-header { padding: 20px; background: white; border-bottom: 1px solid #eee; display: none; /* Hidden by default to save space */ }
+        .sidebar-header { padding: 20px; background: white; border-bottom: 1px solid #eee; display: none; }
         
         button.primary { background: #007bff; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 1rem; }
         button.primary:disabled { background: #ccc; cursor: not-allowed; }
@@ -46,23 +47,24 @@
         .log-entry:hover { border-color: #3498db; }
         .log-entry.active-trip { border-left: 5px solid #3498db; background: #fafdff; }
 
-        /* Photo CSS: HEIGHT AUTO */
         .log-img { width: 100%; height: auto; border-radius: 4px; margin-top: 10px; background: #eee; display: block; }
         
         .log-stats { font-size: 0.85em; color: #555; background: #f1f3f5; padding: 5px 10px; border-radius: 4px; display: inline-block; margin-top: 5px; font-weight: 500; }
         #entry-form { display: none; padding: 15px; background: #eef2f5; border-bottom: 1px solid #ddd; }
         
-        /* Delete Button */
         .delete-btn { position: absolute; top: 10px; right: 10px; color: #ff4444; font-weight: bold; cursor: pointer; font-size: 1.2rem; line-height: 1; padding: 5px; z-index: 10; display: none; }
         .delete-btn:hover { color: red; transform: scale(1.1); }
 
         /* Vessel Info & Maintenance */
         #ship-manifest { flex-direction: column; overflow-y: auto; padding: 40px; box-sizing: border-box; max-width: 1200px; margin: 0 auto; width: 100%; }
         .manifest-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 40px; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #eee; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #eee; display: flex; flex-direction: column; }
         .card h2 { margin-top: 0; font-size: 1.2rem; color: #2c3e50; border-bottom: 2px solid #f1f1f1; padding-bottom: 10px; }
-        .card textarea { height: 200px; resize: vertical; overflow-y: auto; background: #fafafa; border: none; }
-        .card textarea:focus { background: white; outline: 1px solid #3498db; }
+        
+        /* QUILL EDITOR OVERRIDES */
+        .ql-container { font-family: -apple-system, system-ui, sans-serif; font-size: 1rem; height: 250px; }
+        .ql-toolbar { border-radius: 4px 4px 0 0; }
+        .ql-container { border-radius: 0 0 4px 4px; background: #fafafa; }
 
         /* Maintenance Table */
         .maint-section { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
@@ -132,15 +134,15 @@
             <div class="manifest-grid">
                 <div class="card">
                     <h2>The Vessel</h2>
-                    <textarea id="txt-boat" disabled>Loading...</textarea>
+                    <div id="editor-boat"></div>
                 </div>
                 <div class="card">
                     <h2>Technical Specs</h2>
-                    <textarea id="txt-tech" disabled>Loading...</textarea>
+                    <div id="editor-tech"></div>
                 </div>
                 <div class="card">
                     <h2>The Crew</h2>
-                    <textarea id="txt-crew" disabled>Loading...</textarea>
+                    <div id="editor-crew"></div>
                 </div>
             </div>
             <div style="text-align: center; margin-bottom: 30px;">
@@ -183,13 +185,15 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    
     <script>
         // ==========================================
         // 1. CONFIGURATION (EDIT THIS!)
         // ==========================================
         const CONFIG = {
-            owner: 'dbaverill', // e.g. 'johndoe'
-            repo: 'Ardenna',    // e.g. 'logbook'
+            owner: 'YOUR_GITHUB_USERNAME', // e.g. 'johndoe'
+            repo: 'sailingardenna.com',    // e.g. 'logbook'
             branch: 'main'
         };
 
@@ -198,12 +202,22 @@
         let trips = [];
         let maintLog = [];
         let manifest = { boat: "", tech: "", crew: "" };
-        let pickingStart = true;
         let activeLayerGroup = L.layerGroup(); 
+        let pickingStart = true;
         
+        // INIT MAP
         const map = L.map('map').setView([41.49, -71.31], 6);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '© OpenStreetMap' }).addTo(map);
         activeLayerGroup.addTo(map);
+
+        // INIT QUILL EDITORS
+        const quillOptions = {
+            theme: 'snow',
+            modules: { toolbar: [['bold', 'italic', 'underline'], [{'list': 'ordered'}, {'list': 'bullet'}], ['clean']] }
+        };
+        const quillBoat = new Quill('#editor-boat', quillOptions);
+        const quillTech = new Quill('#editor-tech', quillOptions);
+        const quillCrew = new Quill('#editor-crew', quillOptions);
 
         // ==========================================
         // 2. GITHUB API HELPERS
@@ -245,21 +259,15 @@
             showLoading(true);
             const filename = `images/${Date.now()}-${file.name.replace(/\s/g, '_')}`;
             const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${filename}`;
-            
             const base64 = await new Promise((resolve) => {
                 const reader = new FileReader();
                 reader.onloadend = () => resolve(reader.result.split(',')[1]);
                 reader.readAsDataURL(file);
             });
-
             const res = await fetch(url, {
                 method: 'PUT',
                 headers: { "Authorization": `token ${GH_TOKEN}`, "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    message: `Upload ${filename}`,
-                    content: base64,
-                    branch: CONFIG.branch
-                })
+                body: JSON.stringify({ message: `Upload ${filename}`, content: base64, branch: CONFIG.branch })
             });
             showLoading(false);
             if(res.ok) return filename; 
@@ -298,12 +306,9 @@
         function renderLog() {
             const container = document.getElementById('entries-container');
             container.innerHTML = '';
-            
-            // Clear Map
             map.eachLayer(l => { if (!!l.toGeoJSON && l !== activeLayerGroup) map.removeLayer(l); });
             activeLayerGroup.clearLayers();
 
-            // 1. Sort Chronologically & Calc
             trips.sort((a, b) => new Date(a.date) - new Date(b.date));
             let runningTotal = 0;
             const allCoords = []; 
@@ -312,20 +317,14 @@
                 const legMiles = parseFloat(t.miles) || 0;
                 runningTotal += legMiles;
                 t.calculatedTotal = runningTotal;
-                
-                // Add Clean Background Layers (No Pins, Thin Lines)
                 L.circleMarker(t.startCoords, {radius: 3, color: '#888', fillColor: '#ccc', fillOpacity:1, weight:1}).addTo(map);
                 L.polyline([t.startCoords, t.endCoords], {color: '#999', weight: 2, opacity: 0.4, dashArray: '5,5'}).addTo(map);
                 allCoords.push(t.startCoords, t.endCoords);
             });
 
-            // Auto-fit bounds on load
             if(allCoords.length > 0) map.fitBounds(allCoords);
 
-            // 2. Sort Newest First for List
             const displayTrips = [...trips].sort((a, b) => new Date(b.date) - new Date(a.date));
-
-            // 3. Render List
             const groups = {};
             displayTrips.forEach(t => {
                 const k = new Date(t.date).toLocaleString('default', { month: 'long', year: 'numeric' });
@@ -344,11 +343,7 @@
                     el.className = 'log-entry';
                     el.id = `entry-${trip.date}-${trip.title.replace(/\s/g,'')}`;
                     const safeTitle = trip.title.replace(/'/g, "\\'");
-                    
-                    const milesDisplay = trip.miles ? `
-                        <div class="log-stats">
-                            Dist: ${trip.miles} nm | Total: ${trip.calculatedTotal.toFixed(1)} nm
-                        </div>` : '';
+                    const milesDisplay = trip.miles ? `<div class="log-stats">Dist: ${trip.miles} nm | Total: ${trip.calculatedTotal.toFixed(1)} nm</div>` : '';
 
                     el.innerHTML = `
                         <span class="delete-btn admin-only" onclick="event.stopPropagation(); deleteTrip('${trip.date}', '${safeTitle}')">✕</span>
@@ -358,7 +353,6 @@
                         <p>${trip.text}</p>
                         ${trip.image ? `<img src="${getImgUrl(trip.image)}" class="log-img">` : ''}
                     `;
-                    
                     el.onclick = () => highlightTripOnMap(trip, el.id);
                     container.appendChild(el);
                 });
@@ -375,7 +369,6 @@
             L.marker(trip.startCoords).addTo(activeLayerGroup).bindPopup(`<b>${trip.title}</b><br>Start`).openPopup();
             L.marker(trip.endCoords).addTo(activeLayerGroup).bindPopup('End');
             L.polyline([trip.startCoords, trip.endCoords], {color: 'navy', weight: 4}).addTo(activeLayerGroup);
-
             map.flyToBounds([trip.startCoords, trip.endCoords], {padding: [50,50], maxZoom: 9});
         }
 
@@ -386,18 +379,19 @@
             if(allCoords.length > 0) map.flyToBounds(allCoords);
         }
 
-        // --- Manifest Renders ---
+        // --- Manifest Renders (Rich Text) ---
         function renderManifest() {
-            document.getElementById('txt-boat').value = manifest.boat;
-            document.getElementById('txt-tech').value = manifest.tech;
-            document.getElementById('txt-crew').value = manifest.crew;
+            // Load HTML directly into Quill
+            // Use fallback text if empty
+            quillBoat.root.innerHTML = manifest.boat || "Enter details...";
+            quillTech.root.innerHTML = manifest.tech || "Enter details...";
+            quillCrew.root.innerHTML = manifest.crew || "Enter details...";
         }
 
         function renderMaint() {
             const tbody = document.getElementById('maint-body');
             tbody.innerHTML = '';
             maintLog.sort((a, b) => new Date(b.date) - new Date(a.date));
-
             maintLog.forEach(item => {
                 const tr = document.createElement('tr');
                 const safeItem = item.item.replace(/'/g, "\\'");
@@ -415,7 +409,7 @@
         }
 
         // ==========================================
-        // 4. ADMIN ACTIONS (SAVES & DELETES)
+        // 4. ADMIN ACTIONS
         // ==========================================
         function promptAdmin() {
             const token = prompt("Enter GitHub Personal Access Token:");
@@ -432,47 +426,40 @@
         function checkAdmin() {
             const isAdmin = !!GH_TOKEN;
             document.querySelector('.admin-lock').classList.toggle('admin-active', isAdmin);
-            
-            // HIDE HEADER IF NOT ADMIN (To save space)
             const logHeader = document.getElementById('log-header');
-            if (logHeader) {
-                logHeader.style.display = isAdmin ? 'block' : 'none';
-            }
+            if (logHeader) logHeader.style.display = isAdmin ? 'block' : 'none';
             
             document.querySelectorAll('.admin-only').forEach(el => {
                 if(el.tagName === 'SPAN') el.style.display = isAdmin ? 'block' : 'none';
                 else el.style.display = isAdmin ? 'inline-block' : 'none';
             });
 
-            ['txt-boat','txt-tech','txt-crew'].forEach(id => document.getElementById(id).disabled = !isAdmin);
+            // Enable/Disable Quill Editors
+            quillBoat.enable(isAdmin);
+            quillTech.enable(isAdmin);
+            quillCrew.enable(isAdmin);
         }
 
-        // --- DELETE FUNCTIONS ---
+        // --- DELETES ---
         async function deleteTrip(date, title) {
             if(!confirm("Delete this entry?")) return;
-            
             const current = await ghGet('trips.json');
             if(!current) return alert("Sync Error");
-
             const updatedList = current.content.filter(t => !(t.date === date && t.title === title));
-            
             const success = await ghPut('trips.json', JSON.stringify(updatedList, null, 2), `Delete: ${title}`, current.sha);
             if(success) { alert("Deleted."); loadData(); }
         }
 
         async function deleteMaint(date, item) {
             if(!confirm("Delete this record?")) return;
-
             const current = await ghGet('maintenance.json');
             if(!current) return alert("Sync Error");
-
             const updatedList = current.content.filter(m => !(m.date === date && m.item === item));
-
             const success = await ghPut('maintenance.json', JSON.stringify(updatedList, null, 2), `Delete Maint: ${item}`, current.sha);
             if(success) { alert("Deleted."); loadData(); }
         }
 
-        // --- SAVE FUNCTIONS ---
+        // --- SAVES ---
         async function saveEntryToGitHub() {
             const title = document.getElementById('title').value;
             const date = document.getElementById('date').value;
@@ -491,16 +478,8 @@
             }
 
             const current = await ghGet('trips.json');
-            
-            const newEntry = {
-                title, date, text, miles,
-                image: imagePath,
-                startCoords: JSON.parse(startRaw), 
-                endCoords: JSON.parse(endRaw)
-            };
-
+            const newEntry = { title, date, text, miles, image: imagePath, startCoords: JSON.parse(startRaw), endCoords: JSON.parse(endRaw) };
             const updatedList = current ? [...current.content, newEntry] : [newEntry];
-            
             const success = await ghPut('trips.json', JSON.stringify(updatedList, null, 2), `Add trip: ${title}`, current ? current.sha : null);
             if (success) { alert("Saved!"); toggleForm('entry-form'); loadData(); }
         }
@@ -511,7 +490,6 @@
             const notes = document.getElementById('m-notes').value;
             const status = document.getElementById('m-status').value;
             const fileInput = document.getElementById('m-photo');
-
             if (!date || !item) return alert("Missing Fields");
 
             let imagePath = null;
@@ -519,20 +497,19 @@
                 imagePath = await ghUploadImage(fileInput.files[0]);
                 if (!imagePath) return alert("Image Upload Failed");
             }
-
             const current = await ghGet('maintenance.json');
             const updatedList = current ? [...current.content, { date, item, notes, status, image: imagePath }] 
                                         : [{ date, item, notes, status, image: imagePath }];
-            
             const success = await ghPut('maintenance.json', JSON.stringify(updatedList, null, 2), `Maint: ${item}`, current ? current.sha : null);
             if (success) { alert("Saved!"); toggleForm('maint-form'); loadData(); }
         }
 
         async function saveManifestToGitHub() {
+            // SAVE RICH TEXT HTML FROM QUILL
             const newManifest = {
-                boat: document.getElementById('txt-boat').value,
-                tech: document.getElementById('txt-tech').value,
-                crew: document.getElementById('txt-crew').value
+                boat: quillBoat.root.innerHTML,
+                tech: quillTech.root.innerHTML,
+                crew: quillCrew.root.innerHTML
             };
             const current = await ghGet('manifest.json');
             const success = await ghPut('manifest.json', JSON.stringify(newManifest, null, 2), "Update Manifest", current ? current.sha : null);
