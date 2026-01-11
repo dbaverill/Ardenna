@@ -364,4 +364,179 @@
                     <td>${item.date}</td>
                     <td><strong>${item.item}</strong></td>
                     <td>${item.notes}</td>
-                    <td class="${item.status === 'Done' ? 'status-done' : 'status-pending'}">${item.status}
+                    <td class="${item.status === 'Done' ? 'status-done' : 'status-pending'}">${item.status}</td>
+                    <td>${item.image ? `<a href="${getImgUrl(item.image)}" target="_blank"><img src="${getImgUrl(item.image)}" class="maint-thumb"></a>` : ''}</td>
+                    <td><span class="delete-btn admin-only" style="position:static; display:none;" onclick="deleteMaint('${item.date}', '${safeItem}')">✕</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+            checkAdmin();
+        }
+
+        // ==========================================
+        // 4. ADMIN ACTIONS (SAVES & DELETES)
+        // ==========================================
+        function promptAdmin() {
+            const token = prompt("Enter GitHub Personal Access Token:");
+            if (token && token.startsWith('ghp_')) {
+                GH_TOKEN = token;
+                sessionStorage.setItem('gh_token', token);
+                checkAdmin();
+                alert("Admin Mode Enabled");
+            } else {
+                alert("Invalid Token");
+            }
+        }
+
+        function checkAdmin() {
+            const isAdmin = !!GH_TOKEN;
+            document.querySelector('.admin-lock').classList.toggle('admin-active', isAdmin);
+            
+            document.querySelectorAll('.admin-only').forEach(el => {
+                if(el.tagName === 'SPAN') el.style.display = isAdmin ? 'block' : 'none';
+                else el.style.display = isAdmin ? 'inline-block' : 'none';
+            });
+
+            document.getElementById('admin-warning').style.display = isAdmin ? 'none' : 'block';
+            ['txt-boat','txt-tech','txt-crew'].forEach(id => document.getElementById(id).disabled = !isAdmin);
+        }
+
+        // --- DELETE FUNCTIONS ---
+        async function deleteTrip(date, title) {
+            if(!confirm("Delete this entry?")) return;
+            
+            const current = await ghGet('trips.json');
+            if(!current) return alert("Sync Error");
+
+            const updatedList = current.content.filter(t => !(t.date === date && t.title === title));
+            
+            const success = await ghPut('trips.json', JSON.stringify(updatedList, null, 2), `Delete: ${title}`, current.sha);
+            if(success) { alert("Deleted."); loadData(); }
+        }
+
+        async function deleteMaint(date, item) {
+            if(!confirm("Delete this record?")) return;
+
+            const current = await ghGet('maintenance.json');
+            if(!current) return alert("Sync Error");
+
+            const updatedList = current.content.filter(m => !(m.date === date && m.item === item));
+
+            const success = await ghPut('maintenance.json', JSON.stringify(updatedList, null, 2), `Delete Maint: ${item}`, current.sha);
+            if(success) { alert("Deleted."); loadData(); }
+        }
+
+        // --- SAVE FUNCTIONS ---
+        async function saveEntryToGitHub() {
+            const title = document.getElementById('title').value;
+            const date = document.getElementById('date').value;
+            const text = document.getElementById('narrative').value;
+            const miles = document.getElementById('miles').value; // NEW FIELD
+            const startRaw = document.getElementById('startCoord').dataset.raw;
+            const endRaw = document.getElementById('endCoord').dataset.raw;
+            const fileInput = document.getElementById('photoInput');
+
+            if (!title || !date || !startRaw) return alert("Missing Fields");
+
+            let imagePath = null;
+            if (fileInput.files[0]) {
+                imagePath = await ghUploadImage(fileInput.files[0]);
+                if (!imagePath) return alert("Image Upload Failed");
+            }
+
+            const current = await ghGet('trips.json');
+            
+            const newEntry = {
+                title, date, text, miles, // Added miles to object
+                image: imagePath,
+                startCoords: JSON.parse(startRaw), 
+                endCoords: JSON.parse(endRaw)
+            };
+
+            const updatedList = current ? [...current.content, newEntry] : [newEntry];
+            
+            const success = await ghPut('trips.json', JSON.stringify(updatedList, null, 2), `Add trip: ${title}`, current ? current.sha : null);
+            if (success) { alert("Saved!"); toggleForm('entry-form'); loadData(); }
+        }
+
+        async function saveMaintenanceToGitHub() {
+            const date = document.getElementById('m-date').value;
+            const item = document.getElementById('m-item').value;
+            const notes = document.getElementById('m-notes').value;
+            const status = document.getElementById('m-status').value;
+            const fileInput = document.getElementById('m-photo');
+
+            if (!date || !item) return alert("Missing Fields");
+
+            let imagePath = null;
+            if (fileInput.files[0]) {
+                imagePath = await ghUploadImage(fileInput.files[0]);
+                if (!imagePath) return alert("Image Upload Failed");
+            }
+
+            const current = await ghGet('maintenance.json');
+            const updatedList = current ? [...current.content, { date, item, notes, status, image: imagePath }] 
+                                        : [{ date, item, notes, status, image: imagePath }];
+            
+            const success = await ghPut('maintenance.json', JSON.stringify(updatedList, null, 2), `Maint: ${item}`, current ? current.sha : null);
+            if (success) { alert("Saved!"); toggleForm('maint-form'); loadData(); }
+        }
+
+        async function saveManifestToGitHub() {
+            const newManifest = {
+                boat: document.getElementById('txt-boat').value,
+                tech: document.getElementById('txt-tech').value,
+                crew: document.getElementById('txt-crew').value
+            };
+            const current = await ghGet('manifest.json');
+            const success = await ghPut('manifest.json', JSON.stringify(newManifest, null, 2), "Update Manifest", current ? current.sha : null);
+            if (success) alert("Manifest Updated!");
+        }
+
+        // ==========================================
+        // 5. UI HANDLERS
+        // ==========================================
+        function toggleForm(id) {
+            const f = document.getElementById(id);
+            f.style.display = f.style.display === 'grid' || f.style.display === 'block' ? 'none' : (id === 'maint-form' ? 'grid' : 'block');
+            map.invalidateSize();
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.view-container').forEach(e => e.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(e => e.classList.remove('active'));
+            if(tab === 'logbook') {
+                document.getElementById('view-logbook').classList.add('active');
+                document.querySelectorAll('.tab')[0].classList.add('active');
+                map.invalidateSize();
+            } else {
+                document.getElementById('view-manifest').classList.add('active');
+                document.querySelectorAll('.tab')[1].classList.add('active');
+            }
+        }
+
+        function showLoading(show) { document.getElementById('loading').style.display = show ? 'flex' : 'none'; }
+
+        map.on('click', function(e) {
+            if (document.getElementById('entry-form').style.display === 'block') {
+                const c = `${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`;
+                const raw = JSON.stringify([e.latlng.lat, e.latlng.lng]);
+                if (pickingStart) {
+                    document.getElementById('startCoord').value = c;
+                    document.getElementById('startCoord').dataset.raw = raw;
+                    L.popup().setLatLng(e.latlng).setContent("Start Set").openOn(map);
+                    pickingStart = false;
+                } else {
+                    document.getElementById('endCoord').value = c;
+                    document.getElementById('endCoord').dataset.raw = raw;
+                    L.popup().setLatLng(e.latlng).setContent("End Set").openOn(map);
+                    pickingStart = true;
+                }
+            }
+        });
+
+        // INIT
+        loadData();
+    </script>
+</body>
+</html>
