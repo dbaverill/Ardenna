@@ -27,7 +27,11 @@
         
         /* Sidebar & Map */
         #sidebar { width: 400px; display: flex; flex-direction: column; background: #f8f9fa; border-right: 1px solid #ddd; z-index: 2; overflow: hidden; }
-        #map { flex-grow: 1; height: 100%; z-index: 1; }
+        #map { flex-grow: 1; height: 100%; z-index: 1; position: relative; }
+        
+        /* Map Reset Button */
+        .map-reset-btn { position: absolute; top: 10px; right: 10px; z-index: 1000; background: white; padding: 8px 12px; border-radius: 4px; border: 2px solid rgba(0,0,0,0.2); cursor: pointer; font-weight: bold; font-size: 0.9em; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .map-reset-btn:hover { background: #f4f4f4; }
 
         /* Common Elements */
         .sidebar-header { padding: 20px; background: white; border-bottom: 1px solid #eee; }
@@ -37,8 +41,10 @@
         
         /* Log Entries */
         #entries-container { flex-grow: 1; overflow-y: auto; padding: 0; }
-        .log-entry { background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; border: 1px solid #eee; position: relative; }
-        
+        .log-entry { background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; border: 1px solid #eee; position: relative; transition: border-color 0.2s; }
+        .log-entry:hover { border-color: #3498db; }
+        .log-entry.active-trip { border-left: 5px solid #3498db; background: #fafdff; }
+
         /* UPDATED PHOTO CSS: HEIGHT AUTO */
         .log-img { width: 100%; height: auto; border-radius: 4px; margin-top: 10px; background: #eee; display: block; }
         
@@ -115,7 +121,10 @@
             </div>
             <div id="entries-container"></div>
         </div>
-        <div id="map"></div>
+        
+        <div id="map">
+            <button class="map-reset-btn" onclick="resetMap()">Reset View</button>
+        </div>
     </div>
 
     <div id="view-manifest" class="view-container">
@@ -190,9 +199,11 @@
         let maintLog = [];
         let manifest = { boat: "", tech: "", crew: "" };
         let pickingStart = true;
+        let activeLayerGroup = L.layerGroup(); // For highlighting trips
         
         const map = L.map('map').setView([41.49, -71.31], 6);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+        activeLayerGroup.addTo(map);
 
         // ==========================================
         // 2. GITHUB API HELPERS
@@ -288,21 +299,34 @@
         function renderLog() {
             const container = document.getElementById('entries-container');
             container.innerHTML = '';
-            map.eachLayer(l => { if (!!l.toGeoJSON) map.removeLayer(l); });
+            
+            // Clear Map
+            map.eachLayer(l => { if (!!l.toGeoJSON && l !== activeLayerGroup) map.removeLayer(l); });
+            activeLayerGroup.clearLayers();
 
-            // 1. Sort Chronologically to Calculate cumulative miles
+            // 1. Sort Chronologically & Calc
             trips.sort((a, b) => new Date(a.date) - new Date(b.date));
             let runningTotal = 0;
+            const allCoords = []; // For resetting bounds
+
             trips.forEach(t => {
                 const legMiles = parseFloat(t.miles) || 0;
                 runningTotal += legMiles;
-                t.calculatedTotal = runningTotal; 
+                t.calculatedTotal = runningTotal;
+                
+                // Add Clean Background Layers (No Pins, Thin Lines)
+                L.circleMarker(t.startCoords, {radius: 3, color: '#888', fillColor: '#ccc', fillOpacity:1, weight:1}).addTo(map);
+                L.polyline([t.startCoords, t.endCoords], {color: '#999', weight: 2, opacity: 0.4, dashArray: '5,5'}).addTo(map);
+                allCoords.push(t.startCoords, t.endCoords);
             });
 
-            // 2. Sort Reverse-Chronologically for Display (Newest Top)
+            // Auto-fit bounds on load
+            if(allCoords.length > 0) map.fitBounds(allCoords);
+
+            // 2. Sort Newest First for List
             const displayTrips = [...trips].sort((a, b) => new Date(b.date) - new Date(a.date));
 
-            // 3. Group & Render
+            // 3. Render List
             const groups = {};
             displayTrips.forEach(t => {
                 const k = new Date(t.date).toLocaleString('default', { month: 'long', year: 'numeric' });
@@ -319,6 +343,7 @@
                 groups[month].forEach(trip => {
                     const el = document.createElement('div');
                     el.className = 'log-entry';
+                    el.id = `entry-${trip.date}-${trip.title.replace(/\s/g,'')}`; // Unique ID
                     const safeTitle = trip.title.replace(/'/g, "\\'");
                     
                     const milesDisplay = trip.miles ? `
@@ -334,15 +359,39 @@
                         <p>${trip.text}</p>
                         ${trip.image ? `<img src="${getImgUrl(trip.image)}" class="log-img">` : ''}
                     `;
-                    el.onclick = () => map.flyTo(trip.startCoords, 8);
+                    
+                    // HIGHLIGHT CLICK HANDLER
+                    el.onclick = () => highlightTripOnMap(trip, el.id);
+                    
                     container.appendChild(el);
-
-                    L.marker(trip.startCoords).addTo(map).bindPopup(trip.title);
-                    L.marker(trip.endCoords).addTo(map);
-                    L.polyline([trip.startCoords, trip.endCoords], {color: 'navy', weight:4, dashArray:'10,10'}).addTo(map);
                 });
             });
             checkAdmin();
+        }
+
+        function highlightTripOnMap(trip, elemId) {
+            // 1. Reset Styles
+            activeLayerGroup.clearLayers();
+            document.querySelectorAll('.log-entry').forEach(e => e.classList.remove('active-trip'));
+            
+            // 2. Highlight List Element
+            const el = document.getElementById(elemId);
+            if(el) el.classList.add('active-trip');
+
+            // 3. Draw Active Elements on Map
+            L.marker(trip.startCoords).addTo(activeLayerGroup).bindPopup(`<b>${trip.title}</b><br>Start`).openPopup();
+            L.marker(trip.endCoords).addTo(activeLayerGroup).bindPopup('End');
+            L.polyline([trip.startCoords, trip.endCoords], {color: 'navy', weight: 4}).addTo(activeLayerGroup);
+
+            // 4. Zoom
+            map.flyToBounds([trip.startCoords, trip.endCoords], {padding: [50,50], maxZoom: 9});
+        }
+
+        function resetMap() {
+            activeLayerGroup.clearLayers();
+            document.querySelectorAll('.log-entry').forEach(e => e.classList.remove('active-trip'));
+            const allCoords = trips.flatMap(t => [t.startCoords, t.endCoords]);
+            if(allCoords.length > 0) map.flyToBounds(allCoords);
         }
 
         // --- Manifest Renders ---
