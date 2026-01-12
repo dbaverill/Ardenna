@@ -38,7 +38,24 @@
         
         /* Log Entries */
         #entries-container { flex-grow: 1; overflow-y: auto; padding: 0; }
-        .log-entry { background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; border: 1px solid #eee; position: relative; transition: border-color 0.2s; }
+        
+        /* Collapsible Month Headers */
+        .month-header { 
+            padding: 12px 15px; 
+            background: #e9ecef; 
+            font-weight: bold; 
+            border-bottom: 1px solid #ddd; 
+            cursor: pointer; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            color: #2c3e50;
+            user-select: none;
+        }
+        .month-header:hover { background: #dee2e6; }
+        .month-header .toggle-icon { font-size: 0.8em; color: #666; }
+        
+        .log-entry { background: white; padding: 15px; border-radius: 8px; margin: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; border: 1px solid #eee; position: relative; transition: border-color 0.2s; }
         .log-entry:hover { border-color: #3498db; }
         .log-entry.active-trip { border-left: 5px solid #3498db; background: #fafdff; }
         .log-img { width: 100%; height: auto; border-radius: 4px; margin-top: 10px; background: #eee; display: block; }
@@ -317,7 +334,6 @@
             const tData = await ghGet('trips.json');
             trips = tData ? tData.content : [];
             const mData = await ghGet('manifest.json');
-            // Ensure gallery array exists
             manifest = mData ? mData.content : { boat: "", tech: "", crew: "", gallery: [] };
             if(!manifest.gallery) manifest.gallery = []; 
             const mainData = await ghGet('maintenance.json');
@@ -361,11 +377,23 @@
                 groups[k].push(t);
             });
 
+            // UPDATED GROUP RENDER LOGIC
             Object.keys(groups).forEach(month => {
                 const header = document.createElement('div');
-                header.innerHTML = `<strong>${month}</strong>`;
-                header.style.cssText = "padding:10px; background:#eee; font-weight:bold; border-bottom:1px solid #ddd;";
+                header.className = 'month-header';
+                header.innerHTML = `<span>${month}</span> <span class="toggle-icon">▼</span>`;
+                
+                const groupDiv = document.createElement('div');
+                groupDiv.style.display = 'block'; // Expanded by default
+
+                header.onclick = () => {
+                    const isOpen = groupDiv.style.display !== 'none';
+                    groupDiv.style.display = isOpen ? 'none' : 'block';
+                    header.querySelector('.toggle-icon').innerText = isOpen ? '▶' : '▼';
+                };
+
                 container.appendChild(header);
+                container.appendChild(groupDiv);
 
                 groups[month].forEach(trip => {
                     const el = document.createElement('div');
@@ -384,7 +412,7 @@
                         ${trip.image ? `<img src="${getImgUrl(trip.image)}" class="log-img">` : ''}
                     `;
                     el.onclick = () => highlightTripOnMap(trip, el.id);
-                    container.appendChild(el);
+                    groupDiv.appendChild(el); // Add to the group div
                 });
             });
         }
@@ -418,12 +446,6 @@
             const container = document.getElementById('gallery-container');
             container.innerHTML = '';
             if (manifest.gallery && manifest.gallery.length > 0) {
-                manifest.gallery.reverse().forEach((img, idx) => {
-                    // Because we reversed, idx is not the original index. 
-                    // Let's use the actual object comparison for delete or original index.
-                    // Easier: Loop forwards but prepend.
-                });
-                // Let's loop forward but use prepend to show newest first
                  manifest.gallery.forEach((img, idx) => {
                     const div = document.createElement('div');
                     div.className = 'gallery-item';
@@ -431,7 +453,7 @@
                         <img src="${getImgUrl(img.url)}" class="gallery-img" onclick="window.open('${getImgUrl(img.url)}')">
                         <div class="gallery-del admin-only" onclick="deleteGalleryPhoto(${idx})">✕</div>
                     `;
-                    container.prepend(div); // Newest first
+                    container.prepend(div); 
                  });
             } else {
                 container.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#aaa; padding:20px;">No photos yet.</p>';
@@ -443,11 +465,9 @@
             const path = await ghUploadImage(input.files[0]);
             if (!path) return alert("Upload failed");
 
-            // Add to manifest
             if(!manifest.gallery) manifest.gallery = [];
             manifest.gallery.push({ url: path, date: new Date().toISOString() });
 
-            // Save
             const current = await ghGet('manifest.json');
             const success = await ghPut('manifest.json', JSON.stringify(manifest, null, 2), "Add Gallery Photo", current ? current.sha : null);
             
@@ -456,17 +476,14 @@
                 renderGallery();
                 checkAdmin();
             }
-            input.value = ''; // Reset
+            input.value = ''; 
         }
 
         async function deleteGalleryPhoto(index) {
             if(!confirm("Delete this photo?")) return;
-            // index matches the manifest.gallery array index
             manifest.gallery.splice(index, 1);
-            
             const current = await ghGet('manifest.json');
             const success = await ghPut('manifest.json', JSON.stringify(manifest, null, 2), "Delete Gallery Photo", current ? current.sha : null);
-            
             if (success) {
                 alert("Deleted.");
                 renderGallery();
@@ -649,7 +666,6 @@
             manifest.boat = quillBoat.root.innerHTML;
             manifest.tech = quillTech.root.innerHTML;
             manifest.crew = quillCrew.root.innerHTML;
-            // Note: manifest.gallery is already updated by uploadGalleryPhoto
             
             const current = await ghGet('manifest.json');
             const success = await ghPut('manifest.json', JSON.stringify(manifest, null, 2), "Update Manifest", current ? current.sha : null);
