@@ -36,6 +36,10 @@
         button.primary { background: #007bff; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 1rem; }
         input, textarea, select { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         
+        /* FILTER BAR */
+        .filter-bar { padding: 10px 15px; background: #fff; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px; }
+        .filter-select { width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; background: #f9f9f9; font-size: 0.9rem; margin: 0; }
+
         /* Log Entries */
         #entries-container { flex-grow: 1; overflow-y: auto; padding: 0; }
         
@@ -128,6 +132,13 @@
         <div id="sidebar">
             <div class="sidebar-header" id="log-header">
                 <button class="primary admin-only" onclick="toggleForm('entry-form')" style="display:none;">+ Add Log Entry</button>
+            </div>
+
+            <div class="filter-bar">
+                <select id="log-filter" class="filter-select" onchange="renderLog()">
+                    <option value="all">Show All Time</option>
+                    <option value="90">Last 90 Days</option>
+                    </select>
             </div>
             
             <div id="entry-form">
@@ -237,8 +248,8 @@
         // 1. CONFIGURATION (EDIT THIS!)
         // ==========================================
         const CONFIG = {
-            owner: 'dbaverill', // e.g. 'johndoe'
-            repo: 'Ardenna',    // e.g. 'logbook'
+            owner: 'YOUR_GITHUB_USERNAME', // e.g. 'johndoe'
+            repo: 'sailingardenna.com',    // e.g. 'logbook'
             branch: 'main'
         };
 
@@ -339,12 +350,28 @@
             const mainData = await ghGet('maintenance.json');
             maintLog = mainData ? mainData.content : [];
 
+            populateFilter(); // New: Populate Years
             renderLog();
             renderManifest();
             renderMaint();
             renderGallery();
             checkAdmin();
             showLoading(false);
+        }
+
+        function populateFilter() {
+            const select = document.getElementById('log-filter');
+            // Keep first two options (All, 90 days)
+            while (select.options.length > 2) select.remove(2);
+            
+            // Get unique years
+            const years = [...new Set(trips.map(t => t.date.split('-')[0]))].sort().reverse();
+            years.forEach(y => {
+                const opt = document.createElement('option');
+                opt.value = y;
+                opt.innerText = y;
+                select.appendChild(opt);
+            });
         }
 
         // --- Logbook ---
@@ -354,22 +381,38 @@
             map.eachLayer(l => { if (!!l.toGeoJSON && l !== activeLayerGroup) map.removeLayer(l); });
             activeLayerGroup.clearLayers();
 
+            // 1. Calculate Odometer (Chronological) on FULL DATASET
             trips.sort((a, b) => new Date(a.date) - new Date(b.date));
             let runningTotal = 0;
-            const allCoords = []; 
-
             trips.forEach(t => {
                 const legMiles = parseFloat(t.miles) || 0;
                 runningTotal += legMiles;
                 t.calculatedTotal = runningTotal;
+            });
+
+            // 2. Filter
+            const filterVal = document.getElementById('log-filter').value;
+            const now = new Date();
+            const filteredTrips = trips.filter(t => {
+                const d = new Date(t.date);
+                if(filterVal === 'all') return true;
+                if(filterVal === '90') return (now - d) / (1000 * 60 * 60 * 24) <= 90;
+                return d.getFullYear().toString() === filterVal;
+            });
+
+            // 3. Render Map Ghost Trail for FILTERED trips
+            const allCoords = [];
+            filteredTrips.forEach(t => {
                 L.circleMarker(t.startCoords, {radius: 3, color: '#888', fillColor: '#ccc', fillOpacity:1, weight:1}).addTo(map);
                 L.polyline([t.startCoords, t.endCoords], {color: '#999', weight: 2, opacity: 0.4, dashArray: '5,5'}).addTo(map);
                 allCoords.push(t.startCoords, t.endCoords);
             });
-
             if(allCoords.length > 0) map.fitBounds(allCoords);
 
-            const displayTrips = [...trips].sort((a, b) => new Date(b.date) - new Date(a.date));
+            // 4. Sort for List (Newest First)
+            const displayTrips = [...filteredTrips].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            // 5. Group
             const groups = {};
             displayTrips.forEach(t => {
                 const k = new Date(t.date).toLocaleString('default', { month: 'long', year: 'numeric' });
@@ -377,14 +420,13 @@
                 groups[k].push(t);
             });
 
-            // UPDATED GROUP RENDER LOGIC
             Object.keys(groups).forEach(month => {
                 const header = document.createElement('div');
                 header.className = 'month-header';
-                header.innerHTML = `<span>${month}</span> <span class="toggle-icon">▼</span>`;
+                header.innerHTML = `<span>${month}</span> <span class="toggle-icon">▶</span>`; // Default Closed Icon
                 
                 const groupDiv = document.createElement('div');
-                groupDiv.style.display = 'block'; // Expanded by default
+                groupDiv.style.display = 'none'; // Default Closed
 
                 header.onclick = () => {
                     const isOpen = groupDiv.style.display !== 'none';
@@ -412,7 +454,7 @@
                         ${trip.image ? `<img src="${getImgUrl(trip.image)}" class="log-img">` : ''}
                     `;
                     el.onclick = () => highlightTripOnMap(trip, el.id);
-                    groupDiv.appendChild(el); // Add to the group div
+                    groupDiv.appendChild(el); 
                 });
             });
         }
@@ -431,8 +473,8 @@
         function resetMap() {
             activeLayerGroup.clearLayers();
             document.querySelectorAll('.log-entry').forEach(e => e.classList.remove('active-trip'));
-            const allCoords = trips.flatMap(t => [t.startCoords, t.endCoords]);
-            if(allCoords.length > 0) map.flyToBounds(allCoords);
+            // Refilter coords based on current selection
+            renderLog(); // This effectively resets view
         }
 
         // --- Manifest & Gallery ---
