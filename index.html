@@ -27,7 +27,8 @@
         .view-container.active { display: flex; }
         
         /* Sidebar & Map */
-        #sidebar { width: 400px; display: flex; flex-direction: column; background: #f8f9fa; border-right: 1px solid #ddd; z-index: 2; overflow: hidden; }
+        /* UPDATE: Darker Sidebar Background */
+        #sidebar { width: 400px; display: flex; flex-direction: column; background: #cbd5e1; border-right: 1px solid #94a3b8; z-index: 2; overflow: hidden; }
         #map { flex-grow: 1; height: 100%; z-index: 1; position: relative; }
         .map-reset-btn { position: absolute; top: 10px; right: 10px; z-index: 1000; background: white; padding: 8px 12px; border-radius: 4px; border: 2px solid rgba(0,0,0,0.2); cursor: pointer; font-weight: bold; font-size: 0.9em; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         
@@ -37,17 +38,31 @@
         input, textarea, select { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         
         /* FILTER BAR */
-        .filter-bar { padding: 10px 15px; background: #fff; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px; }
-        .filter-select { width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; background: #f9f9f9; font-size: 0.9rem; margin: 0; }
+        .filter-bar { padding: 10px 15px; background: #f1f5f9; border-bottom: 1px solid #ccc; display: flex; align-items: center; gap: 10px; }
+        .filter-select { width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; background: #fff; font-size: 0.9rem; margin: 0; }
 
         /* Log Entries */
         #entries-container { flex-grow: 1; overflow-y: auto; padding: 0; }
-        .month-header { padding: 12px 15px; background: #e9ecef; font-weight: bold; border-bottom: 1px solid #ddd; cursor: pointer; display: flex; justify-content: space-between; align-items: center; color: #2c3e50; user-select: none; }
-        .month-header:hover { background: #dee2e6; }
         
-        .log-entry { background: white; padding: 15px; border-radius: 8px; margin: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; border: 1px solid #eee; position: relative; transition: border-color 0.2s; }
-        .log-entry:hover { border-color: #3498db; }
-        .log-entry.active-trip { border-left: 5px solid #3498db; background: #fafdff; }
+        .month-header { 
+            padding: 12px 15px; 
+            background: #e2e8f0; /* Slightly darker header to match sidebar */
+            font-weight: bold; 
+            border-bottom: 1px solid #cbd5e1; 
+            border-top: 1px solid #fff;
+            cursor: pointer; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            color: #1e293b;
+            user-select: none;
+        }
+        .month-header:hover { background: #cbd5e1; }
+        .month-header .toggle-icon { font-size: 0.8em; color: #475569; }
+        
+        .log-entry { background: white; padding: 15px; border-radius: 8px; margin: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer; border: 1px solid #e2e8f0; position: relative; transition: transform 0.2s; }
+        .log-entry:hover { transform: translateY(-2px); }
+        .log-entry.active-trip { border-left: 5px solid #3498db; background: #f0f9ff; }
         .log-img { width: 100%; height: auto; border-radius: 4px; margin-top: 10px; display: block; }
         .log-stats { font-size: 0.85em; color: #555; background: #f1f3f5; padding: 5px 10px; border-radius: 4px; display: inline-block; margin-top: 5px; font-weight: 500; }
         #entry-form { display: none; padding: 15px; background: #eef2f5; border-bottom: 1px solid #ddd; }
@@ -286,7 +301,7 @@
             theme: 'snow', 
             modules: { 
                 toolbar: toolbarOptions,
-                imageResize: {} // Enable Image Resizing
+                imageResize: {} 
             } 
         };
 
@@ -450,12 +465,17 @@
                 groups[k].push(t);
             });
 
-            Object.keys(groups).forEach(month => {
+            const monthKeys = Object.keys(groups);
+            monthKeys.forEach((month, index) => {
                 const header = document.createElement('div');
                 header.className = 'month-header';
-                header.innerHTML = `<span>${month}</span> <span class="toggle-icon">▶</span>`; 
+                
+                // DEFAULT EXPAND FIRST MONTH ONLY
+                const isFirst = index === 0;
+                header.innerHTML = `<span>${month}</span> <span class="toggle-icon">${isFirst ? '▼' : '▶'}</span>`; 
+                
                 const groupDiv = document.createElement('div');
-                groupDiv.style.display = 'none';
+                groupDiv.style.display = isFirst ? 'block' : 'none';
 
                 header.onclick = () => {
                     const isOpen = groupDiv.style.display !== 'none';
