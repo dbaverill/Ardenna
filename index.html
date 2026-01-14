@@ -621,10 +621,18 @@
 <li><strong>VHF:</strong> B&G V60-B with AIS Transceiver</li>
 <li><strong>Autopilot:</strong> B&G NAC-3 with Precision-9 Compass</li>
 </ul>
-`;
+<h3>Sails & Rigging</h3>
+<ul>
+<li><strong>Rig Type:</strong> Sloop / Cutter</li>
+<li><strong>Mast:</strong> Seldén Aluminum, Keel Stepped</li>
+<li><strong>Furling:</strong> In-mast Furling Mainsail, Furlex for Genoa</li>
+<li><strong>Sails:</strong> North Sails Dacron (Main, Genoa, Staysail)</li>
+<li><strong>Winches:</strong> Lewmar Electric Primaries</li>
+</ul>`;
+            
             let currentContent = manifest.specs || defaultSpecs;
             
-            // SMART CHECK: If missing Navigation Equipment, append it.
+            // SMART CHECKS
             if (!currentContent.includes("Navigation Equipment")) {
                 currentContent += `
 <h3>Navigation Equipment</h3>
@@ -634,6 +642,17 @@
 <li><strong>Chartplotter:</strong> B&G Zeus 3S (12" Helm, 9" Nav Station)</li>
 <li><strong>VHF:</strong> B&G V60-B with AIS Transceiver</li>
 <li><strong>Autopilot:</strong> B&G NAC-3 with Precision-9 Compass</li>
+</ul>`;
+            }
+            if (!currentContent.includes("Sails & Rigging")) {
+                currentContent += `
+<h3>Sails & Rigging</h3>
+<ul>
+<li><strong>Rig Type:</strong> Sloop / Cutter</li>
+<li><strong>Mast:</strong> Seldén Aluminum, Keel Stepped</li>
+<li><strong>Furling:</strong> In-mast Furling Mainsail, Furlex for Genoa</li>
+<li><strong>Sails:</strong> North Sails Dacron (Main, Genoa, Staysail)</li>
+<li><strong>Winches:</strong> Lewmar Electric Primaries</li>
 </ul>`;
             }
 
