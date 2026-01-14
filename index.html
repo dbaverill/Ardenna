@@ -587,7 +587,6 @@
         }
 
         function renderManifest() {
-            // Updated Template including Navigation Equipment
             const defaultSpecs = `
 <h3>General Dimensions</h3>
 <ul>
@@ -623,17 +622,24 @@
 <li><strong>Autopilot:</strong> B&G NAC-3 with Precision-9 Compass</li>
 </ul>
 `;
-            const rawHTML = manifest.specs || defaultSpecs;
+            let currentContent = manifest.specs || defaultSpecs;
             
-            // Populate Quill (always needed for saving)
-            // But if we already have content, don't overwrite user edits with default unless empty
-            if (quillSpecs.root.innerHTML.length < 50 && !manifest.specs) {
-                quillSpecs.root.innerHTML = rawHTML;
-            } else if (manifest.specs) {
-                quillSpecs.root.innerHTML = manifest.specs;
+            // SMART CHECK: If missing Navigation Equipment, append it.
+            if (!currentContent.includes("Navigation Equipment")) {
+                currentContent += `
+<h3>Navigation Equipment</h3>
+<ul>
+<li><strong>Instruments:</strong> B&G H5000</li>
+<li><strong>Radar:</strong> B&G Halo 20+</li>
+<li><strong>Chartplotter:</strong> B&G Zeus 3S (12" Helm, 9" Nav Station)</li>
+<li><strong>VHF:</strong> B&G V60-B with AIS Transceiver</li>
+<li><strong>Autopilot:</strong> B&G NAC-3 with Precision-9 Compass</li>
+</ul>`;
             }
 
-            // Render Accordion View for Visitors
+            quillSpecs.root.innerHTML = currentContent;
+
+            // Render Accordion
             const viewDiv = document.getElementById('specs-view');
             viewDiv.innerHTML = generateAccordionHTML(quillSpecs.root.innerHTML);
 
@@ -650,26 +656,23 @@
 
             Array.from(tempDiv.childNodes).forEach(node => {
                 if (node.nodeName === 'H3') {
-                    // If we have a previous section, close it
                     if (currentHeader) {
                         output += createAccordionSection(currentHeader, currentContent);
                         currentContent = '';
                     }
                     currentHeader = node.innerText;
                 } else {
-                    if (node.nodeType === 1) currentContent += node.outerHTML; // Element
-                    else if (node.nodeType === 3) currentContent += node.textContent; // Text
+                    if (node.nodeType === 1) currentContent += node.outerHTML; 
+                    else if (node.nodeType === 3) currentContent += node.textContent; 
                 }
             });
-            // Close last section
             if (currentHeader) {
                 output += createAccordionSection(currentHeader, currentContent);
             }
-            return output || html; // Fallback if no H3 found
+            return output || html; 
         }
 
         function createAccordionSection(title, content) {
-            // Using inline onclick for simplicity in generated HTML
             return `
                 <div class="acc-item">
                     <div class="acc-header" onclick="toggleAcc(this)">
@@ -682,7 +685,6 @@
             `;
         }
 
-        // Global function for Accordion Toggle
         window.toggleAcc = function(header) {
             const content = header.nextElementSibling;
             const isOpen = content.style.display === 'block';
@@ -761,7 +763,6 @@
             const logHeader = document.getElementById('log-header');
             if (logHeader) logHeader.style.display = isAdmin ? 'block' : 'none';
             
-            // Toggle Specs View/Edit
             const viewDiv = document.getElementById('specs-view');
             const editDiv = document.getElementById('specs-editor-container');
             if (isAdmin) {
@@ -770,7 +771,6 @@
             } else {
                 viewDiv.style.display = 'block';
                 editDiv.style.display = 'none';
-                // Regenerate view in case edits happened
                 if (quillSpecs.root.innerHTML) viewDiv.innerHTML = generateAccordionHTML(quillSpecs.root.innerHTML);
             }
 
