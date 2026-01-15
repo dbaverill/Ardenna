@@ -8,56 +8,87 @@
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <style>
         body { font-family: -apple-system, system-ui, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; background: #f4f4f9; }
+        
+        /* Navigation */
         nav { background: #2c3e50; padding: 0 10px; display: flex; align-items: center; height: 50px; flex-shrink: 0; justify-content: space-between; }
         .nav-left { display: flex; align-items: center; overflow-x: auto; }
         nav h1 { color: white; margin: 0 15px 0 0; font-size: 1.1rem; font-style: italic; white-space: nowrap; }
         .tab { color: #aaa; padding: 15px 15px; cursor: pointer; text-transform: uppercase; font-size: 0.8rem; font-weight: bold; letter-spacing: 1px; white-space: nowrap; }
         .tab:hover { color: white; }
         .tab.active { color: white; border-bottom: 3px solid #3498db; background: rgba(255,255,255,0.05); }
+        
+        /* Admin Lock */
         .admin-lock { cursor: pointer; opacity: 0.3; font-size: 1.2rem; margin-left: 10px; }
         .admin-lock:hover { opacity: 1; }
         .admin-active { opacity: 1; filter: drop-shadow(0 0 5px #00ff00); }
+
+        /* Main Views */
         .view-container { display: none; height: calc(100vh - 50px); width: 100%; }
         .view-container.active { display: flex; }
+        
+        /* Sidebar & Map */
         #sidebar { width: 400px; display: flex; flex-direction: column; background: #cbd5e1; border-right: 1px solid #94a3b8; z-index: 2; overflow: hidden; }
         #map { flex-grow: 1; height: 100%; z-index: 1; position: relative; }
         .map-reset-btn { position: absolute; top: 10px; right: 10px; z-index: 1000; background: white; padding: 8px 12px; border-radius: 4px; border: 2px solid rgba(0,0,0,0.2); cursor: pointer; font-weight: bold; font-size: 0.9em; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        
+        /* Common Elements */
         .sidebar-header { padding: 20px; background: white; border-bottom: 1px solid #eee; display: none; }
         button.primary { background: #007bff; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 1rem; }
         input, textarea, select { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        
+        /* FILTER BAR */
         .filter-bar { padding: 10px 15px; background: #f1f5f9; border-bottom: 1px solid #ccc; display: flex; align-items: center; gap: 10px; }
         .filter-select { width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; background: #fff; font-size: 0.9rem; margin: 0; }
+
+        /* Log Entries */
         #entries-container { flex-grow: 1; overflow-y: auto; padding: 0; }
         .month-header { padding: 12px 15px; background: #e2e8f0; font-weight: bold; border-bottom: 1px solid #cbd5e1; border-top: 1px solid #fff; cursor: pointer; display: flex; justify-content: space-between; align-items: center; color: #1e293b; user-select: none; }
         .month-header:hover { background: #cbd5e1; }
         .month-header .toggle-icon { font-size: 0.8em; color: #475569; }
+        
         .log-entry { background: white; padding: 15px; border-radius: 8px; margin: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer; border: 1px solid #e2e8f0; position: relative; transition: transform 0.2s; }
         .log-entry:hover { transform: translateY(-2px); }
         .log-entry.active-trip { border-left: 5px solid #3498db; background: #f0f9ff; }
         .log-img { width: 100%; height: auto; border-radius: 4px; margin-top: 10px; display: block; }
         .log-stats { font-size: 0.85em; color: #555; background: #f1f3f5; padding: 5px 10px; border-radius: 4px; display: inline-block; margin-top: 5px; font-weight: 500; }
         #entry-form { display: none; padding: 15px; background: #eef2f5; border-bottom: 1px solid #ddd; }
-        .action-btn { position: absolute; top: 10px; cursor: pointer; font-size: 1.2rem; line-height: 1; padding: 5px; z-index: 10; display: none; font-weight: bold; }
-        .delete-btn { right: 10px; color: #ff4444; }
-        .edit-btn { right: 40px; color: #aaa; }
+        
+        /* Buttons */
+        .action-btn { cursor: pointer; font-size: 1.1rem; line-height: 1; padding: 5px; font-weight: bold; }
+        .delete-btn { color: #ff4444; }
+        .edit-btn { color: #aaa; margin-right: 5px;}
+        .edit-btn:hover { color: #3498db; }
+        .delete-btn:hover { color: red; }
+        
+        /* Positioned Buttons for Log Entries */
+        .entry-actions { position: absolute; top: 10px; right: 10px; display: none; } /* Container */
+
+        /* General Layouts */
         .scroll-container { flex-direction: column; overflow-y: auto; padding: 40px; box-sizing: border-box; max-width: 1200px; margin: 0 auto; width: 100%; }
         .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #eee; display: flex; flex-direction: column; margin-bottom: 20px; }
         .card h2 { margin-top: 0; font-size: 1.2rem; color: #2c3e50; border-bottom: 2px solid #f1f1f1; padding-bottom: 10px; }
+        
         .manifest-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 40px; }
+        
+        /* Gallery */
         .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
         .gallery-item { position: relative; aspect-ratio: 1/1; cursor: pointer; overflow: hidden; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 4px solid white; transition: transform 0.2s; }
         .gallery-item:hover { transform: scale(1.02); }
         .gallery-item img { width: 100%; height: 100%; object-fit: cover; }
         .gallery-del { position: absolute; top: 5px; right: 5px; background: red; color: white; width: 24px; height: 24px; border-radius: 50%; text-align: center; line-height: 24px; display: none; font-weight: bold; z-index: 10; }
+        
         #lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 99999; justify-content: center; align-items: center; flex-direction: column; }
         #lightbox img { max-width: 90%; max-height: 90vh; border-radius: 4px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
         .lightbox-close { position: absolute; top: 20px; right: 30px; color: white; font-size: 40px; cursor: pointer; opacity: 0.8; }
-        .lightbox-close:hover { opacity: 1; color: #ff4444; }
+        
+        /* Accordions */
         .acc-item { border-bottom: 1px solid #eee; }
         .acc-header { padding: 15px 10px; font-weight: bold; color: #2c3e50; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: #fafafa; }
         .acc-header:hover { background: #f1f1f1; }
         .acc-content { display: none; padding: 15px; color: #555; line-height: 1.6; background: #fff; }
         .acc-content ul { padding-left: 20px; margin: 0; }
+        
+        /* Quill */
         .ql-toolbar { display: none; }
         .ql-container.ql-snow { border: none; }
         .ql-container { font-family: -apple-system, system-ui, sans-serif; font-size: 1rem; }
@@ -70,6 +101,8 @@
         #view-specs .ql-editor { height: 100%; overflow-y: auto; padding: 0 5px 0 0; }
         #view-crew .ql-container { height: auto; }
         #view-crew .ql-editor { overflow-y: visible; padding: 0; }
+
+        /* Tables */
         .log-section { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 30px; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { text-align: left; padding: 12px; border-bottom: 1px solid #eee; vertical-align: middle; }
@@ -80,11 +113,14 @@
         .table-form { display: none; gap: 10px; background: #f1f3f5; padding: 15px; border-radius: 8px; align-items: center; margin-bottom: 20px; }
         .maint-form-grid { grid-template-columns: 130px 1fr 1.5fr 100px 160px 80px; }
         .fuel-form-grid { grid-template-columns: 130px 1fr 100px 80px 80px 80px; }
+        
         .contact-form { display: flex; flex-direction: column; gap: 15px; max-width: 600px; margin: 0 auto; width: 100%; }
         .contact-label { font-weight: bold; color: #2c3e50; margin-bottom: 5px; display: block; }
+
         #loading { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
         .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 10px;}
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
         @media (max-width: 768px) { 
             .view-container { flex-direction: column-reverse; } 
             #sidebar, #map { width: 100%; height: 50%; } 
@@ -181,14 +217,14 @@
                 <div id="fuel-form" class="table-form fuel-form-grid">
                     <input type="date" id="f-date"><input type="text" id="f-location" placeholder="Location"><select id="f-type"><option value="Diesel">Diesel</option><option value="Gasoline">Gasoline</option></select><input type="number" id="f-amount" placeholder="Gals" step="0.1"><input type="number" id="f-price" placeholder="$/Gal" step="0.01"><button class="primary" onclick="saveFuelToGitHub()">Save</button>
                 </div>
-                <table id="fuel-table"><thead><tr><th>Date</th><th>Location</th><th>Type</th><th>Amount</th><th>Price/Gal</th><th>Total Cost</th><th width="5%"></th></tr></thead><tbody id="fuel-body"></tbody></table>
+                <table id="fuel-table"><thead><tr><th>Date</th><th>Location</th><th>Type</th><th>Amount</th><th>Price/Gal</th><th>Total Cost</th><th width="10%"></th></tr></thead><tbody id="fuel-body"></tbody></table>
             </div>
             <div class="log-section">
                 <div style="display:flex; justify-content:space-between; align-items:center;"><h2 style="margin:0">Maintenance Log</h2><button class="primary admin-only" onclick="toggleForm('maint-form')" style="width:auto; display:none;">+ Add Record</button></div>
                 <div id="maint-form" class="table-form maint-form-grid">
                     <input type="date" id="m-date"><input type="text" id="m-item" placeholder="Item"><input type="text" id="m-notes" placeholder="Notes"><select id="m-status"><option value="Done">Done</option><option value="Pending">Pending</option></select><input type="file" id="m-photo" accept="image/*" style="font-size: 0.8em"><button class="primary" onclick="saveMaintenanceToGitHub()">Save</button>
                 </div>
-                <table id="maint-table"><thead><tr><th width="15%">Date</th><th width="20%">Item</th><th>Notes</th><th width="10%">Status</th><th width="10%">Photo</th><th width="5%"></th></tr></thead><tbody id="maint-body"></tbody></table>
+                <table id="maint-table"><thead><tr><th width="15%">Date</th><th width="20%">Item</th><th>Notes</th><th width="10%">Status</th><th width="10%">Photo</th><th width="10%"></th></tr></thead><tbody id="maint-body"></tbody></table>
             </div>
         </div>
     </div>
@@ -214,7 +250,7 @@
         const CONFIG = { owner: 'dbaverill', repo: 'Ardenna', branch: 'main' };
         let GH_TOKEN = localStorage.getItem('gh_token');
         let trips = [], maintLog = [], fuelLog = [], manifest = { specs: "", crew: "", gallery: [] };
-        let activeLayerGroup = L.layerGroup(), currentRoute = [], editingTrip = null, activeQuill = null; 
+        let activeLayerGroup = L.layerGroup(), currentRoute = [], editingTrip = null, editingFuel = null, editingMaint = null, activeQuill = null; 
         
         const map = L.map('map').setView([41.49, -71.31], 6);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '© OpenStreetMap' }).addTo(map);
@@ -251,6 +287,7 @@
         function closeLightbox() { document.getElementById('lightbox').style.display = 'none'; }
         function sendEmail() { window.location.href = `mailto:dbaverill@gmail.com?subject=${encodeURIComponent(document.getElementById('contact-subject').value)}&body=${encodeURIComponent(document.getElementById('contact-message').value)}`; }
 
+        // --- API ---
         async function ghGet(path) {
             try {
                 const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}?ref=${CONFIG.branch}&t=${Date.now()}`, { headers: GH_TOKEN ? { "Authorization": `token ${GH_TOKEN}` } : {}, cache: "no-store" });
@@ -306,6 +343,7 @@
             finally { showLoading(false); }
         }
 
+        // --- RENDERERS ---
         function renderGallery() {
             const container = document.getElementById('gallery-grid'); container.innerHTML = '';
             if (manifest.gallery && manifest.gallery.length > 0) {
@@ -318,14 +356,9 @@
             } else container.innerHTML = '<p style="color:#aaa; grid-column:1/-1; text-align:center;">No photos uploaded.</p>';
         }
 
-        async function deleteGalleryPhoto(index) { if(!confirm("Delete photo?")) return; manifest.gallery.splice(index, 1); await saveManifestToGitHub(true); renderGallery(); }
-
         function renderManifest() {
-            const defaultSpecs = `<h3>General Dimensions</h3><ul><li><strong>LOA:</strong> 14.99m (49.18ft)</li><li><strong>Beam:</strong> 4.58m (15.03ft)</li><li><strong>Draft:</strong> 2.15m (7.05ft)</li><li><strong>Displacement:</strong> 17,500kg</li></ul><h3>Engine & Propulsion</h3><ul><li><strong>Engine:</strong> Yanmar 4JH4-HTE (110hp)</li><li><strong>Propeller:</strong> MaxProp 3-blade feathering</li><li><strong>Gearbox:</strong> Kanzaki KM4A</li><li><strong>Bow Thruster:</strong> MaxPower 24V</li></ul><h3>Electrical Systems</h3><ul><li><strong>Generator:</strong> Mastervolt Whisper 6</li><li><strong>House Bank:</strong> 24V System</li></ul><h3>Water & Plumbing</h3><ul><li><strong>Watermaker:</strong> Schenker Ready 60</li><li><strong>Water Tank:</strong> 700L</li><li><strong>Fuel Tank:</strong> 600L</li></ul><h3>Navigation Equipment</h3><ul><li><strong>Instruments:</strong> B&G H5000</li><li><strong>Radar:</strong> B&G Halo 20+</li><li><strong>Chartplotter:</strong> B&G Zeus 3S</li><li><strong>VHF:</strong> B&G V60-B</li><li><strong>Autopilot:</strong> B&G NAC-3</li></ul><h3>Sails & Rigging</h3><ul><li><strong>Rig Type:</strong> Sloop / Cutter</li><li><strong>Mast:</strong> Seldén Aluminum</li><li><strong>Furling:</strong> In-mast Furling</li><li><strong>Sails:</strong> North Sails Dacron</li><li><strong>Winches:</strong> Lewmar Electric</li></ul>`;
-            // Only use default if empty. No auto-append logic to prevent dupes.
-            if (!manifest.specs || manifest.specs.length < 50) quillSpecs.root.innerHTML = defaultSpecs;
+            if (!manifest.specs || manifest.specs.length < 50) quillSpecs.root.innerHTML = `<h3>General Dimensions</h3><ul><li><strong>LOA:</strong> 14.99m (49.18ft)</li><li><strong>Beam:</strong> 4.58m (15.03ft)</li><li><strong>Draft:</strong> 2.15m (7.05ft)</li><li><strong>Displacement:</strong> 17,500kg</li></ul><h3>Engine & Propulsion</h3><ul><li><strong>Engine:</strong> Yanmar 4JH4-HTE (110hp)</li><li><strong>Propeller:</strong> MaxProp 3-blade feathering</li><li><strong>Gearbox:</strong> Kanzaki KM4A</li><li><strong>Bow Thruster:</strong> MaxPower 24V</li></ul><h3>Electrical Systems</h3><ul><li><strong>Generator:</strong> Mastervolt Whisper 6</li><li><strong>House Bank:</strong> 24V System</li></ul><h3>Water & Plumbing</h3><ul><li><strong>Watermaker:</strong> Schenker Ready 60</li><li><strong>Water Tank:</strong> 700L</li><li><strong>Fuel Tank:</strong> 600L</li></ul><h3>Navigation Equipment</h3><ul><li><strong>Instruments:</strong> B&G H5000</li><li><strong>Radar:</strong> B&G Halo 20+</li><li><strong>Chartplotter:</strong> B&G Zeus 3S</li><li><strong>VHF:</strong> B&G V60-B</li><li><strong>Autopilot:</strong> B&G NAC-3</li></ul><h3>Sails & Rigging</h3><ul><li><strong>Rig Type:</strong> Sloop / Cutter</li><li><strong>Mast:</strong> Seldén Aluminum</li><li><strong>Furling:</strong> In-mast Furling</li><li><strong>Sails:</strong> North Sails Dacron</li><li><strong>Winches:</strong> Lewmar Electric</li></ul>`;
             else quillSpecs.root.innerHTML = manifest.specs;
-
             document.getElementById('specs-view').innerHTML = generateAccordionHTML(quillSpecs.root.innerHTML);
             quillCrew.root.innerHTML = manifest.crew || "Enter details...";
         }
@@ -342,15 +375,9 @@
             if (currentHeader) output += createAccordionSection(currentHeader, currentContent);
             return output || html; 
         }
-
         function createAccordionSection(title, content) { return `<div class="acc-item"><div class="acc-header" onclick="toggleAcc(this)">${title} <span class="toggle-icon">▼</span></div><div class="acc-content">${content}</div></div>`; }
         window.toggleAcc = function(header) { const content = header.nextElementSibling; const isOpen = content.style.display === 'block'; content.style.display = isOpen ? 'none' : 'block'; header.querySelector('.toggle-icon').innerText = isOpen ? '▼' : '▲'; }
 
-        // ... [Common helpers renderLog, renderMaint, renderFuel, save*, delete*, etc.] ...
-        // Re-included below for completeness
-        
-        function populateFilter() { const select = document.getElementById('log-filter'); while (select.options.length > 2) select.remove(2); const years = [...new Set(trips.map(t => t.date.split('-')[0]))].sort().reverse(); years.forEach(y => { const opt = document.createElement('option'); opt.value = y; opt.innerText = y; select.appendChild(opt); }); }
-        
         function renderLog() {
             const container = document.getElementById('entries-container'); container.innerHTML = '';
             map.eachLayer(l => { if (!!l.toGeoJSON && l !== activeLayerGroup) map.removeLayer(l); }); activeLayerGroup.clearLayers();
@@ -358,7 +385,7 @@
             const filterVal = document.getElementById('log-filter').value; const now = new Date();
             const filtered = trips.filter(t => filterVal === 'all' ? true : filterVal === '90' ? (now - new Date(t.date))/(1000*60*60*24) <= 90 : new Date(t.date).getFullYear().toString() === filterVal);
             const allCoords = [];
-            filtered.forEach(t => { const pts = t.route && t.route.length ? t.route : (t.startCoords ? [t.startCoords, t.endCoords] : []); if(pts.length) { L.polyline(pts, {color: '#999', weight: 2, dashArray: '5,5'}).addTo(map); pts.forEach(p => {L.circleMarker(p,{radius:3, color:'#888',fillColor:'#ccc',fillOpacity:1}).addTo(map); allCoords.push(p);}); } });
+            filtered.forEach(t => { const pts = (t.route && t.route.length) ? t.route : (t.startCoords ? [t.startCoords, t.endCoords] : []); if(pts.length) { L.polyline(pts, {color: '#999', weight: 2, dashArray: '5,5'}).addTo(map); pts.forEach(p => {L.circleMarker(p,{radius:3, color:'#888',fillColor:'#ccc',fillOpacity:1}).addTo(map); allCoords.push(p);}); } });
             if(allCoords.length) map.fitBounds(allCoords);
             const display = [...filtered].sort((a, b) => new Date(b.date) - new Date(a.date));
             const groups = {}; display.forEach(t => { const k = new Date(t.date).toLocaleString('default', { month: 'long', year: 'numeric' }); if(!groups[k]) groups[k]=[]; groups[k].push(t); });
@@ -370,37 +397,76 @@
                 container.appendChild(header); container.appendChild(div);
                 groups[m].forEach(t => {
                     const d = document.createElement('div'); d.className = 'log-entry'; d.id = `entry-${t.date}-${t.title.replace(/\s/g,'')}`;
-                    d.innerHTML = `<span class="action-btn delete-btn admin-only" onclick="event.stopPropagation();deleteTrip('${t.date}','${t.title.replace(/'/g,"\\'")}')">✕</span><span class="action-btn edit-btn admin-only" onclick="event.stopPropagation();editTrip('${t.date}','${t.title.replace(/'/g,"\\'")}')">✎</span><div style="font-size:0.8em;color:#888;font-weight:bold">${t.date}</div><h3 style="margin:5px 0">${t.title}</h3><div class="log-stats">Dist: ${t.miles} nm | Total: ${t.calculatedTotal.toFixed(1)} nm</div><p>${t.text}</p>${t.image?`<img src="${getImgUrl(t.image)}" class="log-img">`:''}`;
+                    d.innerHTML = `<span class="entry-actions admin-only"><span class="action-btn edit-btn" onclick="event.stopPropagation();editTrip('${t.date}','${t.title.replace(/'/g,"\\'")}')">✎</span><span class="action-btn delete-btn" onclick="event.stopPropagation();deleteTrip('${t.date}','${t.title.replace(/'/g,"\\'")}')">✕</span></span><div style="font-size:0.8em;color:#888;font-weight:bold">${t.date}</div><h3 style="margin:5px 0">${t.title}</h3><div class="log-stats">Dist: ${t.miles} nm | Total: ${t.calculatedTotal.toFixed(1)} nm</div><p>${t.text}</p>${t.image?`<img src="${getImgUrl(t.image)}" class="log-img">`:''}`;
                     d.onclick = () => highlightTripOnMap(t, d.id); div.appendChild(d);
                 });
             });
+            checkAdmin();
         }
 
-        function highlightTripOnMap(trip, elemId) { activeLayerGroup.clearLayers(); document.querySelectorAll('.log-entry').forEach(e => e.classList.remove('active-trip')); const el = document.getElementById(elemId); if(el) el.classList.add('active-trip'); const points = trip.route && trip.route.length ? trip.route : (trip.startCoords ? [trip.startCoords, trip.endCoords] : []); if (points.length > 0) { L.polyline(points, {color: 'navy', weight: 4}).addTo(activeLayerGroup); L.marker(points[0]).addTo(activeLayerGroup).bindPopup(`<b>${trip.title}</b><br>Start`).openPopup(); if (points.length > 1) { L.marker(points[points.length-1]).addTo(activeLayerGroup).bindPopup('End'); for(let i=1; i<points.length-1; i++) L.circleMarker(points[i], {radius:4, color:'navy', fillColor:'white', fillOpacity:1}).addTo(activeLayerGroup); } map.flyToBounds(points, {padding: [50,50], maxZoom: 10}); } }
+        function highlightTripOnMap(trip, elemId) { activeLayerGroup.clearLayers(); document.querySelectorAll('.log-entry').forEach(e => e.classList.remove('active-trip')); const el = document.getElementById(elemId); if(el) el.classList.add('active-trip'); const points = (trip.route && trip.route.length) ? trip.route : (trip.startCoords ? [trip.startCoords, trip.endCoords] : []); if (points.length > 0) { L.polyline(points, {color: 'navy', weight: 4}).addTo(activeLayerGroup); L.marker(points[0]).addTo(activeLayerGroup).bindPopup(`<b>${trip.title}</b><br>Start`).openPopup(); if (points.length > 1) { L.marker(points[points.length-1]).addTo(activeLayerGroup).bindPopup('End'); for(let i=1; i<points.length-1; i++) L.circleMarker(points[i], {radius:4, color:'navy', fillColor:'white', fillOpacity:1}).addTo(activeLayerGroup); } map.flyToBounds(points, {padding: [50,50], maxZoom: 10}); } }
         function resetMap() { activeLayerGroup.clearLayers(); document.querySelectorAll('.log-entry').forEach(e => e.classList.remove('active-trip')); renderLog(); }
         function getTripPoints(t) { return (t.route && t.route.length) ? t.route : (t.startCoords && t.endCoords ? [t.startCoords, t.endCoords] : []); }
 
-        function renderMaint() { const b = document.getElementById('maint-body'); b.innerHTML = ''; maintLog.sort((a,b)=>new Date(b.date)-new Date(a.date)); maintLog.forEach(i => { const tr=document.createElement('tr'); tr.innerHTML=`<td>${i.date}</td><td><strong>${i.item}</strong></td><td>${i.notes}</td><td class="${i.status==='Done'?'status-done':'status-pending'}">${i.status}</td><td>${i.image?`<a href="${getImgUrl(i.image)}" target="_blank"><img src="${getImgUrl(i.image)}" class="maint-thumb"></a>`:''}</td><td><span class="action-btn delete-btn admin-only" style="position:static;display:none" onclick="deleteMaint('${i.date}','${i.item.replace(/'/g,"\\'")}')">✕</span></td>`; b.appendChild(tr); }); checkAdmin(); }
-        function renderFuel() { const b = document.getElementById('fuel-body'); b.innerHTML = ''; fuelLog.sort((a,b)=>new Date(b.date)-new Date(a.date)); fuelLog.forEach(i => { const tr=document.createElement('tr'); tr.innerHTML=`<td>${i.date}</td><td>${i.location}</td><td>${i.type}</td><td>${i.amount}</td><td>$${i.price}</td><td><strong>$${(i.amount*i.price).toFixed(2)}</strong></td><td><span class="action-btn delete-btn admin-only" style="position:static;display:none" onclick="deleteFuel('${i.date}','${i.amount}')">✕</span></td>`; b.appendChild(tr); }); checkAdmin(); }
+        function renderMaint() { const b = document.getElementById('maint-body'); b.innerHTML = ''; maintLog.sort((a,b)=>new Date(b.date)-new Date(a.date)); maintLog.forEach(i => { const tr=document.createElement('tr'); tr.innerHTML=`<td>${i.date}</td><td><strong>${i.item}</strong></td><td>${i.notes}</td><td class="${i.status==='Done'?'status-done':'status-pending'}">${i.status}</td><td>${i.image?`<a href="${getImgUrl(i.image)}" target="_blank"><img src="${getImgUrl(i.image)}" class="maint-thumb"></a>`:''}</td><td><span class="action-btn edit-btn admin-only" onclick="editMaint('${i.date}','${i.item.replace(/'/g,"\\'")}')">✎</span><span class="action-btn delete-btn admin-only" onclick="deleteMaint('${i.date}','${i.item.replace(/'/g,"\\'")}')">✕</span></td>`; b.appendChild(tr); }); checkAdmin(); }
+        function renderFuel() { const b = document.getElementById('fuel-body'); b.innerHTML = ''; fuelLog.sort((a,b)=>new Date(b.date)-new Date(a.date)); fuelLog.forEach(i => { const tr=document.createElement('tr'); tr.innerHTML=`<td>${i.date}</td><td>${i.location}</td><td>${i.type}</td><td>${i.amount}</td><td>$${i.price}</td><td><strong>$${(i.amount*i.price).toFixed(2)}</strong></td><td><span class="action-btn edit-btn admin-only" onclick="editFuel('${i.date}','${i.amount}','${i.type}')">✎</span><span class="action-btn delete-btn admin-only" onclick="deleteFuel('${i.date}','${i.amount}')">✕</span></td>`; b.appendChild(tr); }); checkAdmin(); }
 
         function promptAdmin() { if (GH_TOKEN) { if(confirm("Logout?")) { localStorage.removeItem('gh_token'); GH_TOKEN = null; checkAdmin(); } return; } const token = prompt("Enter GitHub Token:"); if (token && token.startsWith('ghp_')) { GH_TOKEN = token; localStorage.setItem('gh_token', token); checkAdmin(); } }
-        function checkAdmin() { const isAdmin = !!GH_TOKEN; document.body.classList.toggle('is-admin', isAdmin); document.querySelector('.admin-lock').classList.toggle('admin-active', isAdmin); document.getElementById('log-header').style.display = isAdmin ? 'block' : 'none'; document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? (el.tagName==='SPAN'||el.classList.contains('gallery-del')?'block':'inline-block') : 'none'); if (isAdmin) { document.getElementById('specs-view').style.display='none'; document.getElementById('specs-editor-container').style.display='block'; } else { document.getElementById('specs-view').style.display='block'; document.getElementById('specs-editor-container').style.display='none'; if(quillSpecs.root.innerHTML) document.getElementById('specs-view').innerHTML = generateAccordionHTML(quillSpecs.root.innerHTML); } quillSpecs.enable(isAdmin); quillCrew.enable(isAdmin); }
+        function checkAdmin() { const isAdmin = !!GH_TOKEN; document.body.classList.toggle('is-admin', isAdmin); document.querySelector('.admin-lock').classList.toggle('admin-active', isAdmin); document.getElementById('log-header').style.display = isAdmin ? 'block' : 'none'; document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? (el.tagName==='SPAN'||el.classList.contains('gallery-del')||el.classList.contains('entry-actions')?'block':'inline-block') : 'none'); if (isAdmin) { document.getElementById('specs-view').style.display='none'; document.getElementById('specs-editor-container').style.display='block'; } else { document.getElementById('specs-view').style.display='block'; document.getElementById('specs-editor-container').style.display='none'; if(quillSpecs.root.innerHTML) document.getElementById('specs-view').innerHTML = generateAccordionHTML(quillSpecs.root.innerHTML); } quillSpecs.enable(isAdmin); quillCrew.enable(isAdmin); }
 
         function switchTab(tab) { document.querySelectorAll('.view-container').forEach(e => e.classList.remove('active')); document.querySelectorAll('.tab').forEach(e => e.classList.remove('active')); document.getElementById(`view-${tab}`).classList.add('active'); document.querySelector(`.tab[onclick="switchTab('${tab}')"]`).classList.add('active'); if(tab==='logbook') map.invalidateSize(); }
-        function toggleForm(id) { const f = document.getElementById(id); if(id==='entry-form') { if(f.style.display==='none' && !editingTrip) { document.getElementById('title').value=''; document.getElementById('narrative').value=''; document.getElementById('miles').value=''; document.getElementById('date').value=new Date().toISOString().split('T')[0]; document.getElementById('form-title').innerText="New Entry"; clearRouteInput(); } f.style.display = f.style.display==='block'?'none':'block'; if(f.style.display==='none') editingTrip=null; } else { f.style.display = f.style.display==='grid'?'none':'grid'; } map.invalidateSize(); }
+        function toggleForm(id) { 
+            const f = document.getElementById(id); 
+            if(id==='entry-form') { 
+                if(f.style.display==='none' && !editingTrip) { document.getElementById('title').value=''; document.getElementById('narrative').value=''; document.getElementById('miles').value=''; document.getElementById('date').value=new Date().toISOString().split('T')[0]; document.getElementById('form-title').innerText="New Entry"; clearRouteInput(); } 
+                f.style.display = f.style.display==='block'?'none':'block'; 
+                if(f.style.display==='none') editingTrip=null; 
+            } else { 
+                f.style.display = f.style.display==='grid'?'none':'grid'; 
+                if(f.style.display==='none') { 
+                    if(id==='fuel-form') { editingFuel=null; document.getElementById('f-date').value=''; document.getElementById('f-amount').value=''; }
+                    if(id==='maint-form') { editingMaint=null; document.getElementById('m-date').value=''; document.getElementById('m-item').value=''; }
+                }
+            } 
+            map.invalidateSize(); 
+        }
 
         async function saveManifestToGitHub(silent=false) { manifest.specs=quillSpecs.root.innerHTML; manifest.crew=quillCrew.root.innerHTML; const s = await ghPut('manifest.json', JSON.stringify(manifest,null,2), "Update Manifest", (await ghGet('manifest.json'))?.sha); if(!silent && s) alert("Saved!"); }
+        async function deleteGalleryPhoto(index) { if(!confirm("Delete photo?")) return; manifest.gallery.splice(index, 1); await saveManifestToGitHub(true); renderGallery(); }
         
+        // TRIP LOGIC
         async function deleteTrip(date, title) { if(!confirm("Delete?")) return; const c=await ghGet('trips.json'); await ghPut('trips.json', JSON.stringify(c.content.filter(t=>!(t.date===date && t.title===title)),null,2), "Del Trip", c.sha); loadData(); }
-        async function deleteFuel(d, a) { if(confirm("Del?")) { const c=await ghGet('fuel.json'); await ghPut('fuel.json', JSON.stringify(c.content.filter(f=>!(f.date===d && f.amount===a)),null,2), "Del Fuel", c.sha); loadData(); }}
-        async function deleteMaint(d, i) { if(confirm("Del?")) { const c=await ghGet('maintenance.json'); await ghPut('maintenance.json', JSON.stringify(c.content.filter(m=>!(m.date===d && m.item===i)),null,2), "Del Maint", c.sha); loadData(); }}
-
         function editTrip(d, t) { const trip = trips.find(x => x.date===d && x.title===t); if(!trip) return; editingTrip = trip; document.getElementById('title').value = trip.title; document.getElementById('date').value = trip.date; document.getElementById('miles').value = trip.miles||''; document.getElementById('narrative').value = trip.text; currentRoute = getTripPoints(trip); updateRouteDisplay(); document.getElementById('form-title').innerText = "Edit Entry"; toggleForm('entry-form'); }
         function clearRouteInput() { currentRoute = []; updateRouteDisplay(); }
         function updateRouteDisplay() { const el = document.getElementById('route-display'); if (!currentRoute.length) el.innerHTML = '<em style="color:#999">Click map to set points...</em>'; else el.innerHTML = currentRoute.map((p,i) => `<div style="padding:2px;border-bottom:1px dashed #eee">Pt ${i+1}: ${p[0].toFixed(4)}, ${p[1].toFixed(4)}</div>`).join(''); activeLayerGroup.clearLayers(); if(currentRoute.length) { L.polyline(currentRoute, {color:'red', weight:3, dashArray:'5,5'}).addTo(activeLayerGroup); currentRoute.forEach(p => L.circleMarker(p,{radius:4, color:'red'}).addTo(activeLayerGroup)); } }
         async function saveEntryToGitHub() { const t=document.getElementById('title').value, d=document.getElementById('date').value; if(!t||!d||!currentRoute.length) return alert("Missing Fields/Route"); const f=document.getElementById('photoInput'); let img=editingTrip?editingTrip.image:null; if(f.files[0]) img=await ghUploadImage(f.files[0]); const c=await ghGet('trips.json'); let list=c?c.content:[]; if(editingTrip) list=list.filter(x=>!(x.date===editingTrip.date && x.title===editingTrip.title)); list.push({title:t, date:d, text:document.getElementById('narrative').value, miles:document.getElementById('miles').value, image:img, route:currentRoute, startCoords:currentRoute[0], endCoords:currentRoute[currentRoute.length-1]}); if(await ghPut('trips.json', JSON.stringify(list,null,2), "Save Trip", c?c.sha:null)) { alert("Saved"); toggleForm('entry-form'); loadData(); } }
-        async function saveFuelToGitHub() { const d=document.getElementById('f-date').value, a=document.getElementById('f-amount').value, p=document.getElementById('f-price').value; if(!d||!a||!p) return alert("Missing"); const c=await ghGet('fuel.json'); const list=c?[...c.content]:[]; list.push({date:d, location:document.getElementById('f-location').value, type:document.getElementById('f-type').value, amount:a, price:p}); if(await ghPut('fuel.json', JSON.stringify(list,null,2), "Add Fuel", c?c.sha:null)) { alert("Saved"); toggleForm('fuel-form'); loadData(); } }
-        async function saveMaintenanceToGitHub() { const d=document.getElementById('m-date').value, i=document.getElementById('m-item').value; if(!d||!i) return alert("Missing"); const f=document.getElementById('m-photo'); let img=null; if(f.files[0]) img=await ghUploadImage(f.files[0]); const c=await ghGet('maintenance.json'); const list=c?[...c.content]:[]; list.push({date:d, item:i, notes:document.getElementById('m-notes').value, status:document.getElementById('m-status').value, image:img}); if(await ghPut('maintenance.json', JSON.stringify(list,null,2), "Add Maint", c?c.sha:null)) { alert("Saved"); toggleForm('maint-form'); loadData(); } }
+
+        // FUEL LOGIC
+        function editFuel(d, a, t) { const f = fuelLog.find(x => x.date===d && x.amount===a && x.type===t); if(!f) return; editingFuel = f; document.getElementById('f-date').value=f.date; document.getElementById('f-location').value=f.location; document.getElementById('f-type').value=f.type; document.getElementById('f-amount').value=f.amount; document.getElementById('f-price').value=f.price; toggleForm('fuel-form'); }
+        async function deleteFuel(d, a) { if(confirm("Del?")) { const c=await ghGet('fuel.json'); await ghPut('fuel.json', JSON.stringify(c.content.filter(f=>!(f.date===d && f.amount===a)),null,2), "Del Fuel", c.sha); loadData(); }}
+        async function saveFuelToGitHub() { 
+            const d=document.getElementById('f-date').value, a=document.getElementById('f-amount').value, p=document.getElementById('f-price').value; 
+            if(!d||!a||!p) return alert("Missing"); 
+            const c=await ghGet('fuel.json'); let list=c?[...c.content]:[]; 
+            if(editingFuel) list=list.filter(x => !(x.date===editingFuel.date && x.amount===editingFuel.amount && x.type===editingFuel.type));
+            list.push({date:d, location:document.getElementById('f-location').value, type:document.getElementById('f-type').value, amount:a, price:p}); 
+            if(await ghPut('fuel.json', JSON.stringify(list,null,2), "Save Fuel", c?c.sha:null)) { alert("Saved"); toggleForm('fuel-form'); loadData(); } 
+        }
+
+        // MAINT LOGIC
+        function editMaint(d, i) { const m = maintLog.find(x => x.date===d && x.item===i); if(!m) return; editingMaint = m; document.getElementById('m-date').value=m.date; document.getElementById('m-item').value=m.item; document.getElementById('m-notes').value=m.notes; document.getElementById('m-status').value=m.status; toggleForm('maint-form'); }
+        async function deleteMaint(d, i) { if(confirm("Del?")) { const c=await ghGet('maintenance.json'); await ghPut('maintenance.json', JSON.stringify(c.content.filter(m=>!(m.date===d && m.item===i)),null,2), "Del Maint", c.sha); loadData(); }}
+        async function saveMaintenanceToGitHub() { 
+            const d=document.getElementById('m-date').value, i=document.getElementById('m-item').value; 
+            if(!d||!i) return alert("Missing"); 
+            const f=document.getElementById('m-photo'); 
+            let img = editingMaint ? editingMaint.image : null; 
+            if(f.files[0]) img=await ghUploadImage(f.files[0]); 
+            const c=await ghGet('maintenance.json'); let list=c?[...c.content]:[]; 
+            if(editingMaint) list=list.filter(x => !(x.date===editingMaint.date && x.item===editingMaint.item));
+            list.push({date:d, item:i, notes:document.getElementById('m-notes').value, status:document.getElementById('m-status').value, image:img}); 
+            if(await ghPut('maintenance.json', JSON.stringify(list,null,2), "Save Maint", c?c.sha:null)) { alert("Saved"); toggleForm('maint-form'); loadData(); } 
+        }
 
         loadData();
     </script>
