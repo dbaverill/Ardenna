@@ -230,16 +230,15 @@
         const map = L.map('map').setView([41.49, -71.31], 6);
         
         // --- STADIA MAPS INTEGRATION ---
-        // Style: Alidade Satellite
-        let tileUrl = 'https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg';
+        // Style: OSM Bright (Colorful, High Contrast)
+        let tileUrl = 'https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png';
         if (STADIA_API_KEY) tileUrl += `?api_key=${STADIA_API_KEY}`;
         
         L.tileLayer(tileUrl, {
             maxZoom: 20,
-            attribution: '&copy; CNES, Distribution Airbus DS, &copy; Airbus DS, &copy; PlanetObserver (Contains Copernicus Data) | &copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
+            attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
         }).addTo(map);
         activeLayerGroup.addTo(map);
-
         function imageHandler() { activeQuill = this.quill; document.getElementById('quill-image-upload').click(); }
         const toolbarOptions = { container: [['bold', 'italic', 'underline', 'header'], [{'list': 'ordered'}, {'list': 'bullet'}], ['image'], ['clean']], handlers: { image: imageHandler } };
         const quillConfig = { theme: 'snow', modules: { toolbar: toolbarOptions, imageResize: {} } };
