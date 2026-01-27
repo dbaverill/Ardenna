@@ -232,7 +232,7 @@
         // --- STADIA MAPS INTEGRATION ---
         // Style: alidade_smooth (Clean/Minimalist)
         // Alternatives: stamen_watercolor, alidade_smooth_dark, stamen_toner
-        let tileUrl = 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png';
+        let tileUrl = 'https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png';
         if (STADIA_API_KEY) tileUrl += `?api_key=${STADIA_API_KEY}`;
         
         L.tileLayer(tileUrl, {
