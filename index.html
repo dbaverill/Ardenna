@@ -243,8 +243,8 @@
         
         const map = L.map('map').setView([41.49, -71.31], 6);
         
-        // --- 1. BASE LAYER (Stadia OSM Bright) ---
-        let stadiaUrl = 'https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png';
+        // --- 1. BASE LAYER (Stadia Outdoors) ---
+        let stadiaUrl = 'https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png';
         if (STADIA_API_KEY) stadiaUrl += `?api_key=${STADIA_API_KEY}`;
         L.tileLayer(stadiaUrl, {
             maxZoom: 20,
@@ -343,7 +343,7 @@
 
         async function saveManifestToGitHub(silent=false) { manifest.specs=quillSpecs.root.innerHTML; manifest.crew=quillCrew.root.innerHTML; const s=await ghPut('manifest.json', JSON.stringify(manifest,null,2), "Upd Manifest", (await ghGet('manifest.json'))?.sha); if(!silent && s) alert("Saved!"); }
         async function deleteTrip(d,t){if(!confirm("Del?"))return;const c=await ghGet('trips.json');await ghPut('trips.json',JSON.stringify(c.content.filter(x=>!(x.date===d&&x.title===t)),null,2),"Del Trip",c.sha);loadData();}
-        async function saveEntryToGitHub() { const t=document.getElementById('title').value, d=document.getElementById('date').value; if(!t||!d) return alert("Missing"); const f=document.getElementById('photoInput'); let img=editingTrip?editingTrip.image:null; if(f.files[0]) img=await ghUploadImage(f.files[0]); const c=await ghGet('trips.json'); let list=c?c.content:[]; if(editingTrip) list=list.filter(x=>!(x.date===editingTrip.date&&x.title===editingTrip.title)); list.push({title:t,date:d,text:document.getElementById('narrative').value,miles:document.getElementById('miles').value,image:img,route:currentRoute,startCoords:currentRoute[0]}); if(await ghPut('trips.json',JSON.stringify(list,null,2),"Save Trip",c?c.sha:null)){alert("Saved");toggleForm('entry-form');loadData();} }
+        async function saveEntryToGitHub() { const t=document.getElementById('title').value, d=document.getElementById('date').value; if(!t||!d) return alert("Missing"); const f=document.getElementById('photoInput'); let img=editingTrip?editingTrip.image:null; if(f.files[0]) img=await ghUploadImage(f.files[0]); const c=await ghGet('trips.json'); let list=c?c.content:[]; if(editingTrip) list=list.filter(x=>!(x.date===editingTrip.date&&x.title===editingTrip.title)); list.push({title:t,date:d,text:document.getElementById('narrative').value,miles:document.getElementById('miles').value,image:img,route:currentRoute,startCoords:currentRoute[0]}); if(await ghPut('trips.json',JSON.stringify(list,null,2),"Save Trip",c?c.sha:null)){alert("Saved");toggleForm('entry-form');loadData();}}
         function editTrip(d,t){const tr=trips.find(x=>x.date===d&&x.title===t);if(!tr)return;editingTrip=tr;document.getElementById('title').value=tr.title;document.getElementById('date').value=tr.date;document.getElementById('miles').value=tr.miles||'';document.getElementById('narrative').value=tr.text;currentRoute=getTripPoints(tr);updateRouteDisplay();document.getElementById('form-title').innerText="Edit";toggleForm('entry-form');}
         function clearRouteInput(){currentRoute=[];updateRouteDisplay();} function updateRouteDisplay(){const e=document.getElementById('route-display');if(!currentRoute.length)e.innerHTML='<em>Click map...</em>';else e.innerHTML=currentRoute.map((p,i)=>`<div>Pt ${i+1}: ${p[0].toFixed(2)}, ${p[1].toFixed(2)}</div>`).join('');activeLayerGroup.clearLayers();if(currentRoute.length){L.polyline(currentRoute,{color:'var(--accent)',dashArray:'5,5'}).addTo(activeLayerGroup);currentRoute.forEach(p=>L.circleMarker(p,{radius:4,color:'var(--accent)'}).addTo(activeLayerGroup));}}
         
