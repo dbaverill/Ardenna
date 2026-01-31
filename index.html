@@ -181,7 +181,7 @@
         <div class="scroll-container">
             <div class="card">
                 <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid #f1f1f1; padding-bottom:10px; margin-bottom:20px;">
-                    <h2 style="margin:0; border:none; padding:0;">Captain's Updates</h2>
+                    <h2 style="margin:0; border:none; padding:0;">Updates</h2>
                     <button class="primary admin-only" style="width:auto; display:none;" onclick="toggleForm('update-form')">+ Post Update</button>
                 </div>
                 
@@ -216,7 +216,7 @@
     <div id="view-crew" class="view-container">
         <div class="scroll-container">
             <div class="card" style="min-height: 500px;">
-                <h2>Crew & Vessel Story</h2>
+                <h2>Crew</h2>
                 <div id="editor-crew"></div>
                 <div style="margin-top:20px; text-align:right;"><button id="btn-save-crew" class="primary admin-only" style="width:auto; display:none;" onclick="saveManifestToGitHub()">Save Changes</button></div>
             </div>
@@ -360,12 +360,6 @@
             if(!confirm("Delete update?")) return;
             const c = await ghGet('updates.json');
             let list = c.content;
-            list.splice(idx, 1); // Remove by index since updates aren't uniquely keyed
-            // Note: In a real DB we'd use IDs, but list reversal makes index tricky. 
-            // Correct approach for simple array: re-sort matching render, splice, save.
-            // Simplified here: we assume user sees current 'updates' array order. 
-            // Better: Filter by timestamp match if possible, but index works for single user.
-            // *Wait*, we sorted updates in render. We must find original item in list.
             const itemToDelete = updates[idx]; // 'updates' global is already sorted
             const unsortedList = c.content.filter(u => !(u.date === itemToDelete.date && u.text === itemToDelete.text));
             
