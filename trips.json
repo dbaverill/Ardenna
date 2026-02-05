@@ -1,1 +1,10 @@
-[]
+[
+  {
+    "title": "Temp log entry",
+    "date": "2026-02-05",
+    "text": "This is a placeholder log entry until I get to the boat and pull the log book.",
+    "miles": "10",
+    "image": null,
+    "route": []
+  }
+]
