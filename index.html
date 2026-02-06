@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>s/v Ardenna Log</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --sidebar-bg: #ffffff;
+            --text-main: #333;
+            --text-light: #888;
+            --accent: #2c3e50;
+            --accent-hover: #34495e;
+            --border: #eaeaea;
+            --active-tab: #e3f2fd;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; background: var(--bg-color); color: var(--text-main); }
+        
+        /* Minimal Nav */
+        nav { background: var(--sidebar-bg); padding: 0 20px; display: flex; align-items: center; height: 60px; flex-shrink: 0; justify-content: space-between; border-bottom: 1px solid var(--border); }
+        .nav-left { display: flex; align-items: center; overflow-x: auto; gap: 20px; }
+        nav h1 { color: var(--accent); margin: 0; font-size: 1.2rem; font-weight: 700; letter-spacing: -0.5px; white-space: nowrap; }
+        .tab { color: var(--text-light); padding: 8px 12px; cursor: pointer; font-size: 0.85rem; font-weight: 500; border-radius: 6px; transition: all 0.2s; white-space: nowrap; }
+        .tab:hover { color: var(--accent); background: #f5f5f5; }
+        .tab.active { color: var(--accent); background: var(--active-tab); font-weight: 600; }
+        .admin-lock { cursor: pointer; opacity: 0.2; font-size: 1.1rem; margin-left: 15px; transition: opacity 0.2s; }
+        .admin-lock:hover { opacity: 1; }
+        .admin-active { opacity: 1; color: #27ae60; }
+
+        /* Layout */
+        .view-container { display: none; height: calc(100vh - 60px); width: 100%; }
+        .view-container.active { display: flex; }
+        #sidebar { width: 420px; display: flex; flex-direction: column; background: var(--sidebar-bg); border-right: 1px solid var(--border); z-index: 2; overflow: hidden; box-shadow: 2px 0 10px rgba(0,0,0,0.02); }
+        #map { flex-grow: 1; height: 100%; z-index: 1; position: relative; }
+        
+        /* Clean Buttons & Inputs */
+        button.primary { background: var(--accent); color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; width: 100%; font-size: 0.9rem; font-weight: 500; transition: background 0.2s; }
+        button.primary:hover { background: var(--accent-hover); }
+        input, textarea, select { width: 100%; padding: 10px; margin-bottom: 12px; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; font-family: inherit; font-size: 0.9rem; transition: border-color 0.2s; }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent); }
+
+        /* Log Entries */
+        .filter-bar { padding: 15px 20px; border-bottom: 1px solid var(--border); }
+        #entries-container { flex-grow: 1; overflow-y: auto; padding: 0; }
+        .month-header { padding: 15px 20px; background: #fafafa; font-weight: 600; font-size: 0.85rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); cursor: pointer; display: flex; justify-content: space-between; }
+        .log-entry { padding: 25px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; position: relative; }
+        .log-entry:hover { background: #fafafa; }
+        .log-entry.active-trip { background: #f8fbff; border-left: 4px solid var(--accent); }
+        .log-date { font-size: 0.8rem; color: var(--text-light); margin-bottom: 5px; font-weight: 500; }
+        .log-entry h3 { margin: 0 0 8px 0; font-size: 1.1rem; color: var(--accent); }
+        .log-stats { font-size: 0.8rem; color: var(--text-light); background: #f0f2f5; padding: 4px 8px; border-radius: 4px; display: inline-block; margin-bottom: 10px; }
+        .log-entry p { font-size: 0.95rem; line-height: 1.5; color: #555; margin: 0; }
+        .log-img { width: 100%; height: auto; border-radius: 6px; margin-top: 15px; display: block; border: 1px solid var(--border); }
+
+        /* General Content & Forms */
+        .scroll-container { flex-direction: column; overflow-y: auto; padding: 40px; box-sizing: border-box; max-width: 1200px; margin: 0 auto; width: 100%; }
+        .card { background: white; padding: 30px; border-radius: 8px; border: 1px solid var(--border); display: flex; flex-direction: column; margin-bottom: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); position: relative; }
+        .card h2 { margin-top: 0; font-size: 1.4rem; color: var(--accent); border-bottom: 2px solid #f0f0f0; padding-bottom: 15px; margin-bottom: 20px; }
+        
+        .manifest-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 40px; }
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+        .gallery-item { aspect-ratio: 1/1; cursor: pointer; border-radius: 6px; overflow: hidden; position: relative; }
+        .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+        .gallery-item:hover img { transform: scale(1.05); }
+        .gallery-del { position: absolute; top: 5px; right: 5px; background: red; color: white; width: 24px; height: 24px; border-radius: 50%; text-align: center; line-height: 24px; display: none; font-weight: bold; z-index: 10; }
+
+        /* UPDATES - MAGAZINE STYLE */
+        .updates-scroll { flex-direction: column; overflow-y: auto; padding: 30px; box-sizing: border-box; max-width: 1200px; margin: 0 auto; width: 100%; }
+        
+        .update-form { display: none; flex-direction: column; gap:10px; margin-bottom:30px; background:#fff; padding:25px; border-radius:8px; border:1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+        body.admin .update-form { display: flex; }
+        
+        .add-update-fab { display: none; position: fixed; bottom: 30px; right: 30px; width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: white; border: none; font-size: 1.5rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 100; transition: transform 0.2s; }
+        .add-update-fab:hover { transform: scale(1.1); }
+        body.admin .add-update-fab { display: block; }
+        
+        .hero-update { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 50px; position: relative; }
+        .hero-update-image { width: 100%; height: 450px; object-fit: cover; cursor: pointer; }
+        .hero-update-content { padding: 35px; }
+        .update-meta { display: flex; gap: 20px; align-items: center; margin-bottom: 15px; font-size: 0.9rem; color: var(--text-light); }
+        .update-category { background: #e3f2fd; color: #1976d2; padding: 4px 12px; border-radius: 4px; font-weight: 600; font-size: 0.85rem; }
+        .hero-update-content h2 { font-size: 2rem; margin: 0 0 20px 0; color: var(--accent); line-height: 1.3; }
+        .update-excerpt { font-size: 1.05rem; line-height: 1.7; color: #555; }
+        
+        .updates-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 30px; }
+        .update-card-mag { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.06); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; position: relative; }
+        .update-card-mag:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+        .update-thumbnail { width: 100%; height: 250px; object-fit: cover; }
+        .update-card-content { padding: 25px; }
+        .update-card-content h3 { margin: 0 0 15px 0; font-size: 1.3rem; color: var(--accent); }
+        .update-card-excerpt { color: #666; line-height: 1.6; font-size: 0.95rem; white-space: pre-wrap; }
+
+        /* CREW - CARD GRID STYLE */
+        .crew-page-header { text-align: center; margin-bottom: 50px; padding-top: 20px; }
+        .crew-page-header h1 { font-size: 2.5rem; margin: 0 0 15px 0; color: var(--accent); }
+        .crew-page-header p { color: var(--text-light); font-size: 1.1rem; margin: 0; }
+        
+        .add-crew-btn { display: none; background: var(--accent); color: white; border: none; padding: 12px 24px; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 20px; }
+        body.admin .add-crew-btn { display: inline-block; }
+        
+        .crew-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; margin-bottom: 40px; }
+        
+        .crew-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.08); transition: transform 0.3s, box-shadow 0.3s; position: relative; }
+        .crew-card:hover { transform: translateY(-8px); box-shadow: 0 12px 32px rgba(0,0,0,0.15); }
+        
+        .crew-photo { width: 100%; height: 300px; object-fit: cover; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .crew-content { padding: 30px; }
+        .crew-name { margin: 0 0 5px 0; font-size: 1.8rem; color: var(--accent); font-weight: 700; }
+        .crew-role { color: #3498db; font-weight: 600; font-size: 1rem; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        .crew-bio { color: #555; line-height: 1.7; font-size: 0.95rem; margin-bottom: 20px; }
+
+        /* Tables */
+        .log-section { background: white; padding: 30px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9rem; }
+        th { text-align: left; padding: 12px; border-bottom: 2px solid var(--border); color: var(--text-light); font-weight: 600; text-transform: uppercase; font-size: 0.8rem; }
+        td { padding: 12px; border-bottom: 1px solid var(--border); color: #444; }
+        .status-done { color: #27ae60; font-weight: 600; background: #e8f8f0; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;}
+        .status-pending { color: #f39c12; font-weight: 600; background: #fef5e6; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;}
+
+        /* Utilities */
+        .admin-only { display: none; }
+        .action-btn { cursor: pointer; margin-left: 8px; opacity: 0.6; transition: opacity 0.2s; font-size: 1.1rem;}
+        .action-btn:hover { opacity: 1; }
+        .edit-btn { color: var(--accent); }
+        .delete-btn { color: #e74c3c; }
+        .entry-actions { position: absolute; top: 15px; right: 15px; display: none; }
+        .post-actions { display: none; position: absolute; top: 15px; right: 15px; gap: 8px; z-index: 10; }
+        body.admin .post-actions { display: flex; }
+        .action-btn-round { background: rgba(255,255,255,0.95); border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+        .action-btn-round:hover { background: white; }
+        
+        .map-reset-btn { position: absolute; top: 20px; right: 20px; z-index: 1000; background: white; padding: 10px 16px; border-radius: 30px; border: none; cursor: pointer; font-weight: 600; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15); color: var(--accent); transition: transform 0.2s; }
+        .map-reset-btn:hover { transform: translateY(-2px); }
+        
+        #loading { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
+        .spinner { border: 3px solid #f0f0f0; border-top: 3px solid var(--accent); border-radius: 50%; width: 40px; height: 40px; animation: spin 0.8s linear infinite; margin-bottom: 15px;}
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Quill Clean */
+        .ql-container { font-family: inherit; font-size: 1rem; line-height: 1.6; color: #444; }
+        .ql-editor { padding: 0; }
+        .ql-toolbar { border: 1px solid var(--border) !important; background: #f8f9fa; border-radius: 6px 6px 0 0; }
+        body.is-admin .ql-container { border: 1px solid var(--border); border-top: none; border-radius: 0 0 6px 6px; padding: 10px; background: #fff; }
+        #view-specs .ql-container { height: 450px; overflow: hidden; }
+        #view-specs .ql-editor { height: 100%; overflow-y: auto; padding: 0 5px 0 0; }
+
+        /* Accordions */
+        .acc-item { border-bottom: 1px solid #eee; }
+        .acc-header { padding: 15px 10px; font-weight: bold; color: #2c3e50; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: #fafafa; }
+        .acc-header:hover { background: #f1f1f1; }
+        .acc-content { display: none; padding: 15px; color: #555; line-height: 1.6; background: #fff; }
+        .acc-content ul { padding-left: 20px; margin: 0; }
+
+        .table-form { display: none; grid-template-columns: 1fr 1fr 1fr 1fr 1fr auto; gap:10px; margin-bottom:20px; background:#f9f9f9; padding:15px; border-radius:6px; border:1px solid var(--border); }
+        .maint-form-grid { grid-template-columns: 1fr 2fr 2fr 1fr auto auto; }
+
+        @media (max-width: 768px) { 
+            .view-container { flex-direction: column-reverse; } 
+            #sidebar, #map { width: 100%; height: 50%; } 
+            .manifest-grid { grid-template-columns: 1fr; }
+            .nav-left { overflow-x: scroll; }
+            .table-form { grid-template-columns: 1fr !important; }
+            .updates-grid { grid-template-columns: 1fr; }
+            .crew-grid { grid-template-columns: 1fr; }
+        }
+        
+        #lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); z-index: 99999; justify-content: center; align-items: center; }
+        #lightbox img { max-width: 90%; max-height: 90vh; box-shadow: 0 10px 40px rgba(0,0,0,0.2); border-radius: 4px; }
+        .lightbox-close { position: absolute; top: 30px; right: 40px; font-size: 3rem; color: var(--text-main); cursor: pointer; font-weight: 300; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-left">
+            <h1>s/v Ardenna</h1>
+            <div class="tab active" onclick="switchTab('logbook')">Logbook</div>
+            <div class="tab" onclick="switchTab('updates')">Updates</div>
+            <div class="tab" onclick="switchTab('gallery')">Gallery</div>
+            <div class="tab" onclick="switchTab('crew')">Crew</div>
+            <div class="tab" onclick="switchTab('specs')">Specs</div>
+            <div class="tab" onclick="switchTab('fuel')">Fuel & Maint</div>
+        </div>
+        <div class="admin-lock" onclick="promptAdmin()">🔒</div>
+    </nav>
+
+    <div id="loading"><div class="spinner"></div><span style="font-weight:500; color:#555;">Syncing...</span></div>
+    <div id="lightbox" onclick="closeLightbox()"><span class="lightbox-close">&times;</span><img id="lightbox-img" src="" onclick="event.stopPropagation()"></div>
+    <input type="file" id="quill-image-upload" accept="image/*" style="display:none">
+    <input type="file" id="gallery-upload-input" accept="image/*" style="display:none">
+
+    <div id="view-logbook" class="view-container active">
+        <div id="sidebar">
+            <div class="sidebar-header" id="log-header"><button class="primary admin-only" onclick="toggleForm('entry-form')" style="display:none;">+ New Log Entry</button></div>
+            <div class="filter-bar">
+                <select id="log-filter" onchange="renderLog()">
+                    <option value="all">All Time</option>
+                    <option value="30">Last 30 Days</option>
+                    <option value="90">Last 90 Days</option>
+                </select>
+            </div>
+            <div id="entry-form" style="display:none; padding:20px; background:#fff; border-bottom:1px solid #eee;">
+                <h3 id="form-title" style="margin-top:0">New Entry</h3>
+                <input type="text" id="title" placeholder="Trip Title" required>
+                <input type="date" id="date" required>
+                <input type="number" id="miles" placeholder="Distance (nm)" step="0.1">
+                <textarea id="narrative" rows="3" placeholder="Notes..." required></textarea>
+                <div style="margin-bottom:10px; border:1px solid #eee; padding:10px; border-radius:4px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><small style="font-weight:bold;">Route (Max 5)</small><span style="color:blue; cursor:pointer; font-size:0.8em;" onclick="clearRouteInput()">Reset</span></div>
+                    <div id="route-display" style="font-size:0.85em; color:#666;"><em>Click map to set points...</em></div>
+                </div>
+                <input type="file" id="photoInput" accept="image/*">
+                <div style="display:flex; gap:10px; margin-top:15px;"><button class="primary" onclick="saveEntryToGitHub()">Save</button><button style="background:#eee; color:#333; border:none; padding:10px; border-radius:6px; cursor:pointer; flex:1;" onclick="toggleForm('entry-form')">Cancel</button></div>
+            </div>
+            <div id="entries-container"></div>
+        </div>
+        <div id="map"><button class="map-reset-btn" onclick="resetMap()">Reset Map</button></div>
+    </div>
+
+    <div id="view-updates" class="view-container">
+        <div class="updates-scroll">
+            <button class="add-update-fab" onclick="toggleForm('update-form')" title="New Update">+</button>
+            
+            <div id="update-form" class="update-form">
+                <h3 style="margin-top:0">New Post</h3>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <input type="date" id="u-date">
+                    <input type="text" id="u-author" placeholder="Author (e.g. Captain)">
+                </div>
+                <textarea id="u-text" rows="5" placeholder="Write your update..."></textarea>
+                <input type="file" id="u-photo" accept="image/*">
+                <button class="primary" onclick="saveUpdateToGitHub()">Post Update</button>
+            </div>
+
+            <div id="updates-container"></div>
+        </div>
+    </div>
+
+    <div id="view-gallery" class="view-container">
+        <div class="scroll-container">
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <h2 style="margin:0; border:none;">Photo Gallery</h2>
+                    <button class="primary admin-only" style="width:auto; display:none;" onclick="document.getElementById('gallery-upload-input').click()">+ Upload</button>
+                </div>
+                <div id="gallery-grid" class="gallery-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-crew" class="view-container">
+        <div class="scroll-container">
+            <div class="crew-page-header">
+                <h1>The Crew</h1>
+                <p>The team behind s/v Ardenna's adventures</p>
+                <button class="add-crew-btn">+ Add Crew Member</button>
+            </div>
+            <div id="crew-container" class="crew-grid"></div>
+        </div>
+    </div>
+
+    <div id="view-specs" class="view-container">
+        <div class="scroll-container">
+            <div class="card">
+                <h2>Specifications</h2>
+                <div id="specs-view"></div>
+                <div id="specs-editor-container" style="display:none;"><div id="editor-specs"></div><div style="margin-top:20px; text-align:right;"><button id="btn-save-specs" class="primary admin-only" style="width:auto;" onclick="saveManifestToGitHub()">Save Specs</button></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-fuel" class="view-container">
+        <div class="scroll-container">
+            <div class="log-section">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;"><h2 style="margin:0;border:none;">Fuel Log</h2><button class="primary admin-only" onclick="toggleForm('fuel-form')" style="width:auto; display:none;">+ Add</button></div>
+                <div id="fuel-form" class="table-form">
+                    <input type="date" id="f-date"><input type="text" id="f-location" placeholder="Location"><select id="f-type"><option value="Diesel">Diesel</option><option value="Gasoline">Gasoline</option></select><input type="number" id="f-amount" placeholder="Gals" step="0.1"><input type="number" id="f-price" placeholder="$/Gal" step="0.01"><button class="primary" onclick="saveFuelToGitHub()">Save</button>
+                </div>
+                <table id="fuel-table"><thead><tr><th>Date</th><th>Location</th><th>Type</th><th>Gals</th><th>$/Gal</th><th>Total</th><th width="10%"></th></tr></thead><tbody id="fuel-body"></tbody></table>
+            </div>
+            <div class="log-section">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;"><h2 style="margin:0;border:none;">Maintenance</h2><button class="primary admin-only" onclick="toggleForm('maint-form')" style="width:auto; display:none;">+ Add</button></div>
+                <div id="maint-form" class="table-form maint-form-grid">
+                    <input type="date" id="m-date"><input type="text" id="m-item" placeholder="Item"><input type="text" id="m-notes" placeholder="Notes"><select id="m-status"><option value="Done">Done</option><option value="Pending">Pending</option></select><input type="file" id="m-photo" accept="image/*"><button class="primary" onclick="saveMaintenanceToGitHub()">Save</button>
+                </div>
+                <table id="maint-table"><thead><tr><th>Date</th><th>Item</th><th>Notes</th><th>Status</th><th>Img</th><th></th></tr></thead><tbody id="maint-body"></tbody></table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script src="https://unpkg.com/quill-image-resize-module@3.0.0/image-resize.min.js"></script>
+    
+    <script>
+        const CONFIG = { owner: 'dbaverill', repo: 'Ardenna', branch: 'main' };
+        const STADIA_API_KEY = "8def8aa3-d91b-4b91-9c96-b6e4696f84d4";
+
+        let GH_TOKEN = localStorage.getItem('gh_token');
+        let trips = [], maintLog = [], fuelLog = [], updates = [], manifest = { specs: "", crew: [], gallery: [] };
+        let activeLayerGroup = L.layerGroup(), currentRoute = [], editingTrip = null, editingFuel = null, editingMaint = null, activeQuill = null; 
+        
+        const map = L.map('map').setView([41.49, -71.31], 6);
+        
+        // --- 1. BASE LAYER (Stadia Outdoors) ---
+        let stadiaUrl = 'https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png';
+        if (STADIA_API_KEY) stadiaUrl += `?api_key=${STADIA_API_KEY}`;
+        L.tileLayer(stadiaUrl, {
+            maxZoom: 20,
+            attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a>'
+        }).addTo(map);
+
+        // --- 2. OVERLAY LAYER (OpenSeaMap) ---
+        L.tileLayer('https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png', {
+            attribution: 'Map data: &copy; <a href="http://www.openseamap.org">OpenSeaMap</a> contributors'
+        }).addTo(map);
+
+        // --- 3. DATA LAYER (User Routes) ---
+        activeLayerGroup.addTo(map);
+
+        // --- APP LOGIC ---
+        function imageHandler() { activeQuill = this.quill; document.getElementById('quill-image-upload').click(); }
+        const toolbarOptions = { container: [['bold', 'italic', 'underline', 'header'], [{'list': 'ordered'}, {'list': 'bullet'}], ['image'], ['clean']], handlers: { image: imageHandler } };
+        const quillConfig = { theme: 'snow', modules: { toolbar: toolbarOptions, imageResize: {} } };
+        const quillSpecs = new Quill('#editor-specs', quillConfig);
+
+        document.getElementById('quill-image-upload').onchange = async function() { if (this.files[0]) { const url = await ghUploadImage(this.files[0]); if (url) activeQuill.insertEmbed(activeQuill.getSelection().index, 'image', getImgUrl(url)); } this.value = ''; };
+        document.getElementById('gallery-upload-input').onchange = async function() { if (this.files[0]) { const url = await ghUploadImage(this.files[0]); if (url) { if(!manifest.gallery) manifest.gallery = []; manifest.gallery.push({url: url, date: new Date().toISOString()}); await saveManifestToGitHub(true); renderGallery(); } } this.value = ''; };
+
+        function openLightbox(url) { document.getElementById('lightbox-img').src = url; document.getElementById('lightbox').style.display = 'flex'; }
+        function closeLightbox() { document.getElementById('lightbox').style.display = 'none'; }
+
+        async function ghGet(path) { try { const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}?ref=${CONFIG.branch}&t=${Date.now()}`, { headers: GH_TOKEN ? { "Authorization": `token ${GH_TOKEN}` } : {}, cache: "no-store" }); if (!res.ok) return null; const data = await res.json(); return { sha: data.sha, content: JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(data.content), c => c.charCodeAt(0)))) }; } catch(e) { return null; } }
+        async function ghPut(path, content, message, sha = null) { if (!GH_TOKEN) return alert("Admin Token Missing"); showLoading(true); try { const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}`, { method: 'PUT', headers: { "Authorization": `token ${GH_TOKEN}`, "Content-Type": "application/json" }, body: JSON.stringify({ message: message, content: btoa(String.fromCharCode(...new Uint8Array(new TextEncoder().encode(content)))), branch: CONFIG.branch, sha: sha }) }); showLoading(false); return res.ok; } catch(e) { showLoading(false); alert("Error saving: " + e.message); return false; } }
+        async function ghUploadImage(file) { if (!GH_TOKEN) return null; showLoading(true); const filename = `images/${Date.now()}-${file.name.replace(/\s/g, '_')}`; const base64 = await new Promise(r => { const reader = new FileReader(); reader.onloadend = () => r(reader.result.split(',')[1]); reader.readAsDataURL(file); }); const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${filename}`, { method: 'PUT', headers: { "Authorization": `token ${GH_TOKEN}`, "Content-Type": "application/json" }, body: JSON.stringify({ message: `Upload ${filename}`, content: base64, branch: CONFIG.branch }) }); showLoading(false); return res.ok ? filename : null; }
+        function getImgUrl(path) { return path ? (path.startsWith('http') ? path : `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${path}`) : ''; }
+        function showLoading(show) { document.getElementById('loading').style.display = show ? 'flex' : 'none'; }
+
+        async function loadData() {
+            showLoading(true);
+            try {
+                const tData = await ghGet('trips.json'); trips = (tData && Array.isArray(tData.content)) ? tData.content : [];
+                const mData = await ghGet('manifest.json'); manifest = (mData && mData.content) ? mData.content : { specs: "", crew: [], gallery: [] };
+                if(!manifest.gallery) manifest.gallery = [];
+                if(!manifest.crew) manifest.crew = [];
+                const mainData = await ghGet('maintenance.json'); maintLog = (mainData && Array.isArray(mainData.content)) ? mainData.content : [];
+                const fuelData = await ghGet('fuel.json'); fuelLog = (fuelData && Array.isArray(fuelData.content)) ? fuelData.content : [];
+                const upData = await ghGet('updates.json'); updates = (upData && Array.isArray(upData.content)) ? upData.content : [];
+                
+                populateFilter(); renderLog(); renderManifest(); renderMaint(); renderFuel(); renderGallery(); renderUpdates(); renderCrew();
+                checkAdmin();
+            } catch(e) { console.error(e); alert("Data Load Error. Check Repo."); } finally { showLoading(false); }
+        }
+
+        // --- UPDATES (MAGAZINE STYLE) ---
+        function renderUpdates() {
+            const container = document.getElementById('updates-container');
+            container.innerHTML = '';
+            
+            if(!updates || !updates.length) {
+                container.innerHTML = '<div style="text-align:center; padding:60px; color:#999;">No updates yet.</div>';
+                return;
+            }
+            
+            const sorted = [...updates].sort((a,b) => new Date(b.date) - new Date(a.date));
+            
+            // Hero Post (most recent)
+            if(sorted.length > 0) {
+                const hero = sorted[0];
+                const heroDiv = document.createElement('div');
+                heroDiv.className = 'hero-update';
+                
+                const excerpt = hero.text.length > 300 ? hero.text.substring(0, 300) + '...' : hero.text;
+                
+                heroDiv.innerHTML = `
+                    <div class="post-actions">
+                        <button class="action-btn-round edit-btn" onclick="event.stopPropagation(); editUpdate(0)" title="Edit">✎</button>
+                        <button class="action-btn-round delete-btn" onclick="event.stopPropagation(); deleteUpdate(0)" title="Delete">✕</button>
+                    </div>
+                    ${hero.image ? `<img src="${getImgUrl(hero.image)}" class="hero-update-image" onclick="openLightbox(this.src)">` : ''}
+                    <div class="hero-update-content">
+                        <div class="update-meta">
+                            <span>${hero.date}</span>
+                            <span>by ${hero.author || 'Captain'}</span>
+                        </div>
+                        <h2>${escapeHtml(hero.text.split('\n')[0].substring(0, 80))}</h2>
+                        <p class="update-excerpt">${escapeHtml(excerpt)}</p>
+                    </div>
+                `;
+                container.appendChild(heroDiv);
+            }
+            
+            // Grid of older posts
+            if(sorted.length > 1) {
+                const grid = document.createElement('div');
+                grid.className = 'updates-grid';
+                
+                sorted.slice(1).forEach((u, idx) => {
+                    const card = document.createElement('div');
+                    card.className = 'update-card-mag';
+                    
+                    const excerpt = u.text.length > 150 ? u.text.substring(0, 150) + '...' : u.text;
+                    
+                    card.innerHTML = `
+                        <div class="post-actions">
+                            <button class="action-btn-round edit-btn" onclick="event.stopPropagation(); editUpdate(${idx + 1})" title="Edit">✎</button>
+                            <button class="action-btn-round delete-btn" onclick="event.stopPropagation(); deleteUpdate(${idx + 1})" title="Delete">✕</button>
+                        </div>
+                        ${u.image ? `<img src="${getImgUrl(u.image)}" class="update-thumbnail" onclick="openLightbox(this.src)">` : ''}
+                        <div class="update-card-content">
+                            <div class="update-meta">
+                                <span>${u.date}</span>
+                                <span>by ${u.author || 'Captain'}</span>
+                            </div>
+                            <h3>${escapeHtml(u.text.split('\n')[0].substring(0, 60))}</h3>
+                            <p class="update-card-excerpt">${escapeHtml(excerpt)}</p>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+                
+                container.appendChild(grid);
+            }
+            
+            checkAdmin();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        async function saveUpdateToGitHub() {
+            const date = document.getElementById('u-date').value;
+            const text = document.getElementById('u-text').value;
+            const author = document.getElementById('u-author').value;
+            if(!date || !text) return alert("Date and Text required.");
+            
+            const f = document.getElementById('u-photo'); 
+            let img = null; if(f.files[0]) img = await ghUploadImage(f.files[0]);
+            
+            const c = await ghGet('updates.json');
+            let list = c ? c.content : [];
+            list.push({ date, text, author, image: img });
+            
+            if(await ghPut('updates.json', JSON.stringify(list, null, 2), "New Update", c ? c.sha : null)) {
+                alert("Posted!");
+                toggleForm('update-form');
+                document.getElementById('u-date').value = '';
+                document.getElementById('u-text').value = '';
+                document.getElementById('u-author').value = '';
+                document.getElementById('u-photo').value = '';
+                loadData();
+            }
+        }
+
+        function editUpdate(idx) {
+            // For now just alert - you can implement edit later
+            alert("Edit functionality coming soon!");
+        }
+
+        async function deleteUpdate(idx) {
+            if(!confirm("Delete update?")) return;
+            const c = await ghGet('updates.json');
+            const sorted = [...c.content].sort((a,b) => new Date(b.date) - new Date(a.date));
+            const itemToDelete = sorted[idx];
+            const unsortedList = c.content.filter(u => !(u.date === itemToDelete.date && u.text === itemToDelete.text && u.author === itemToDelete.author));
+            
+            await ghPut('updates.json', JSON.stringify(unsortedList, null, 2), "Del Update", c.sha);
+            loadData();
+        }
+
+        // --- CREW (CARD GRID STYLE) ---
+        function renderCrew() {
+            const container = document.getElementById('crew-container');
+            container.innerHTML = '';
+            
+            if(!manifest.crew || !manifest.crew.length) {
+                container.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:60px; color:#999;">No crew members added yet.</div>';
+                return;
+            }
+            
+            manifest.crew.forEach((member, idx) => {
+                const card = document.createElement('article');
+                card.className = 'crew-card';
+                
+                card.innerHTML = `
+                    <div class="post-actions">
+                        <button class="action-btn-round edit-btn" onclick="event.stopPropagation(); editCrew(${idx})" title="Edit">✎</button>
+                        <button class="action-btn-round delete-btn" onclick="event.stopPropagation(); deleteCrew(${idx})" title="Delete">✕</button>
+                    </div>
+                    ${member.photo ? `<img src="${getImgUrl(member.photo)}" class="crew-photo">` : '<div class="crew-photo"></div>'}
+                    <div class="crew-content">
+                        <h2 class="crew-name">${escapeHtml(member.name || '')}</h2>
+                        <div class="crew-role">${escapeHtml(member.role || '')}</div>
+                        <p class="crew-bio">${escapeHtml(member.bio || '')}</p>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        function editCrew(idx) {
+            alert("Edit crew functionality coming soon!");
+        }
+
+        async function deleteCrew(idx) {
+            if(!confirm("Delete crew member?")) return;
+            manifest.crew.splice(idx, 1);
+            await saveManifestToGitHub(true);
+            renderCrew();
+        }
+
+        function renderGallery() { const c = document.getElementById('gallery-grid'); c.innerHTML = ''; if (manifest.gallery && manifest.gallery.length) { [...manifest.gallery].reverse().forEach((img, idx) => { const originalIdx = manifest.gallery.length - 1 - idx; const div = document.createElement('div'); div.className = 'gallery-item'; div.onclick = () => openLightbox(getImgUrl(img.url)); div.innerHTML = `<img src="${getImgUrl(img.url)}" loading="lazy"><div class="gallery-del admin-only" onclick="event.stopPropagation(); deleteGalleryPhoto(${originalIdx})">✕</div>`; c.appendChild(div); }); } else c.innerHTML = '<p style="color:#aaa; grid-column:1/-1; text-align:center;">No photos uploaded.</p>'; }
+        async function deleteGalleryPhoto(idx) { if(!confirm("Delete?")) return; manifest.gallery.splice(idx, 1); await saveManifestToGitHub(true); renderGallery(); }
+
+        function renderManifest() {
+            if (!manifest.specs || manifest.specs.length < 50) quillSpecs.root.innerHTML = `<h3>General Dimensions</h3><ul><li><strong>LOA:</strong> 14.99m (49.18ft)</li><li><strong>Beam:</strong> 4.58m (15.03ft)</li><li><strong>Draft:</strong> 2.15m (7.05ft)</li><li><strong>Displacement:</strong> 17,500kg</li></ul><h3>Engine & Propulsion</h3><ul><li><strong>Engine:</strong> Yanmar 4JH4-HTE (110hp)</li><li><strong>Propeller:</strong> MaxProp 3-blade feathering</li><li><strong>Gearbox:</strong> Kanzaki KM4A</li><li><strong>Bow Thruster:</strong> MaxPower 24V</li></ul><h3>Electrical Systems</h3><ul><li><strong>Generator:</strong> Mastervolt Whisper 6</li><li><strong>House Bank:</strong> 24V System</li></ul><h3>Water & Plumbing</h3><ul><li><strong>Watermaker:</strong> Schenker Ready 60</li><li><strong>Water Tank:</strong> 700L</li><li><strong>Fuel Tank:</strong> 600L</li></ul><h3>Navigation Equipment</h3><ul><li><strong>Instruments:</strong> B&G H5000</li><li><strong>Radar:</strong> B&G Halo 20+</li><li><strong>Chartplotter:</strong> B&G Zeus 3S</li><li><strong>VHF:</strong> B&G V60-B</li><li><strong>Autopilot:</strong> B&G NAC-3</li></ul><h3>Sails & Rigging</h3><ul><li><strong>Rig Type:</strong> Sloop / Cutter</li><li><strong>Mast:</strong> Seldén Aluminum</li><li><strong>Furling:</strong> In-mast Furling</li><li><strong>Sails:</strong> North Sails Dacron</li><li><strong>Winches:</strong> Lewmar Electric</li></ul>`; else quillSpecs.root.innerHTML = manifest.specs;
+            document.getElementById('specs-view').innerHTML = generateAccordionHTML(quillSpecs.root.innerHTML);
+        }
+        function generateAccordionHTML(html) { const d=document.createElement('div'); d.innerHTML=html; let out='', content='', header=''; Array.from(d.childNodes).forEach(n=>{ if(n.nodeName==='H3'){ if(header){ out+=`<div class="acc-item"><div class="acc-header" onclick="toggleAcc(this)">${header} <span class="toggle-icon">▼</span></div><div class="acc-content">${content}</div></div>`; content=''; } header=n.innerText; } else { if(n.nodeType===1) content+=n.outerHTML; else if(n.nodeType===3) content+=n.textContent; } }); if(header) out+=`<div class="acc-item"><div class="acc-header" onclick="toggleAcc(this)">${header} <span class="toggle-icon">▼</span></div><div class="acc-content">${content}</div></div>`; return out||html; }
+        window.toggleAcc = function(h) { const c=h.nextElementSibling; const open=c.style.display==='block'; c.style.display=open?'none':'block'; h.querySelector('.toggle-icon').innerText=open?'▼':'▲'; }
+
+        function renderLog() {
+            const c=document.getElementById('entries-container'); c.innerHTML=''; map.eachLayer(l=>{if(!!l.toGeoJSON&&l!==activeLayerGroup)map.removeLayer(l)}); 
+            activeLayerGroup.clearLayers();
+            if(!Array.isArray(trips)) trips=[]; trips.sort((a,b)=>new Date(a.date)-new Date(b.date));
+            const filter=document.getElementById('log-filter').value; const now=new Date();
+            const filtered=trips.filter(t=> {
+                if(filter === 'all') return true;
+                const days = (now - new Date(t.date))/(1000*60*60*24);
+                if(filter === '30') return days <= 30;
+                if(filter === '90') return days <= 90;
+                return false; 
+            });
+            const allCoords=[]; filtered.forEach(t=>{ const pts=getTripPoints(t); if(pts.length){ L.polyline(pts,{color:'#3498db',weight:3,dashArray:'5,5'}).addTo(map); pts.forEach(p=>{L.circleMarker(p,{radius:4,color:'#2c3e50',fillColor:'#fff',fillOpacity:1}).addTo(map); allCoords.push(p)}); } });
+            if(allCoords.length) map.fitBounds(allCoords);
+            const groups={}; [...filtered].sort((a,b)=>new Date(b.date)-new Date(a.date)).forEach(t=>{ const k=new Date(t.date).toLocaleString('default',{month:'long',year:'numeric'}); if(!groups[k]) groups[k]=[]; groups[k].push(t); });
+            Object.keys(groups).forEach((m,i)=>{
+                const h=document.createElement('div'); h.className='month-header'; h.innerHTML=`<span>${m}</span> <span class="toggle-icon">${i===0?'▼':'▶'}</span>`;
+                const d=document.createElement('div'); d.style.display=i===0?'block':'none';
+                h.onclick=()=>{ const o=d.style.display!=='none'; d.style.display=o?'none':'block'; h.querySelector('.toggle-icon').innerText=o?'▶':'▼'; };
+                c.appendChild(h); c.appendChild(d);
+                groups[m].forEach(t=>{
+                    const e=document.createElement('div'); e.className='log-entry'; e.id=`entry-${t.date}`;
+                    e.innerHTML=`<div class="log-date">${t.date}</div><h3 style="margin:0 0 5px 0; color:#2c3e50;">${t.title}</h3><div class="log-stats">Dist: ${t.miles||0} nm</div><p>${t.text}</p>${t.image?`<img src="${getImgUrl(t.image)}" class="log-img">`:''}<div class="entry-actions admin-only"><span class="action-btn edit-btn" onclick="event.stopPropagation();editTrip('${t.date}','${t.title.replace(/'/g,"\\'")}')">✎</span><span class="action-btn delete-btn" onclick="event.stopPropagation();deleteTrip('${t.date}','${t.title.replace(/'/g,"\\'")}')">✕</span></div>`;
+                    e.onclick=()=>highlightTrip(t, e); d.appendChild(e);
+                });
+            });
+            checkAdmin();
+        }
+        function highlightTrip(t, el) { activeLayerGroup.clearLayers(); document.querySelectorAll('.log-entry').forEach(x=>x.classList.remove('active-trip')); el.classList.add('active-trip'); const pts=getTripPoints(t); if(pts.length) { L.polyline(pts,{color:'#e74c3c',weight:4}).addTo(activeLayerGroup); pts.forEach(p=>L.circleMarker(p,{radius:5,color:'#e74c3c',fillColor:'#fff',fillOpacity:1}).addTo(activeLayerGroup)); map.flyToBounds(pts,{padding:[50,50],maxZoom:10}); } }
+        function resetMap() { activeLayerGroup.clearLayers(); document.querySelectorAll('.log-entry').forEach(x=>x.classList.remove('active-trip')); renderLog(); }
+        function getTripPoints(t) { return (t.route && t.route.length) ? t.route : (t.startCoords ? [t.startCoords, t.endCoords] : []); }
+        
+        function renderMaint() { const b=document.getElementById('maint-body'); b.innerHTML=''; if(!Array.isArray(maintLog))maintLog=[]; maintLog.sort((a,b)=>new Date(b.date)-new Date(a.date)); maintLog.forEach(i=>{ const r=document.createElement('tr'); r.innerHTML=`<td>${i.date}</td><td><strong>${i.item}</strong></td><td>${i.notes}</td><td class="${i.status==='Done'?'status-done':'status-pending'}">${i.status}</td><td>${i.image?`<a href="${getImgUrl(i.image)}" target="_blank">View</a>`:''}</td><td><span class="action-btn edit-btn admin-only" onclick="editMaint('${i.date}','${i.item.replace(/'/g,"\\'")}')">✎</span><span class="action-btn delete-btn admin-only" onclick="deleteMaint('${i.date}','${i.item.replace(/'/g,"\\'")}')">✕</span></td>`; b.appendChild(r); }); checkAdmin(); }
+        function renderFuel() { const b=document.getElementById('fuel-body'); b.innerHTML=''; if(!Array.isArray(fuelLog))fuelLog=[]; fuelLog.sort((a,b)=>new Date(b.date)-new Date(a.date)); fuelLog.forEach(i=>{ const r=document.createElement('tr'); r.innerHTML=`<td>${i.date}</td><td>${i.location}</td><td>${i.type}</td><td>${i.amount}</td><td>$${i.price}</td><td><strong>$${(i.amount*i.price).toFixed(2)}</strong></td><td><span class="action-btn edit-btn admin-only" onclick="editFuel('${i.date}','${i.amount}','${i.type}')">✎</span><span class="action-btn delete-btn admin-only" onclick="deleteFuel('${i.date}','${i.amount}')">✕</span></td>`; b.appendChild(r); }); checkAdmin(); }
+
+        function promptAdmin() { if(GH_TOKEN){if(confirm("Logout?")){localStorage.removeItem('gh_token');GH_TOKEN=null;checkAdmin();}return;} const t=prompt("Token:"); if(t&&t.startsWith('ghp_')){GH_TOKEN=t;localStorage.setItem('gh_token',t);checkAdmin();} }
+        function checkAdmin() { const a=!!GH_TOKEN; document.body.classList.toggle('is-admin',a); document.querySelector('.admin-lock').classList.toggle('admin-active',a); document.getElementById('log-header').style.display=a?'block':'none'; document.querySelectorAll('.admin-only').forEach(e=>e.style.display=a?(e.tagName==='SPAN'||e.classList.contains('gallery-del')||e.classList.contains('entry-actions')?'block':'inline-block'):'none'); 
+            if(a){document.getElementById('specs-view').style.display='none';document.getElementById('specs-editor-container').style.display='block';}else{document.getElementById('specs-view').style.display='block';document.getElementById('specs-editor-container').style.display='none'; if(quillSpecs.root.innerHTML) document.getElementById('specs-view').innerHTML=generateAccordionHTML(quillSpecs.root.innerHTML);}
+            quillSpecs.enable(a);
+        }
+
+        function switchTab(t) { document.querySelectorAll('.view-container').forEach(e=>e.classList.remove('active')); document.querySelectorAll('.tab').forEach(e=>e.classList.remove('active')); document.getElementById(`view-${t}`).classList.add('active'); document.querySelector(`.tab[onclick="switchTab('${t}')"]`).classList.add('active'); if(t==='logbook') map.invalidateSize(); }
+        function toggleForm(id) { 
+            const f=document.getElementById(id); 
+            if(id==='entry-form'){if(f.style.display==='none'&&!editingTrip){document.getElementById('title').value='';document.getElementById('narrative').value='';document.getElementById('miles').value='';document.getElementById('date').value=new Date().toISOString().split('T')[0];document.getElementById('form-title').innerText="New Entry";clearRouteInput();}f.style.display=f.style.display==='block'?'none':'block';if(f.style.display==='none')editingTrip=null;}
+            else if(id==='update-form'){
+                f.style.display = f.style.display==='flex'?'none':'flex';
+                if(f.style.display==='flex') { document.getElementById('u-date').value = new Date().toISOString().split('T')[0]; }
+            }
+            else{f.style.display=f.style.display==='grid'?'none':'grid';if(f.style.display==='none'){if(id==='fuel-form')editingFuel=null;if(id==='maint-form')editingMaint=null;document.getElementById('f-date').value='';document.getElementById('m-date').value='';}}
+            map.invalidateSize();
+        }
+        function populateFilter() { const s=document.getElementById('log-filter'); while(s.options.length>3)s.remove(3); [...new Set(trips.map(t=>t.date.split('-')[0]))].sort().reverse().forEach(y=>{const o=document.createElement('option');o.value=y;o.innerText=y;s.appendChild(o)}); }
+
+        async function saveManifestToGitHub(silent=false) { manifest.specs=quillSpecs.root.innerHTML; const s=await ghPut('manifest.json', JSON.stringify(manifest,null,2), "Upd Manifest", (await ghGet('manifest.json'))?.sha); if(!silent && s) alert("Saved!"); }
+        async function deleteTrip(d,t){if(!confirm("Del?"))return;const c=await ghGet('trips.json');await ghPut('trips.json',JSON.stringify(c.content.filter(x=>!(x.date===d&&x.title===t)),null,2),"Del Trip",c.sha);loadData();}
+        async function saveEntryToGitHub() { const t=document.getElementById('title').value, d=document.getElementById('date').value; if(!t||!d) return alert("Missing"); const f=document.getElementById('photoInput'); let img=editingTrip?editingTrip.image:null; if(f.files[0]) img=await ghUploadImage(f.files[0]); const c=await ghGet('trips.json'); let list=c?c.content:[]; if(editingTrip) list=list.filter(x=>!(x.date===editingTrip.date&&x.title===editingTrip.title)); list.push({title:t,date:d,text:document.getElementById('narrative').value,miles:document.getElementById('miles').value,image:img,route:currentRoute,startCoords:currentRoute[0]}); if(await ghPut('trips.json',JSON.stringify(list,null,2),"Save Trip",c?c.sha:null)){alert("Saved");toggleForm('entry-form');loadData();} }
+        function editTrip(d,t){const tr=trips.find(x=>x.date===d&&x.title===t);if(!tr)return;editingTrip=tr;document.getElementById('title').value=tr.title;document.getElementById('date').value=tr.date;document.getElementById('miles').value=tr.miles||'';document.getElementById('narrative').value=tr.text;currentRoute=getTripPoints(tr);updateRouteDisplay();document.getElementById('form-title').innerText="Edit";toggleForm('entry-form');}
+        function clearRouteInput(){currentRoute=[];updateRouteDisplay();} function updateRouteDisplay(){const e=document.getElementById('route-display');if(!currentRoute.length)e.innerHTML='<em>Click map...</em>';else e.innerHTML=currentRoute.map((p,i)=>`<div>Pt ${i+1}: ${p[0].toFixed(2)}, ${p[1].toFixed(2)}</div>`).join('');activeLayerGroup.clearLayers();if(currentRoute.length){L.polyline(currentRoute,{color:'var(--accent)',dashArray:'5,5'}).addTo(activeLayerGroup);currentRoute.forEach(p=>L.circleMarker(p,{radius:4,color:'var(--accent)'}).addTo(activeLayerGroup));}}
+        
+        async function deleteFuel(d,a){if(confirm("Del?")){const c=await ghGet('fuel.json');await ghPut('fuel.json',JSON.stringify(c.content.filter(f=>!(f.date===d&&f.amount===a)),null,2),"Del Fuel",c.sha);loadData();}}
+        async function saveFuelToGitHub(){const d=document.getElementById('f-date').value,a=document.getElementById('f-amount').value,p=document.getElementById('f-price').value;if(!d||!a)return alert("Missing");const c=await ghGet('fuel.json');let list=c?[...c.content]:[];if(editingFuel)list=list.filter(x=>!(x.date===editingFuel.date&&x.amount===editingFuel.amount));list.push({date:d,location:document.getElementById('f-location').value,type:document.getElementById('f-type').value,amount:a,price:p});if(await ghPut('fuel.json',JSON.stringify(list,null,2),"Fuel",c?c.sha:null)){alert("Saved");toggleForm('fuel-form');loadData();}}
+        function editFuel(d,a,t){const f=fuelLog.find(x=>x.date===d&&x.amount===a);if(!f)return;editingFuel=f;document.getElementById('f-date').value=f.date;document.getElementById('f-location').value=f.location;document.getElementById('f-type').value=f.type;document.getElementById('f-amount').value=f.amount;document.getElementById('f-price').value=f.price;toggleForm('fuel-form');}
+
+        async function deleteMaint(d,i){if(confirm("Del?")){const c=await ghGet('maintenance.json');await ghPut('maintenance.json',JSON.stringify(c.content.filter(m=>!(m.date===d&&m.item===i)),null,2),"Del Maint",c.sha);loadData();}}
+        async function saveMaintenanceToGitHub(){const d=document.getElementById('m-date').value,i=document.getElementById('m-item').value;if(!d||!i)return alert("Missing");const f=document.getElementById('m-photo');let img=editingMaint?editingMaint.image:null;if(f.files[0])img=await ghUploadImage(f.files[0]);const c=await ghGet('maintenance.json');let list=c?[...c.content]:[];if(editingMaint)list=list.filter(x=>!(x.date===editingMaint.date&&x.item===editingMaint.item));list.push({date:d,item:i,notes:document.getElementById('m-notes').value,status:document.getElementById('m-status').value,image:img});if(await ghPut('maintenance.json',JSON.stringify(list,null,2),"Maint",c?c.sha:null)){alert("Saved");toggleForm('maint-form');loadData();}}
+        function editMaint(d,i){const m=maintLog.find(x=>x.date===d&&x.item===i);if(!m)return;editingMaint=m;document.getElementById('m-date').value=m.date;document.getElementById('m-item').value=m.item;document.getElementById('m-notes').value=m.notes;document.getElementById('m-status').value=m.status;toggleForm('maint-form');}
+
+        loadData();
+    </script>
+</body>
+</html>
