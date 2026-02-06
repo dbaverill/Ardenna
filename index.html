@@ -408,6 +408,16 @@
 
                 // --- 3. DATA LAYER (User Routes) ---
                 activeLayerGroup.addTo(map);
+                
+                // --- MAP CLICK HANDLER (for creating routes) ---
+                map.on('click', function(e) {
+                    // Only add points when entry form is open (in admin mode)
+                    const entryForm = document.getElementById('entry-form');
+                    if(entryForm && entryForm.style.display === 'block' && GH_TOKEN) {
+                        currentRoute.push([e.latlng.lat, e.latlng.lng]);
+                        updateRouteDisplay();
+                    }
+                });
             } catch(e) {
                 console.error('Map initialization failed:', e);
             }
