@@ -111,6 +111,11 @@
         .crew-name { margin: 0 0 5px 0; font-size: 1.8rem; color: var(--accent); font-weight: 700; }
         .crew-role { color: #3498db; font-weight: 600; font-size: 1rem; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
         .crew-bio { color: #555; line-height: 1.7; font-size: 0.95rem; margin-bottom: 20px; }
+        .crew-bio p { margin: 0 0 10px 0; }
+        .crew-bio ul, .crew-bio ol { margin: 10px 0; padding-left: 25px; }
+        .crew-bio li { margin-bottom: 5px; }
+        .crew-bio strong { font-weight: 600; }
+        .crew-bio em { font-style: italic; }
 
         /* Tables */
         .log-section { background: white; padding: 30px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
@@ -146,6 +151,8 @@
         body.is-admin .ql-container { border: 1px solid var(--border); border-top: none; border-radius: 0 0 6px 6px; padding: 10px; background: #fff; }
         #view-specs .ql-container { height: 450px; overflow: hidden; }
         #view-specs .ql-editor { height: 100%; overflow-y: auto; padding: 0 5px 0 0; }
+        #crew-bio-editor .ql-container { border: 1px solid var(--border); border-top: none; border-radius: 0 0 6px 6px; padding: 10px; background: #fff; }
+        #crew-bio-editor .ql-editor { min-height: 150px; }
 
         /* Accordions */
         .acc-item { border-bottom: 1px solid #eee; }
@@ -265,7 +272,9 @@
                     <input type="text" id="crew-name" placeholder="Name">
                     <input type="text" id="crew-role" placeholder="Role (e.g., Captain, First Mate)">
                 </div>
-                <textarea id="crew-bio" rows="5" placeholder="Bio and experience..."></textarea>
+                <div style="margin-bottom: 12px;">
+                    <div id="crew-bio-editor" style="height: 200px;"></div>
+                </div>
                 <input type="file" id="crew-photo" accept="image/*">
                 <div style="display:flex; gap:10px;">
                     <button class="primary" onclick="saveCrewToGitHub()">Save Crew Member</button>
@@ -361,6 +370,9 @@
         const toolbarOptions = { container: [['bold', 'italic', 'underline', 'header'], [{'list': 'ordered'}, {'list': 'bullet'}], ['image'], ['clean']], handlers: { image: imageHandler } };
         const quillConfig = { theme: 'snow', modules: { toolbar: toolbarOptions, imageResize: {} } };
         const quillSpecs = new Quill('#editor-specs', quillConfig);
+        
+        // Crew bio editor - initialized when form opens
+        let quillCrewBio = null;
 
         document.getElementById('quill-image-upload').onchange = async function() { if (this.files[0]) { const url = await ghUploadImage(this.files[0]); if (url) activeQuill.insertEmbed(activeQuill.getSelection().index, 'image', getImgUrl(url)); } this.value = ''; };
         document.getElementById('gallery-upload-input').onchange = async function() { if (this.files[0]) { const url = await ghUploadImage(this.files[0]); if (url) { if(!manifest.gallery) manifest.gallery = []; manifest.gallery.push({url: url, date: new Date().toISOString()}); await saveManifestToGitHub(true); renderGallery(); } } this.value = ''; };
@@ -534,7 +546,7 @@
                     <div class="crew-content">
                         <h2 class="crew-name">${escapeHtml(member.name || '')}</h2>
                         <div class="crew-role">${escapeHtml(member.role || '')}</div>
-                        <p class="crew-bio">${escapeHtml(member.bio || '')}</p>
+                        <div class="crew-bio">${member.bio || ''}</div>
                     </div>
                 `;
                 
@@ -550,16 +562,25 @@
                 editingCrew = null;
                 document.getElementById('crew-name').value = '';
                 document.getElementById('crew-role').value = '';
-                document.getElementById('crew-bio').value = '';
+                if(quillCrewBio) {
+                    quillCrewBio = null;
+                    document.getElementById('crew-bio-editor').innerHTML = '';
+                }
                 document.getElementById('crew-photo').value = '';
                 document.getElementById('crew-form-title').innerText = 'New Crew Member';
             } else {
                 // Opening form
                 form.style.display = 'flex';
+                
+                // Initialize Quill editor for bio
+                if(!quillCrewBio) {
+                    quillCrewBio = new Quill('#crew-bio-editor', quillConfig);
+                }
+                
                 if(!editingCrew) {
                     document.getElementById('crew-name').value = '';
                     document.getElementById('crew-role').value = '';
-                    document.getElementById('crew-bio').value = '';
+                    quillCrewBio.root.innerHTML = '';
                     document.getElementById('crew-photo').value = '';
                     document.getElementById('crew-form-title').innerText = 'New Crew Member';
                 }
@@ -569,7 +590,7 @@
         async function saveCrewToGitHub() {
             const name = document.getElementById('crew-name').value;
             const role = document.getElementById('crew-role').value;
-            const bio = document.getElementById('crew-bio').value;
+            const bio = quillCrewBio ? quillCrewBio.root.innerHTML : '';
             
             if(!name || !role) return alert("Name and Role are required.");
             
@@ -609,11 +630,20 @@
             if(!member) return;
             
             editingCrew = member;
+            
+            // Show form first
+            document.getElementById('crew-form').style.display = 'flex';
+            
+            // Initialize Quill if needed
+            if(!quillCrewBio) {
+                quillCrewBio = new Quill('#crew-bio-editor', quillConfig);
+            }
+            
+            // Populate form fields
             document.getElementById('crew-name').value = member.name || '';
             document.getElementById('crew-role').value = member.role || '';
-            document.getElementById('crew-bio').value = member.bio || '';
+            quillCrewBio.root.innerHTML = member.bio || '';
             document.getElementById('crew-form-title').innerText = 'Edit Crew Member';
-            document.getElementById('crew-form').style.display = 'flex';
         }
 
         async function deleteCrew(idx) {
