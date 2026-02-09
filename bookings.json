@@ -12,5 +12,12 @@
     "endDate": "2026-07-05",
     "location": "Hamilton, Bermuda",
     "status": "tentative"
+  },
+  {
+    "guest": "Sail to Salem, MA",
+    "startDate": "2026-07-05",
+    "endDate": "2026-07-08",
+    "location": "Salem, MA",
+    "status": "trip"
   }
 ]
