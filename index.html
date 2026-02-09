@@ -26,6 +26,9 @@
         .tab { color: var(--text-light); padding: 8px 12px; cursor: pointer; font-size: 0.85rem; font-weight: 500; border-radius: 6px; transition: all 0.2s; white-space: nowrap; }
         .tab:hover { color: var(--accent); background: #f5f5f5; }
         .tab.active { color: var(--accent); background: var(--active-tab); font-weight: 600; }
+        .tab-calendar { color: #3498db; }
+        .tab-calendar:hover { color: #2980b9; background: #e8f4f8; }
+        .tab-calendar.active { color: #3498db; background: #d6eaf8; }
         .admin-lock { cursor: pointer; opacity: 0.2; font-size: 1.1rem; margin-left: 15px; transition: opacity 0.2s; }
         .admin-lock:hover { opacity: 1; }
         .admin-active { opacity: 1; color: #27ae60; }
@@ -528,7 +531,6 @@
         .acc-content ul { padding-left: 20px; margin: 0; }
 
         .table-form { display: none; grid-template-columns: 1fr 1fr 1fr 1fr 1fr auto; gap:10px; margin-bottom:20px; background:#f9f9f9; padding:15px; border-radius:6px; border:1px solid var(--border); }
-        .maint-form-grid { grid-template-columns: 1fr 2fr 2fr 1fr auto auto; }
 
         @media (max-width: 768px) { 
             .view-container { flex-direction: column-reverse; } 
@@ -554,9 +556,8 @@
             <div class="tab" onclick="switchTab('updates')">Updates</div>
             <div class="tab" onclick="switchTab('gallery')">Gallery</div>
             <div class="tab" onclick="switchTab('crew')">Crew</div>
-            <div class="tab" onclick="switchTab('calendar')">Calendar</div>
             <div class="tab" onclick="switchTab('specs')">Specs</div>
-            <div class="tab" onclick="switchTab('fuel')">Fuel & Maint</div>
+            <div class="tab tab-calendar" onclick="switchTab('calendar')">Calendar</div>
         </div>
         <div class="admin-lock" onclick="promptAdmin()">🔒</div>
     </nav>
@@ -659,25 +660,6 @@
                 <h2>Specifications</h2>
                 <div id="specs-view"></div>
                 <div id="specs-editor-container" style="display:none;"><div id="editor-specs"></div><div style="margin-top:20px; text-align:right;"><button id="btn-save-specs" class="primary admin-only" style="width:auto;" onclick="saveManifestToGitHub()">Save Specs</button></div></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="view-fuel" class="view-container">
-        <div class="scroll-container">
-            <div class="log-section">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;"><h2 style="margin:0;border:none;">Fuel Log</h2><button class="primary admin-only" onclick="toggleForm('fuel-form')" style="width:auto; display:none;">+ Add</button></div>
-                <div id="fuel-form" class="table-form">
-                    <input type="date" id="f-date"><input type="text" id="f-location" placeholder="Location"><select id="f-type"><option value="Diesel">Diesel</option><option value="Gasoline">Gasoline</option></select><input type="number" id="f-amount" placeholder="Gals" step="0.1"><input type="number" id="f-price" placeholder="$/Gal" step="0.01"><button class="primary" onclick="saveFuelToGitHub()">Save</button>
-                </div>
-                <table id="fuel-table"><thead><tr><th>Date</th><th>Location</th><th>Type</th><th>Gals</th><th>$/Gal</th><th>Total</th><th width="10%"></th></tr></thead><tbody id="fuel-body"></tbody></table>
-            </div>
-            <div class="log-section">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;"><h2 style="margin:0;border:none;">Maintenance</h2><button class="primary admin-only" onclick="toggleForm('maint-form')" style="width:auto; display:none;">+ Add</button></div>
-                <div id="maint-form" class="table-form maint-form-grid">
-                    <input type="date" id="m-date"><input type="text" id="m-item" placeholder="Item"><input type="text" id="m-notes" placeholder="Notes"><select id="m-status"><option value="Done">Done</option><option value="Pending">Pending</option></select><input type="file" id="m-photo" accept="image/*"><button class="primary" onclick="saveMaintenanceToGitHub()">Save</button>
-                </div>
-                <table id="maint-table"><thead><tr><th>Date</th><th>Item</th><th>Notes</th><th>Status</th><th>Img</th><th></th></tr></thead><tbody id="maint-body"></tbody></table>
             </div>
         </div>
     </div>
@@ -821,12 +803,10 @@
                 const mData = await ghGet('manifest.json'); manifest = (mData && mData.content) ? mData.content : { specs: "", crew: [], gallery: [] };
                 if(!manifest.gallery) manifest.gallery = [];
                 if(!manifest.crew) manifest.crew = [];
-                const mainData = await ghGet('maintenance.json'); maintLog = (mainData && Array.isArray(mainData.content)) ? mainData.content : [];
-                const fuelData = await ghGet('fuel.json'); fuelLog = (fuelData && Array.isArray(fuelData.content)) ? fuelData.content : [];
                 const upData = await ghGet('updates.json'); updates = (upData && Array.isArray(upData.content)) ? upData.content : [];
                 const bookData = await ghGet('bookings.json'); bookings = (bookData && Array.isArray(bookData.content)) ? bookData.content : [];
                 
-                populateFilter(); renderLog(); renderManifest(); renderMaint(); renderFuel(); renderGallery(); renderUpdates(); renderCrew(); renderCalendar();
+                populateFilter(); renderLog(); renderManifest(); renderGallery(); renderUpdates(); renderCrew(); renderCalendar();
                 checkAdmin();
             } catch(e) { console.error(e); alert("Data Load Error. Check Repo."); } finally { showLoading(false); }
         }
@@ -1350,9 +1330,6 @@
         function resetMap() { activeLayerGroup.clearLayers(); document.querySelectorAll('.log-entry').forEach(x=>x.classList.remove('active-trip')); renderLog(); }
         function getTripPoints(t) { return (t.route && t.route.length) ? t.route : (t.startCoords ? [t.startCoords, t.endCoords] : []); }
         
-        function renderMaint() { const b=document.getElementById('maint-body'); b.innerHTML=''; if(!Array.isArray(maintLog))maintLog=[]; maintLog.sort((a,b)=>new Date(b.date)-new Date(a.date)); maintLog.forEach(i=>{ const r=document.createElement('tr'); r.innerHTML=`<td>${i.date}</td><td><strong>${i.item}</strong></td><td>${i.notes}</td><td class="${i.status==='Done'?'status-done':'status-pending'}">${i.status}</td><td>${i.image?`<a href="${getImgUrl(i.image)}" target="_blank">View</a>`:''}</td><td><span class="action-btn edit-btn admin-only" onclick="editMaint('${i.date}','${i.item.replace(/'/g,"\\'")}')">✎</span><span class="action-btn delete-btn admin-only" onclick="deleteMaint('${i.date}','${i.item.replace(/'/g,"\\'")}')">✕</span></td>`; b.appendChild(r); }); checkAdmin(); }
-        function renderFuel() { const b=document.getElementById('fuel-body'); b.innerHTML=''; if(!Array.isArray(fuelLog))fuelLog=[]; fuelLog.sort((a,b)=>new Date(b.date)-new Date(a.date)); fuelLog.forEach(i=>{ const r=document.createElement('tr'); r.innerHTML=`<td>${i.date}</td><td>${i.location}</td><td>${i.type}</td><td>${i.amount}</td><td>$${i.price}</td><td><strong>$${(i.amount*i.price).toFixed(2)}</strong></td><td><span class="action-btn edit-btn admin-only" onclick="editFuel('${i.date}','${i.amount}','${i.type}')">✎</span><span class="action-btn delete-btn admin-only" onclick="deleteFuel('${i.date}','${i.amount}')">✕</span></td>`; b.appendChild(r); }); checkAdmin(); }
-
         function promptAdmin() { if(GH_TOKEN){if(confirm("Logout?")){localStorage.removeItem('gh_token');GH_TOKEN=null;checkAdmin();}return;} const t=prompt("Token:"); if(t&&t.startsWith('ghp_')){GH_TOKEN=t;localStorage.setItem('gh_token',t);checkAdmin();} }
         function checkAdmin() { 
             const a=!!GH_TOKEN; 
@@ -1380,7 +1357,6 @@
                 f.style.display = f.style.display==='flex'?'none':'flex';
                 if(f.style.display==='flex') { document.getElementById('u-date').value = new Date().toISOString().split('T')[0]; }
             }
-            else{f.style.display=f.style.display==='grid'?'none':'grid';if(f.style.display==='none'){if(id==='fuel-form')editingFuel=null;if(id==='maint-form')editingMaint=null;document.getElementById('f-date').value='';document.getElementById('m-date').value='';}}
             map.invalidateSize();
         }
         function populateFilter() { const s=document.getElementById('log-filter'); while(s.options.length>3)s.remove(3); [...new Set(trips.map(t=>t.date.split('-')[0]))].sort().reverse().forEach(y=>{const o=document.createElement('option');o.value=y;o.innerText=y;s.appendChild(o)}); }
@@ -1400,14 +1376,6 @@
                 currentRoute.forEach(p=>L.circleMarker(p,{radius:4,color:'var(--accent)'}).addTo(activeLayerGroup));
             }
         }
-        
-        async function deleteFuel(d,a){if(confirm("Del?")){const c=await ghGet('fuel.json');await ghPut('fuel.json',JSON.stringify(c.content.filter(f=>!(f.date===d&&f.amount===a)),null,2),"Del Fuel",c.sha);loadData();}}
-        async function saveFuelToGitHub(){const d=document.getElementById('f-date').value,a=document.getElementById('f-amount').value,p=document.getElementById('f-price').value;if(!d||!a)return alert("Missing");const c=await ghGet('fuel.json');let list=c?[...c.content]:[];if(editingFuel)list=list.filter(x=>!(x.date===editingFuel.date&&x.amount===editingFuel.amount));list.push({date:d,location:document.getElementById('f-location').value,type:document.getElementById('f-type').value,amount:a,price:p});if(await ghPut('fuel.json',JSON.stringify(list,null,2),"Fuel",c?c.sha:null)){alert("Saved");toggleForm('fuel-form');loadData();}}
-        function editFuel(d,a,t){const f=fuelLog.find(x=>x.date===d&&x.amount===a);if(!f)return;editingFuel=f;document.getElementById('f-date').value=f.date;document.getElementById('f-location').value=f.location;document.getElementById('f-type').value=f.type;document.getElementById('f-amount').value=f.amount;document.getElementById('f-price').value=f.price;toggleForm('fuel-form');}
-
-        async function deleteMaint(d,i){if(confirm("Del?")){const c=await ghGet('maintenance.json');await ghPut('maintenance.json',JSON.stringify(c.content.filter(m=>!(m.date===d&&m.item===i)),null,2),"Del Maint",c.sha);loadData();}}
-        async function saveMaintenanceToGitHub(){const d=document.getElementById('m-date').value,i=document.getElementById('m-item').value;if(!d||!i)return alert("Missing");const f=document.getElementById('m-photo');let img=editingMaint?editingMaint.image:null;if(f.files[0])img=await ghUploadImage(f.files[0]);const c=await ghGet('maintenance.json');let list=c?[...c.content]:[];if(editingMaint)list=list.filter(x=>!(x.date===editingMaint.date&&x.item===editingMaint.item));list.push({date:d,item:i,notes:document.getElementById('m-notes').value,status:document.getElementById('m-status').value,image:img});if(await ghPut('maintenance.json',JSON.stringify(list,null,2),"Maint",c?c.sha:null)){alert("Saved");toggleForm('maint-form');loadData();}}
-        function editMaint(d,i){const m=maintLog.find(x=>x.date===d&&x.item===i);if(!m)return;editingMaint=m;document.getElementById('m-date').value=m.date;document.getElementById('m-item').value=m.item;document.getElementById('m-notes').value=m.notes;document.getElementById('m-status').value=m.status;toggleForm('maint-form');}
 
         loadData();
     </script>
