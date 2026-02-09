@@ -19,5 +19,12 @@
     "endDate": "2026-07-08",
     "location": "Salem, MA",
     "status": "trip"
+  },
+  {
+    "guest": "Sail to Newport for BWCC rally",
+    "startDate": "2026-10-30",
+    "endDate": "2026-11-02",
+    "location": "Newport, RI",
+    "status": "trip"
   }
 ]
