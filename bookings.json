@@ -26,5 +26,12 @@
     "endDate": "2026-11-02",
     "location": "Newport, RI",
     "status": "trip"
+  },
+  {
+    "guest": "Sail to Samaná, Dominican Republic",
+    "startDate": "2026-11-02",
+    "endDate": "2026-11-15",
+    "location": "Samaná, DR",
+    "status": "trip"
   }
 ]
