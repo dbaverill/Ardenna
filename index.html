@@ -563,7 +563,7 @@
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
         
         // Firebase configuration
         const firebaseConfig = {
@@ -590,7 +590,8 @@
         window.firebaseAuth = auth;
         window.googleProvider = provider;
         window.ADMIN_EMAILS = ADMIN_EMAILS;
-        window.firebaseSignInWithPopup = signInWithPopup;
+        window.firebaseSignInWithRedirect = signInWithRedirect;
+        window.firebaseGetRedirectResult = getRedirectResult;
         window.firebaseSignOut = signOut;
         window.onAuthStateChanged = onAuthStateChanged;
     </script>
@@ -1396,13 +1397,12 @@
         // --- FIREBASE AUTH FUNCTIONS ---
         async function signInWithGoogle() {
             try {
-                const result = await window.firebaseSignInWithPopup(window.firebaseAuth, window.googleProvider);
-                // Auth state change will be handled by onAuthStateChanged listener
+                // Use redirect instead of popup (fixes COOP policy issues)
+                await window.firebaseSignInWithRedirect(window.firebaseAuth, window.googleProvider);
+                // User will be redirected away and come back
             } catch (error) {
                 console.error('Sign in error:', error);
-                if (error.code !== 'auth/popup-closed-by-user') {
-                    alert('Sign in failed. Please try again.');
-                }
+                alert('Sign in failed. Please try again.');
             }
         }
         
@@ -1455,7 +1455,21 @@
         }
         
         // Initialize Firebase auth state listener
-        window.addEventListener('load', function() {
+        window.addEventListener('load', async function() {
+            // Check for redirect result first (after sign-in redirect)
+            try {
+                const result = await window.firebaseGetRedirectResult(window.firebaseAuth);
+                if (result && result.user) {
+                    console.log('Redirect sign-in successful:', result.user.email);
+                }
+            } catch (error) {
+                console.error('Redirect result error:', error);
+                if (error.code !== 'auth/operation-not-allowed') {
+                    alert('Sign in error: ' + error.message);
+                }
+            }
+            
+            // Then set up the auth state listener
             window.onAuthStateChanged(window.firebaseAuth, (user) => {
                 currentUser = user;
                 
