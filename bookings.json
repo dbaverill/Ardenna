@@ -33,5 +33,12 @@
     "endDate": "2026-11-15",
     "location": "Samaná, DR",
     "status": "trip"
+  },
+  {
+    "guest": "Averill kids visit",
+    "startDate": "2026-12-27",
+    "endDate": "2027-01-03",
+    "location": "Samaná, DR",
+    "status": "tentative"
   }
 ]
