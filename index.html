@@ -1378,6 +1378,20 @@
         }
 
         loadData();
+        
+        // Auto-fill end date when start date is selected
+        document.getElementById('booking-start').addEventListener('change', function() {
+            const startDate = new Date(this.value);
+            if (!isNaN(startDate.getTime())) {
+                // Add 1 day
+                const endDate = new Date(startDate);
+                endDate.setDate(endDate.getDate() + 1);
+                
+                // Format as YYYY-MM-DD
+                const endDateStr = endDate.toISOString().split('T')[0];
+                document.getElementById('booking-end').value = endDateStr;
+            }
+        });
     </script>
 </body>
 </html>
