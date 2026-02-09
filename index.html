@@ -232,6 +232,15 @@
             transition: all 0.2s;
             position: relative;
         }
+        .booking-card.status-confirmed {
+            border-left-color: #28a745;
+        }
+        .booking-card.status-tentative {
+            border-left-color: #ffc107;
+        }
+        .booking-card.status-trip {
+            border-left-color: #6f42c1;
+        }
         .booking-card:hover {
             box-shadow: 0 4px 12px rgba(0,0,0,0.12);
             transform: translateX(4px);
@@ -318,6 +327,18 @@
             color: #1976d2;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+        }
+        .booking-badge.status-confirmed {
+            background: #d4edda;
+            color: #155724;
+        }
+        .booking-badge.status-tentative {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .booking-badge.status-trip {
+            background: #e2d9f3;
+            color: #4c2a85;
         }
         body.is-admin .booking-badge {
             right: 90px;
@@ -546,10 +567,29 @@
         #lightbox img { max-width: 90%; max-height: 90vh; box-shadow: 0 10px 40px rgba(0,0,0,0.2); border-radius: 4px; }
         .lightbox-close { position: absolute; top: 30px; right: 40px; font-size: 3rem; color: var(--text-main); cursor: pointer; font-weight: 300; }
         
-        /* Auth UI */
-        .auth-container { display: flex; align-items: center; gap: 12px; }
-        .sign-in-btn { padding: 8px 16px; background: #4285f4; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: background 0.2s; }
-        .sign-in-btn:hover { background: #357ae8; }
+        .admin-lock { cursor: pointer; opacity: 0.2; font-size: 1.1rem; margin-left: 15px; transition: opacity 0.2s; }
+        .admin-lock:hover { opacity: 1; }
+        .admin-active { opacity: 1; color: #27ae60; }
+        
+        /* Google Sign-In Button - Round G Icon */
+        .google-signin-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+            padding: 0;
+        }
+        .google-signin-btn:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transform: scale(1.05);
+        }
         .user-profile { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 6px 12px; border-radius: 6px; transition: background 0.2s; }
         .user-profile:hover { background: #f5f5f5; }
         .user-avatar { width: 32px; height: 32px; border-radius: 50%; border: 2px solid #e0e0e0; }
@@ -608,10 +648,14 @@
             <div class="tab" onclick="switchTab('specs')">Specs</div>
             <div class="tab tab-calendar" onclick="switchTab('calendar')">Calendar</div>
         </div>
-        <div class="auth-container" id="auth-container">
-            <button class="sign-in-btn" id="sign-in-btn" onclick="signInWithGoogle()" style="display:none;">
-                <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><path d="M17.6 9.2l-.1-1.8H9v3.4h4.8C13.6 12 13 13 12 13.6v2.2h3a8.8 8.8 0 0 0 2.6-6.6z" fill="#4285F4"/><path d="M9 18c2.4 0 4.5-.8 6-2.2l-3-2.2a5.4 5.4 0 0 1-8-2.9H1V13a9 9 0 0 0 8 5z" fill="#34A853"/><path d="M4 10.7a5.4 5.4 0 0 1 0-3.4V5H1a9 9 0 0 0 0 8l3-2.3z" fill="#FBBC05"/><path d="M9 3.6c1.3 0 2.5.4 3.4 1.3L15 2.3A9 9 0 0 0 1 5l3 2.4a5.4 5.4 0 0 1 5-3.7z" fill="#EA4335"/></g></svg>
-                Sign in with Google
+        <div id="auth-ui">
+            <button class="google-signin-btn" id="sign-in-btn" onclick="signInWithGoogle()" style="display:none;">
+                <svg width="24" height="24" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                </svg>
             </button>
             <div class="user-profile" id="user-profile" onclick="toggleSignOutMenu()" style="display:none;">
                 <img class="user-avatar" id="user-avatar" src="" alt="Profile">
@@ -771,6 +815,15 @@
             <input type="text" class="form-input" placeholder="e.g., Samana, Dominican Republic" id="booking-location">
         </div>
         
+        <div class="form-group">
+            <label class="form-label">Status *</label>
+            <select class="form-input" id="booking-status">
+                <option value="confirmed">Confirmed</option>
+                <option value="tentative">Tentative</option>
+                <option value="trip">Trip</option>
+            </select>
+        </div>
+        
         <div class="form-actions">
             <button class="btn-form btn-secondary" onclick="hideBookingForm()">Cancel</button>
             <button class="btn-form btn-primary" onclick="saveBookingToGitHub()">Save Booking</button>
@@ -786,8 +839,8 @@
         const STADIA_API_KEY = "8def8aa3-d91b-4b91-9c96-b6e4696f84d4";
 
         let GH_TOKEN = localStorage.getItem('gh_token');
-        let currentUser = null; // Firebase auth user
-        let isAdmin = false; // Whether current user is authorized admin
+        let currentUser = null;
+        let isAdmin = false;
         let trips = [], maintLog = [], fuelLog = [], updates = [], manifest = { specs: "", crew: [], gallery: [] };
         let activeLayerGroup, currentRoute = [], editingTrip = null, editingFuel = null, editingMaint = null, activeQuill = null; 
         let map;
@@ -1204,8 +1257,15 @@
                 });
                 
                 // Create booking card
+                const status = booking.status || 'confirmed';
+                const statusLabels = {
+                    confirmed: 'Confirmed',
+                    tentative: 'Tentative',
+                    trip: 'Trip'
+                };
+                
                 const card = document.createElement('div');
-                card.className = 'booking-card';
+                card.className = `booking-card status-${status}`;
                 
                 card.innerHTML = `
                     <div class="booking-card-actions">
@@ -1221,7 +1281,7 @@
                         </div>
                         <div class="booking-duration">${duration} night${duration !== 1 ? 's' : ''}</div>
                     </div>
-                    <div class="booking-badge">Confirmed</div>
+                    <div class="booking-badge status-${status}">${statusLabels[status]}</div>
                 `;
                 
                 container.appendChild(card);
@@ -1235,6 +1295,7 @@
             document.getElementById('booking-start').value = '';
             document.getElementById('booking-end').value = '';
             document.getElementById('booking-location').value = '';
+            document.getElementById('booking-status').value = 'confirmed';
             document.getElementById('booking-form').classList.add('show');
             document.getElementById('booking-form-overlay').classList.add('show');
         }
@@ -1255,6 +1316,7 @@
             document.getElementById('booking-start').value = booking.startDate;
             document.getElementById('booking-end').value = booking.endDate;
             document.getElementById('booking-location').value = booking.location;
+            document.getElementById('booking-status').value = booking.status || 'confirmed';
             document.getElementById('booking-form').classList.add('show');
             document.getElementById('booking-form-overlay').classList.add('show');
         }
@@ -1271,6 +1333,7 @@
             const startDate = document.getElementById('booking-start').value;
             const endDate = document.getElementById('booking-end').value;
             const location = document.getElementById('booking-location').value;
+            const status = document.getElementById('booking-status').value;
             
             if (!guest || !startDate || !endDate || !location) {
                 return alert('All fields are required');
@@ -1287,11 +1350,11 @@
                     b.startDate === editingBooking.startDate
                 );
                 if (idx !== -1) {
-                    bookings[idx] = { guest, startDate, endDate, location };
+                    bookings[idx] = { guest, startDate, endDate, location, status };
                 }
             } else {
                 // Add new
-                bookings.push({ guest, startDate, endDate, location });
+                bookings.push({ guest, startDate, endDate, location, status });
             }
             
             if (await saveBookingsToGitHub()) {
@@ -1397,9 +1460,7 @@
         // --- FIREBASE AUTH FUNCTIONS ---
         async function signInWithGoogle() {
             try {
-                // Use redirect instead of popup (fixes COOP policy issues)
                 await window.firebaseSignInWithRedirect(window.firebaseAuth, window.googleProvider);
-                // User will be redirected away and come back
             } catch (error) {
                 console.error('Sign in error:', error);
                 alert('Sign in failed. Please try again.');
@@ -1456,7 +1517,7 @@
         
         // Initialize Firebase auth state listener
         window.addEventListener('load', async function() {
-            // Check for redirect result first (after sign-in redirect)
+            // Check for redirect result first
             try {
                 const result = await window.firebaseGetRedirectResult(window.firebaseAuth);
                 if (result && result.user) {
@@ -1464,17 +1525,13 @@
                 }
             } catch (error) {
                 console.error('Redirect result error:', error);
-                if (error.code !== 'auth/operation-not-allowed') {
-                    alert('Sign in error: ' + error.message);
-                }
             }
             
-            // Then set up the auth state listener
+            // Set up auth state listener
             window.onAuthStateChanged(window.firebaseAuth, (user) => {
                 currentUser = user;
                 
                 if (user) {
-                    // User is signed in
                     const email = user.email;
                     isAdmin = window.ADMIN_EMAILS.includes(email);
                     
@@ -1491,7 +1548,6 @@
                                 window.firebaseSignOut(window.firebaseAuth);
                                 return;
                             } else {
-                                // User cancelled - sign them out
                                 isAdmin = false;
                                 window.firebaseSignOut(window.firebaseAuth);
                                 return;
@@ -1505,16 +1561,14 @@
                         document.getElementById('user-name').textContent = user.displayName?.split(' ')[0] || 'Admin';
                         checkAdmin();
                     } else {
-                        // Not an authorized admin
                         alert('Access denied. Your email is not authorized for admin access.');
                         window.firebaseSignOut(window.firebaseAuth);
                     }
                 } else {
-                    // User is signed out
                     isAdmin = false;
                     GH_TOKEN = null;
                     localStorage.removeItem('gh_token');
-                    document.getElementById('sign-in-btn').style.display = 'flex';
+                    document.getElementById('sign-in-btn').style.display = 'block';
                     document.getElementById('user-profile').style.display = 'none';
                     checkAdmin();
                 }
