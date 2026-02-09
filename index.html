@@ -720,7 +720,7 @@
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getAuth, GoogleAuthProvider, signInWithRedirect, signInWithPopup, getRedirectResult, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
         
         // Firebase configuration
         const firebaseConfig = {
@@ -748,7 +748,6 @@
         window.googleProvider = provider;
         window.ADMIN_EMAILS = ADMIN_EMAILS;
         window.firebaseSignInWithRedirect = signInWithRedirect;
-        window.firebaseSignInWithPopup = signInWithPopup;
         window.firebaseGetRedirectResult = getRedirectResult;
         window.firebaseSignOut = signOut;
         window.onAuthStateChanged = onAuthStateChanged;
@@ -1626,27 +1625,12 @@
         function getTripPoints(t) { return (t.route && t.route.length) ? t.route : (t.startCoords ? [t.startCoords, t.endCoords] : []); }
         
         // --- FIREBASE AUTH FUNCTIONS ---
-        // Detect iOS devices
-        function isIOSDevice() {
-            return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        }
-        
         async function signInWithGoogle() {
             try {
-                if (isIOSDevice()) {
-                    // Use popup for iOS to avoid storage partitioning issues
-                    const result = await window.firebaseSignInWithPopup(window.firebaseAuth, window.googleProvider);
-                    console.log('iOS popup sign-in successful:', result.user.email);
-                } else {
-                    // Use redirect for desktop to avoid COOP policy issues
-                    await window.firebaseSignInWithRedirect(window.firebaseAuth, window.googleProvider);
-                }
+                await window.firebaseSignInWithRedirect(window.firebaseAuth, window.googleProvider);
             } catch (error) {
                 console.error('Sign in error:', error);
-                // Don't show alert for user-cancelled popups
-                if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
-                    alert('Sign in failed. Please try again.');
-                }
+                alert('Sign in failed. Please try again.');
             }
         }
         
@@ -1700,17 +1684,14 @@
         
         // Initialize Firebase auth state listener
         window.addEventListener('load', async function() {
-            // Only check for redirect result on non-iOS devices
-            // iOS uses popup instead of redirect
-            if (!isIOSDevice()) {
-                try {
-                    const result = await window.firebaseGetRedirectResult(window.firebaseAuth);
-                    if (result && result.user) {
-                        console.log('Redirect sign-in successful:', result.user.email);
-                    }
-                } catch (error) {
-                    console.error('Redirect result error:', error);
+            // Check for redirect result first
+            try {
+                const result = await window.firebaseGetRedirectResult(window.firebaseAuth);
+                if (result && result.user) {
+                    console.log('Redirect sign-in successful:', result.user.email);
                 }
+            } catch (error) {
+                console.error('Redirect result error:', error);
             }
             
             // Set up auth state listener
@@ -1817,3 +1798,12 @@
                 // Add 1 day
                 const endDate = new Date(startDate);
                 endDate.setDate(endDate.getDate() + 1);
+                
+                // Format as YYYY-MM-DD
+                const endDateStr = endDate.toISOString().split('T')[0];
+                document.getElementById('booking-end').value = endDateStr;
+            }
+        });
+    </script>
+</body>
+</html>
