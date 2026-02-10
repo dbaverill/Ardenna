@@ -404,6 +404,123 @@
             transform: scale(1.1);
             box-shadow: 0 6px 20px rgba(74, 144, 226, 0.5);
         }
+        
+        /* Contact Form Styles */
+        .contact-container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        .contact-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .contact-header h1 {
+            font-size: 2.5rem;
+            color: var(--text-main);
+            margin: 0 0 10px 0;
+        }
+        .contact-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            margin: 0;
+        }
+        .contact-intro {
+            text-align: center;
+            color: var(--text-light);
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+        .contact-form {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .form-field {
+            margin-bottom: 24px;
+        }
+        .form-field label {
+            display: block;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+        .form-field input,
+        .form-field textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
+        .form-field input:focus,
+        .form-field textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        .form-field textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .submit-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+        .contact-info {
+            margin-top: 40px;
+            padding: 24px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .contact-info p {
+            margin: 8px 0;
+            color: var(--text-light);
+        }
+        .contact-info a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .contact-info a:hover {
+            text-decoration: underline;
+        }
+        .form-success {
+            display: none;
+            padding: 20px;
+            background: #d4edda;
+            border: 2px solid #28a745;
+            border-radius: 8px;
+            color: #155724;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        .form-success.show {
+            display: block;
+        }
+        
         .booking-form-overlay {
             display: none;
             position: fixed;
@@ -570,71 +687,7 @@
         .admin-lock { cursor: pointer; opacity: 0.2; font-size: 1.1rem; margin-left: 15px; transition: opacity 0.2s; }
         .admin-lock:hover { opacity: 1; }
         .admin-active { opacity: 1; color: #27ae60; }
-        
-        /* Google Sign-In Button - Round G Icon */
-        .google-signin-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: white;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            transition: all 0.2s;
-            padding: 0;
-        }
-        .google-signin-btn:hover {
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-            transform: scale(1.05);
-        }
-        .user-profile { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 6px 12px; border-radius: 6px; transition: background 0.2s; }
-        .user-profile:hover { background: #f5f5f5; }
-        .user-avatar { width: 32px; height: 32px; border-radius: 50%; border: 2px solid #e0e0e0; }
-        .user-name { font-size: 0.85rem; font-weight: 600; color: var(--accent); }
-        .sign-out-menu { display: none; position: absolute; top: 55px; right: 20px; background: white; border: 1px solid #e0e0e0; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 8px 0; min-width: 150px; z-index: 1000; }
-        .sign-out-menu.show { display: block; }
-        .sign-out-btn { width: 100%; padding: 10px 16px; border: none; background: none; cursor: pointer; text-align: left; font-size: 0.9rem; color: #dc3545; font-weight: 600; transition: background 0.2s; }
-        .sign-out-btn:hover { background: #f8f9fa; }
     </style>
-    
-    <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyAA4Bu5F2Je7N-0Uo5qbBm55Fn3g9y_KhU",
-            authDomain: "sailingardenna.firebaseapp.com",
-            projectId: "sailingardenna",
-            storageBucket: "sailingardenna.firebasestorage.app",
-            messagingSenderId: "533611267669",
-            appId: "1:533611267669:web:eb398f0aaa72d3743cb6dc"
-        };
-        
-        // Whitelist of admin emails
-        const ADMIN_EMAILS = [
-            'dbaverill@gmail.com',
-            'marellaverill@gmail.com'
-        ];
-        
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
-        
-        // Make auth globally accessible
-        window.firebaseAuth = auth;
-        window.googleProvider = provider;
-        window.ADMIN_EMAILS = ADMIN_EMAILS;
-        window.firebaseSignInWithRedirect = signInWithRedirect;
-        window.firebaseGetRedirectResult = getRedirectResult;
-        window.firebaseSignOut = signOut;
-        window.onAuthStateChanged = onAuthStateChanged;
-    </script>
 </head>
 <body>
 
@@ -646,27 +699,11 @@
             <div class="tab" onclick="switchTab('gallery')">Gallery</div>
             <div class="tab" onclick="switchTab('crew')">Crew</div>
             <div class="tab" onclick="switchTab('specs')">Specs</div>
+            <div class="tab" onclick="switchTab('contact')">Contact</div>
             <div class="tab tab-calendar" onclick="switchTab('calendar')">Calendar</div>
         </div>
-        <div id="auth-ui">
-            <button class="google-signin-btn" id="sign-in-btn" onclick="signInWithGoogle()" style="display:none;">
-                <svg width="24" height="24" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-                </svg>
-            </button>
-            <div class="user-profile" id="user-profile" onclick="toggleSignOutMenu()" style="display:none;">
-                <img class="user-avatar" id="user-avatar" src="" alt="Profile">
-                <span class="user-name" id="user-name"></span>
-            </div>
-        </div>
+        <div class="admin-lock" onclick="promptAdmin()">🔒</div>
     </nav>
-    
-    <div class="sign-out-menu" id="sign-out-menu">
-        <button class="sign-out-btn" onclick="signOutUser()">Sign Out</button>
-    </div>
 
     <div id="loading"><div class="spinner"></div><span style="font-weight:500; color:#555;">Syncing...</span></div>
     <div id="lightbox" onclick="closeLightbox()"><span class="lightbox-close">&times;</span><img id="lightbox-img" src="" onclick="event.stopPropagation()"></div>
@@ -770,6 +807,55 @@
         </div>
     </div>
 
+    <div id="view-contact" class="view-container">
+        <div class="scroll-container">
+            <div class="contact-container">
+                <div class="contact-header">
+                    <h1>Get in Touch</h1>
+                    <p class="contact-subtitle">We'd love to hear from you</p>
+                </div>
+                
+                <p class="contact-intro">
+                    Planning a sailing adventure or have questions about our journey? 
+                    Drop us a message and we'll get back to you as soon as we have internet access!
+                </p>
+                
+                <div class="form-success" id="contact-success">
+                    ✓ Message sent successfully! We'll get back to you soon.
+                </div>
+                
+                <form class="contact-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST" onsubmit="handleFormSubmit(event)">
+                    <div class="form-field">
+                        <label for="contact-name">Name *</label>
+                        <input type="text" id="contact-name" name="name" required placeholder="Your name">
+                    </div>
+                    
+                    <div class="form-field">
+                        <label for="contact-email">Email *</label>
+                        <input type="email" id="contact-email" name="email" required placeholder="your.email@example.com">
+                    </div>
+                    
+                    <div class="form-field">
+                        <label for="contact-subject">Subject</label>
+                        <input type="text" id="contact-subject" name="subject" placeholder="What's this about?">
+                    </div>
+                    
+                    <div class="form-field">
+                        <label for="contact-message">Message *</label>
+                        <textarea id="contact-message" name="message" required placeholder="Tell us what's on your mind..."></textarea>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">Send Message</button>
+                </form>
+                
+                <div class="contact-info">
+                    <p><strong>Prefer email?</strong></p>
+                    <p>You can reach us directly at <a href="/cdn-cgi/l/email-protection#3e5a5c5f485b4c5752527e59535f5752105d5153"><span class="__cf_email__" data-cfemail="791d1b180f1c0b101515391e14181015571a1614">[email&#160;protected]</span></a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="view-calendar" class="view-container">
         <div class="scroll-container">
             <div class="calendar-header">
@@ -830,7 +916,7 @@
         </div>
     </div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script src="https://unpkg.com/quill-image-resize-module@3.0.0/image-resize.min.js"></script>
     
@@ -839,8 +925,9 @@
         const STADIA_API_KEY = "8def8aa3-d91b-4b91-9c96-b6e4696f84d4";
 
         let GH_TOKEN = localStorage.getItem('gh_token');
-        let currentUser = null;
-        let isAdmin = false;
+        const ADMIN_SESSION_KEY = 'ardenna_admin_session';
+        const PASSPHRASE_HASH = '89642ddd9c9f6a49673629c3de650c02706cec8128e12b0d5c299d94c75016d6'; // Generate using passphrase_generator.html
+        let isAdmin = localStorage.getItem(ADMIN_SESSION_KEY) === 'true';
         let trips = [], maintLog = [], fuelLog = [], updates = [], manifest = { specs: "", crew: [], gallery: [] };
         let activeLayerGroup, currentRoute = [], editingTrip = null, editingFuel = null, editingMaint = null, activeQuill = null; 
         let map;
@@ -1458,42 +1545,71 @@
         function getTripPoints(t) { return (t.route && t.route.length) ? t.route : (t.startCoords ? [t.startCoords, t.endCoords] : []); }
         
         // --- FIREBASE AUTH FUNCTIONS ---
-        async function signInWithGoogle() {
-            try {
-                await window.firebaseSignInWithRedirect(window.firebaseAuth, window.googleProvider);
-            } catch (error) {
-                console.error('Sign in error:', error);
-                alert('Sign in failed. Please try again.');
-            }
+        // Simple hash function for passphrase
+        async function hashString(str) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(str);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
         
-        async function signOutUser() {
-            try {
-                await window.firebaseSignOut(window.firebaseAuth);
-                document.getElementById('sign-out-menu').classList.remove('show');
-            } catch (error) {
-                console.error('Sign out error:', error);
-                alert('Sign out failed. Please try again.');
+        async function promptAdmin() {
+            if (isAdmin) {
+                // Already admin - offer logout
+                if (confirm('Logout from admin mode?')) {
+                    isAdmin = false;
+                    localStorage.removeItem(ADMIN_SESSION_KEY);
+                    localStorage.removeItem('gh_token');
+                    GH_TOKEN = null;
+                    document.querySelector('.admin-lock').classList.remove('admin-active');
+                    checkAdmin();
+                }
+            } else {
+                // Prompt for passphrase
+                const pass = prompt('Enter admin passphrase:');
+                if (pass) {
+                    const hash = await hashString(pass);
+                    if (hash === PASSPHRASE_HASH) {
+                        // Correct passphrase
+                        isAdmin = true;
+                        localStorage.setItem(ADMIN_SESSION_KEY, 'true');
+                        
+                        // Prompt for GitHub token if not already set
+                        if (!GH_TOKEN) {
+                            const token = prompt('Enter your GitHub Personal Access Token (needed for editing):');
+                            if (token && token.startsWith('ghp_')) {
+                                GH_TOKEN = token;
+                                localStorage.setItem('gh_token', token);
+                            } else if (token) {
+                                alert('Invalid token format. Token should start with "ghp_"');
+                                isAdmin = false;
+                                localStorage.removeItem(ADMIN_SESSION_KEY);
+                                return;
+                            } else {
+                                // User cancelled token - exit admin mode
+                                isAdmin = false;
+                                localStorage.removeItem(ADMIN_SESSION_KEY);
+                                return;
+                            }
+                        }
+                        
+                        document.querySelector('.admin-lock').classList.add('admin-active');
+                        checkAdmin();
+                    } else {
+                        alert('Incorrect passphrase');
+                    }
+                }
             }
         }
-        
-        function toggleSignOutMenu() {
-            const menu = document.getElementById('sign-out-menu');
-            menu.classList.toggle('show');
-        }
-        
-        // Close sign out menu when clicking outside
-        document.addEventListener('click', function(e) {
-            const menu = document.getElementById('sign-out-menu');
-            const profile = document.getElementById('user-profile');
-            if (menu && profile && !menu.contains(e.target) && !profile.contains(e.target)) {
-                menu.classList.remove('show');
-            }
-        });
         
         function checkAdmin() { 
             const a = isAdmin; 
-            document.body.classList.toggle('is-admin', a); 
+            document.body.classList.toggle('is-admin', a);
+            const adminLock = document.querySelector('.admin-lock');
+            if (adminLock) {
+                adminLock.classList.toggle('admin-active', a);
+            }
             document.getElementById('log-header').style.display = a ? 'block' : 'none'; 
             document.querySelectorAll('.admin-only').forEach(e => {
                 if(e.classList.contains('entry-actions')) {
@@ -1515,64 +1631,9 @@
             quillSpecs.enable(a);
         }
         
-        // Initialize Firebase auth state listener
-        window.addEventListener('load', async function() {
-            // Check for redirect result first
-            try {
-                const result = await window.firebaseGetRedirectResult(window.firebaseAuth);
-                if (result && result.user) {
-                    console.log('Redirect sign-in successful:', result.user.email);
-                }
-            } catch (error) {
-                console.error('Redirect result error:', error);
-            }
-            
-            // Set up auth state listener
-            window.onAuthStateChanged(window.firebaseAuth, (user) => {
-                currentUser = user;
-                
-                if (user) {
-                    const email = user.email;
-                    isAdmin = window.ADMIN_EMAILS.includes(email);
-                    
-                    if (isAdmin) {
-                        // Check for GitHub token
-                        if (!GH_TOKEN) {
-                            const token = prompt('Enter your GitHub Personal Access Token (needed for editing):');
-                            if (token && token.startsWith('ghp_')) {
-                                GH_TOKEN = token;
-                                localStorage.setItem('gh_token', token);
-                            } else if (token) {
-                                alert('Invalid token format. Token should start with "ghp_"');
-                                isAdmin = false;
-                                window.firebaseSignOut(window.firebaseAuth);
-                                return;
-                            } else {
-                                isAdmin = false;
-                                window.firebaseSignOut(window.firebaseAuth);
-                                return;
-                            }
-                        }
-                        
-                        // Show user profile
-                        document.getElementById('sign-in-btn').style.display = 'none';
-                        document.getElementById('user-profile').style.display = 'flex';
-                        document.getElementById('user-avatar').src = user.photoURL || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23666"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>';
-                        document.getElementById('user-name').textContent = user.displayName?.split(' ')[0] || 'Admin';
-                        checkAdmin();
-                    } else {
-                        alert('Access denied. Your email is not authorized for admin access.');
-                        window.firebaseSignOut(window.firebaseAuth);
-                    }
-                } else {
-                    isAdmin = false;
-                    GH_TOKEN = null;
-                    localStorage.removeItem('gh_token');
-                    document.getElementById('sign-in-btn').style.display = 'block';
-                    document.getElementById('user-profile').style.display = 'none';
-                    checkAdmin();
-                }
-            });
+        // Check admin status on page load
+        window.addEventListener('load', function() {
+            checkAdmin();
         });
 
         function switchTab(t) { document.querySelectorAll('.view-container').forEach(e=>e.classList.remove('active')); document.querySelectorAll('.tab').forEach(e=>e.classList.remove('active')); document.getElementById(`view-${t}`).classList.add('active'); document.querySelector(`.tab[onclick="switchTab('${t}')"]`).classList.add('active'); if(t==='logbook') map.invalidateSize(); }
@@ -1601,6 +1662,25 @@
                 L.polyline(currentRoute,{color:'var(--accent)',dashArray:'5,5'}).addTo(activeLayerGroup);
                 currentRoute.forEach(p=>L.circleMarker(p,{radius:4,color:'var(--accent)'}).addTo(activeLayerGroup));
             }
+        }
+        
+        // Contact form handler
+        function handleFormSubmit(event) {
+            // Formspree will handle the actual submission
+            // This just shows the success message
+            const form = event.target;
+            const successMsg = document.getElementById('contact-success');
+            
+            // Show success message after a brief delay (to allow Formspree to process)
+            setTimeout(() => {
+                successMsg.classList.add('show');
+                form.reset();
+                
+                // Hide success message after 5 seconds
+                setTimeout(() => {
+                    successMsg.classList.remove('show');
+                }, 5000);
+            }, 500);
         }
 
         loadData();
