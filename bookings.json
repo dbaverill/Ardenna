@@ -40,5 +40,12 @@
     "endDate": "2027-01-03",
     "location": "Samaná, DR",
     "status": "tentative"
+  },
+  {
+    "guest": "Parked in marina",
+    "startDate": "2027-01-10",
+    "endDate": "2027-03-31",
+    "location": "Samaná, DR",
+    "status": "trip"
   }
 ]
