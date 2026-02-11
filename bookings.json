@@ -47,5 +47,12 @@
     "endDate": "2027-03-31",
     "location": "Samaná, DR",
     "status": "trip"
+  },
+  {
+    "guest": "Sail from DR to USA",
+    "startDate": "2027-04-24",
+    "endDate": "2027-05-08",
+    "location": "Samaná to Salem",
+    "status": "trip"
   }
 ]
