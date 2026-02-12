@@ -1789,16 +1789,19 @@
             }
             
             // Clean up all existing maps before re-rendering
+            console.log('Cleaning up existing maps. Current count:', Object.keys(masonryMaps).length);
             Object.keys(masonryMaps).forEach(mapId => {
                 try {
                     if (masonryMaps[mapId]) {
                         masonryMaps[mapId].remove();
+                        console.log('Removed map:', mapId);
                     }
                 } catch(e) {
                     console.warn('Error removing map:', mapId, e);
                 }
             });
             masonryMaps = {};
+            console.log('All maps cleaned up. About to render', filteredTrips.length, 'entries');
             
             const gridContainer = document.getElementById('masonry-grid');
             if (!gridContainer) return;
@@ -1850,6 +1853,8 @@
         
         function initMasonryMap(trip, containerId) {
             try {
+                console.log('initMasonryMap called for:', containerId, 'Trip:', trip.title);
+                
                 const container = document.getElementById(containerId);
                 if (!container) {
                     console.warn('Map container not found:', containerId);
@@ -1863,6 +1868,7 @@
                 
                 // Check if map already exists for this container
                 if (masonryMaps[containerId]) {
+                    console.log('Map already exists for', containerId, '- removing it');
                     try {
                         masonryMaps[containerId].remove();
                     } catch(e) {
@@ -1872,6 +1878,7 @@
                 }
                 
                 // Create new map
+                console.log('Creating new map for:', containerId);
                 const mapInstance = L.map(containerId, {
                     zoomControl: false,
                     attributionControl: false,
@@ -1883,21 +1890,31 @@
                     tap: false
                 }).setView([41.49, -71.31], 8);
                 
-                L.tileLayer(`https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png?api_key=${STADIA_API_KEY}`, {
+                // Base layer - Stadia Outdoors
+                L.tileLayer(`https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png?api_key=${STADIA_API_KEY}`, {
                     maxZoom: 20
+                }).addTo(mapInstance);
+                
+                // Overlay layer - OpenSeaMap
+                L.tileLayer('https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png', {
+                    attribution: 'Map data: &copy; <a href="http://www.openseamap.org">OpenSeaMap</a> contributors'
                 }).addTo(mapInstance);
                 
                 // Store the map instance
                 masonryMaps[containerId] = mapInstance;
+                console.log('Map stored. Total maps now:', Object.keys(masonryMaps).length);
                 
                 setTimeout(() => {
                     if (mapInstance) {
                         mapInstance.invalidateSize();
                         const pts = getTripPoints(trip);
                         if (pts.length) {
+                            console.log('Drawing route with', pts.length, 'points for', containerId);
                             L.polyline(pts, {color:'#3498db', weight:3}).addTo(mapInstance);
                             pts.forEach(p => L.circleMarker(p, {radius:4, color:'#2c3e50', fillColor:'#fff', fillOpacity:1}).addTo(mapInstance));
                             mapInstance.fitBounds(pts, {padding: [20, 20]});
+                        } else {
+                            console.log('No route points for', containerId);
                         }
                     }
                 }, 100);
@@ -2153,8 +2170,14 @@
                 // Create new map
                 entryFormMap = L.map('entry-form-map').setView([41.49, -71.31], 8);
                 
-                L.tileLayer(`https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png?api_key=${STADIA_API_KEY}`, {
+                // Base layer - Stadia Outdoors
+                L.tileLayer(`https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png?api_key=${STADIA_API_KEY}`, {
                     maxZoom: 20
+                }).addTo(entryFormMap);
+                
+                // Overlay layer - OpenSeaMap
+                L.tileLayer('https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png', {
+                    attribution: 'Map data: &copy; <a href="http://www.openseamap.org">OpenSeaMap</a> contributors'
                 }).addTo(entryFormMap);
                 
                 // Force map to recalculate size
