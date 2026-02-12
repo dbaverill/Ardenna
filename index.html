@@ -1781,6 +1781,18 @@
                 }
             }
             
+            // Clean up all existing maps before re-rendering
+            Object.keys(masonryMaps).forEach(mapId => {
+                try {
+                    if (masonryMaps[mapId]) {
+                        masonryMaps[mapId].remove();
+                    }
+                } catch(e) {
+                    console.warn('Error removing map:', mapId, e);
+                }
+            });
+            masonryMaps = {};
+            
             const gridContainer = document.getElementById('masonry-grid');
             if (!gridContainer) return;
             
@@ -1832,8 +1844,27 @@
         function initMasonryMap(trip, containerId) {
             try {
                 const container = document.getElementById(containerId);
-                if (!container || typeof L === 'undefined') return;
+                if (!container) {
+                    console.warn('Map container not found:', containerId);
+                    return;
+                }
                 
+                if (typeof L === 'undefined') {
+                    console.warn('Leaflet not loaded');
+                    return;
+                }
+                
+                // Check if map already exists for this container
+                if (masonryMaps[containerId]) {
+                    try {
+                        masonryMaps[containerId].remove();
+                    } catch(e) {
+                        console.warn('Error removing existing map:', e);
+                    }
+                    delete masonryMaps[containerId];
+                }
+                
+                // Create new map
                 const mapInstance = L.map(containerId, {
                     zoomControl: false,
                     attributionControl: false,
@@ -1849,6 +1880,9 @@
                     maxZoom: 20
                 }).addTo(mapInstance);
                 
+                // Store the map instance
+                masonryMaps[containerId] = mapInstance;
+                
                 setTimeout(() => {
                     if (mapInstance) {
                         mapInstance.invalidateSize();
@@ -1860,7 +1894,9 @@
                         }
                     }
                 }, 100);
-            } catch(e) {}
+            } catch(e) {
+                console.error('Error initializing masonry map for', containerId, ':', e);
+            }
         }
         
         function initFeaturedMap(trip) {
@@ -2170,7 +2206,42 @@
 
         async function saveManifestToGitHub(silent=false) { manifest.specs=quillSpecs.root.innerHTML; const s=await ghPut('manifest.json', JSON.stringify(manifest,null,2), "Upd Manifest", (await ghGet('manifest.json'))?.sha); if(!silent && s) alert("Saved!"); }
         async function deleteTrip(d,t){if(!confirm("Del?"))return;const c=await ghGet('trips.json');await ghPut('trips.json',JSON.stringify(c.content.filter(x=>!(x.date===d&&x.title===t)),null,2),"Del Trip",c.sha);loadData();}
-        async function saveEntryToGitHub() { const t=document.getElementById('title').value, d=document.getElementById('date').value; if(!t||!d) return alert("Missing"); const f=document.getElementById('photoInput'); let img=editingTrip?editingTrip.image:null; if(f.files[0]) img=await ghUploadImage(f.files[0]); const c=await ghGet('trips.json'); let list=c?c.content:[]; if(editingTrip) list=list.filter(x=>!(x.date===editingTrip.date&&x.title===editingTrip.title)); list.push({title:t,date:d,text:document.getElementById('narrative').value,miles:document.getElementById('miles').value,image:img,route:currentRoute,startCoords:currentRoute[0]}); if(await ghPut('trips.json',JSON.stringify(list,null,2),"Save Trip",c?c.sha:null)){alert("Saved");toggleForm('entry-form');loadData();} }
+        async function saveEntryToGitHub() { 
+            const t=document.getElementById('title').value;
+            const d=document.getElementById('date').value; 
+            
+            if(!t||!d) return alert("Title and date are required"); 
+            
+            const f=document.getElementById('photoInput'); 
+            let img=editingTrip?editingTrip.image:null; 
+            
+            if(f.files[0]) img=await ghUploadImage(f.files[0]); 
+            
+            const c=await ghGet('trips.json'); 
+            let list=c?c.content:[]; 
+            
+            if(editingTrip) {
+                list=list.filter(x=>!(x.date===editingTrip.date&&x.title===editingTrip.title));
+            }
+            
+            list.push({
+                title:t,
+                date:d,
+                text:document.getElementById('narrative').value,
+                miles:document.getElementById('miles').value,
+                image:img,
+                route:currentRoute,
+                startCoords:currentRoute[0]
+            }); 
+            
+            if(await ghPut('trips.json',JSON.stringify(list,null,2),"Save Trip",c?c.sha:null)){
+                alert("Saved");
+                toggleForm('entry-form');
+                console.log('Entry saved, reloading data...');
+                await loadData();
+                console.log('Data reloaded, maps should be initializing...');
+            }
+        }
         function editTrip(d,t){
             const tr=trips.find(x=>x.date===d&&x.title===t);
             if(!tr)return;
