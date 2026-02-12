@@ -1298,7 +1298,7 @@
                 const upData = await ghGet('updates.json'); updates = (upData && Array.isArray(upData.content)) ? upData.content : [];
                 const bookData = await ghGet('bookings.json'); bookings = (bookData && Array.isArray(bookData.content)) ? bookData.content : [];
                 
-                populateFilter(); renderLog(); renderManifest(); renderGallery(); renderUpdates(); renderCrew(); renderCalendar();
+                renderLog(); renderManifest(); renderGallery(); renderUpdates(); renderCrew(); renderCalendar();
                 checkAdmin();
             } catch(e) { console.error(e); alert("Data Load Error. Check Repo."); } finally { showLoading(false); }
         }
