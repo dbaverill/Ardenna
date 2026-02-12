@@ -1483,6 +1483,10 @@
                 const excerpt = hero.text.length > 300 ? hero.text.substring(0, 300) + '...' : hero.text;
                 const hasMore = hero.text.length > 300;
                 
+                // Store the raw text for expand/collapse
+                heroDiv.dataset.fullText = hero.text;
+                heroDiv.dataset.isExpanded = 'false';
+                
                 heroDiv.innerHTML = `
                     <div class="post-actions">
                         <button class="action-btn-round edit-btn" onclick="event.stopPropagation(); editUpdate(0)" title="Edit">✎</button>
@@ -1495,7 +1499,7 @@
                             <span>by ${hero.author || 'Captain'}</span>
                         </div>
                         <h2>${escapeHtml(hero.title || hero.text.split('\n')[0].substring(0, 80))}</h2>
-                        <p class="update-excerpt" data-full-text="${escapeHtml(hero.text)}">${escapeHtml(excerpt)}</p>
+                        <p class="update-excerpt">${escapeHtml(excerpt)}</p>
                         ${hasMore ? '<span class="read-more-indicator">Read more</span>' : ''}
                     </div>
                 `;
@@ -1510,16 +1514,19 @@
                         }
                         
                         const excerptEl = this.querySelector('.update-excerpt');
-                        const fullText = excerptEl.getAttribute('data-full-text');
-                        const isExpanded = this.classList.contains('expanded');
+                        const fullText = this.dataset.fullText;
+                        const isExpanded = this.dataset.isExpanded === 'true';
                         
                         if (isExpanded) {
-                            // Collapse
+                            // Collapse - show excerpt
                             this.classList.remove('expanded');
-                            excerptEl.textContent = fullText.length > 300 ? fullText.substring(0, 300) + '...' : fullText;
+                            this.dataset.isExpanded = 'false';
+                            const shortExcerpt = fullText.length > 300 ? fullText.substring(0, 300) + '...' : fullText;
+                            excerptEl.textContent = shortExcerpt;
                         } else {
-                            // Expand
+                            // Expand - show full text
                             this.classList.add('expanded');
+                            this.dataset.isExpanded = 'true';
                             excerptEl.textContent = fullText;
                         }
                     });
@@ -1540,6 +1547,10 @@
                     const excerpt = u.text.length > 150 ? u.text.substring(0, 150) + '...' : u.text;
                     const hasMore = u.text.length > 150;
                     
+                    // Store the raw text for expand/collapse
+                    card.dataset.fullText = u.text;
+                    card.dataset.isExpanded = 'false';
+                    
                     card.innerHTML = `
                         <div class="post-actions">
                             <button class="action-btn-round edit-btn" onclick="event.stopPropagation(); editUpdate(${idx + 1})" title="Edit">✎</button>
@@ -1552,32 +1563,37 @@
                                 <span>by ${u.author || 'Captain'}</span>
                             </div>
                             <h3>${escapeHtml(u.title || u.text.split('\n')[0].substring(0, 60))}</h3>
-                            <p class="update-card-excerpt" data-full-text="${escapeHtml(u.text)}">${escapeHtml(excerpt)}</p>
+                            <p class="update-card-excerpt">${escapeHtml(excerpt)}</p>
                             ${hasMore ? '<span class="read-more-indicator">Read more</span>' : ''}
                         </div>
                     `;
                     
                     // Add click handler to toggle expansion
-                    card.addEventListener('click', function(e) {
-                        // Don't expand if clicking admin buttons or image
-                        if (e.target.closest('.post-actions') || e.target.classList.contains('update-thumbnail')) {
-                            return;
-                        }
-                        
-                        const excerptEl = this.querySelector('.update-card-excerpt');
-                        const fullText = excerptEl.getAttribute('data-full-text');
-                        const isExpanded = this.classList.contains('expanded');
-                        
-                        if (isExpanded) {
-                            // Collapse
-                            this.classList.remove('expanded');
-                            excerptEl.textContent = fullText.length > 150 ? fullText.substring(0, 150) + '...' : fullText;
-                        } else {
-                            // Expand
-                            this.classList.add('expanded');
-                            excerptEl.textContent = fullText;
-                        }
-                    });
+                    if (hasMore) {
+                        card.addEventListener('click', function(e) {
+                            // Don't expand if clicking admin buttons or image
+                            if (e.target.closest('.post-actions') || e.target.classList.contains('update-thumbnail')) {
+                                return;
+                            }
+                            
+                            const excerptEl = this.querySelector('.update-card-excerpt');
+                            const fullText = this.dataset.fullText;
+                            const isExpanded = this.dataset.isExpanded === 'true';
+                            
+                            if (isExpanded) {
+                                // Collapse - show excerpt
+                                this.classList.remove('expanded');
+                                this.dataset.isExpanded = 'false';
+                                const shortExcerpt = fullText.length > 150 ? fullText.substring(0, 150) + '...' : fullText;
+                                excerptEl.textContent = shortExcerpt;
+                            } else {
+                                // Expand - show full text
+                                this.classList.add('expanded');
+                                this.dataset.isExpanded = 'true';
+                                excerptEl.textContent = fullText;
+                            }
+                        });
+                    }
                     
                     grid.appendChild(card);
                 });
