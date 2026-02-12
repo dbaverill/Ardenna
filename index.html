@@ -928,6 +928,13 @@
                     <input type="text" id="title" placeholder="Trip Title" required>
                     <input type="date" id="date" required>
                     <input type="number" id="miles" placeholder="Distance (nm)" step="0.1">
+                    <div style="margin-bottom:15px; padding:12px; background:#f8f9fa; border-radius:6px;">
+                        <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                            <input type="checkbox" id="isPassage" style="width:auto; margin:0;">
+                            <span style="font-weight:600; color:#2c3e50;">Mark as Passage</span>
+                            <span style="font-size:0.85em; color:#7f8c8d;">(Offshore voyage or significant coastal trip)</span>
+                        </label>
+                    </div>
                     <textarea id="narrative" rows="5" placeholder="Your story..." required></textarea>
                     <div style="margin-bottom:15px; border:1px solid #eee; padding:15px; border-radius:8px; background:#f8f9fa;">
                         <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
@@ -1775,7 +1782,7 @@
             let filteredTrips = sortedTrips;
             if (currentMasonryFilter !== 'all') {
                 if (currentMasonryFilter === 'passages') {
-                    filteredTrips = sortedTrips.filter(t => (t.miles && parseFloat(t.miles) > 10));
+                    filteredTrips = sortedTrips.filter(t => t.isPassage === true);
                 } else {
                     filteredTrips = sortedTrips.filter(t => t.date.startsWith(currentMasonryFilter));
                 }
@@ -1821,8 +1828,8 @@
                         <h3 class="masonry-title">${trip.title}</h3>
                         <p class="masonry-excerpt">${trip.text.substring(0, 150)}${trip.text.length > 150 ? '...' : ''}</p>
                         <div class="masonry-stats">
-                            ${trip.miles ? `<span>⛵ ${trip.miles} nm</span>` : ''}
-                            ${trip.route && trip.route.length > 0 ? `<span>📍 ${trip.route.length} waypoints</span>` : ''}
+                            ${trip.miles ? `<span>${trip.miles} nm</span>` : ''}
+                            ${trip.route && trip.route.length > 0 ? `<span>${trip.route.length} waypoints</span>` : ''}
                         </div>
                     </div>
                 `;
@@ -2092,6 +2099,7 @@
                     document.getElementById('narrative').value='';
                     document.getElementById('miles').value='';
                     document.getElementById('date').value=new Date().toISOString().split('T')[0];
+                    document.getElementById('isPassage').checked=false;
                     document.getElementById('form-title').innerText="New Entry";
                     clearRouteInput();
                 }
@@ -2231,7 +2239,8 @@
                 miles:document.getElementById('miles').value,
                 image:img,
                 route:currentRoute,
-                startCoords:currentRoute[0]
+                startCoords:currentRoute[0],
+                isPassage:document.getElementById('isPassage').checked
             }); 
             
             if(await ghPut('trips.json',JSON.stringify(list,null,2),"Save Trip",c?c.sha:null)){
@@ -2250,6 +2259,7 @@
             document.getElementById('date').value=tr.date;
             document.getElementById('miles').value=tr.miles||'';
             document.getElementById('narrative').value=tr.text;
+            document.getElementById('isPassage').checked=tr.isPassage||false;
             currentRoute=getTripPoints(tr);
             
             // Update the route text display immediately
