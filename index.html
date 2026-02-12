@@ -1220,8 +1220,8 @@
         let activeLayerGroup, currentRoute = [], editingTrip = null, editingFuel = null, editingMaint = null, activeQuill = null; 
         let map;
         
-        // --- INITIALIZE MAP (with error handling) ---
-        if (typeof L !== 'undefined') {
+        // --- INITIALIZE MAP (only if element exists - old layout) ---
+        if (typeof L !== 'undefined' && document.getElementById('map')) {
             try {
                 activeLayerGroup = L.layerGroup();
                 map = L.map('map').setView([41.49, -71.31], 6);
@@ -1271,7 +1271,26 @@
         function imageHandler() { activeQuill = this.quill; document.getElementById('quill-image-upload').click(); }
         const toolbarOptions = { container: [['bold', 'italic', 'underline', 'header'], [{'list': 'ordered'}, {'list': 'bullet'}], ['image'], ['clean']], handlers: { image: imageHandler } };
         const quillConfig = { theme: 'snow', modules: { toolbar: toolbarOptions, imageResize: {} } };
-        const quillSpecs = new Quill('#editor-specs', quillConfig);
+        
+        // Initialize Quill for specs editor (with error handling)
+        let quillSpecs;
+        try {
+            quillSpecs = new Quill('#editor-specs', quillConfig);
+        } catch(e) {
+            console.error('Quill specs initialization failed:', e);
+            // Create dummy object so code doesn't break
+            quillSpecs = {
+                root: { 
+                    innerHTML: '',
+                    get innerHTML() { return this._content || ''; },
+                    set innerHTML(val) { this._content = val; }
+                },
+                enable: () => {},
+                disable: () => {},
+                getSelection: () => ({ index: 0 }),
+                insertEmbed: () => {}
+            };
+        }
         
         // Crew bio editor - initialized when form opens
         let quillCrewBio = null;
@@ -1291,16 +1310,50 @@
         async function loadData() {
             showLoading(true);
             try {
+                console.log('Loading data from GitHub...');
                 const tData = await ghGet('trips.json'); trips = (tData && Array.isArray(tData.content)) ? tData.content : [];
+                console.log('Trips loaded:', trips.length);
+                
                 const mData = await ghGet('manifest.json'); manifest = (mData && mData.content) ? mData.content : { specs: "", crew: [], gallery: [] };
                 if(!manifest.gallery) manifest.gallery = [];
                 if(!manifest.crew) manifest.crew = [];
-                const upData = await ghGet('updates.json'); updates = (upData && Array.isArray(upData.content)) ? upData.content : [];
-                const bookData = await ghGet('bookings.json'); bookings = (bookData && Array.isArray(bookData.content)) ? bookData.content : [];
+                console.log('Manifest loaded');
                 
-                renderLog(); renderManifest(); renderGallery(); renderUpdates(); renderCrew(); renderCalendar();
+                const upData = await ghGet('updates.json'); updates = (upData && Array.isArray(upData.content)) ? upData.content : [];
+                console.log('Updates loaded:', updates.length);
+                
+                const bookData = await ghGet('bookings.json'); bookings = (bookData && Array.isArray(bookData.content)) ? bookData.content : [];
+                console.log('Bookings loaded:', bookings.length);
+                
+                console.log('Rendering logbook...');
+                renderLog();
+                
+                console.log('Rendering manifest...');
+                renderManifest();
+                
+                console.log('Rendering gallery...');
+                renderGallery();
+                
+                console.log('Rendering updates...');
+                renderUpdates();
+                
+                console.log('Rendering crew...');
+                renderCrew();
+                
+                console.log('Rendering calendar...');
+                renderCalendar();
+                
+                console.log('Checking admin status...');
                 checkAdmin();
-            } catch(e) { console.error(e); alert("Data Load Error. Check Repo."); } finally { showLoading(false); }
+                
+                console.log('All data loaded successfully!');
+            } catch(e) { 
+                console.error('Data load error:', e);
+                console.error('Error stack:', e.stack);
+                alert("Data Load Error: " + e.message + ". Check console for details."); 
+            } finally { 
+                showLoading(false); 
+            }
         }
 
         // --- UPDATES (MAGAZINE STYLE) ---
@@ -1749,8 +1802,18 @@
         async function deleteGalleryPhoto(idx) { if(!confirm("Delete?")) return; manifest.gallery.splice(idx, 1); await saveManifestToGitHub(true); renderGallery(); }
 
         function renderManifest() {
+            // Ensure quillSpecs and root exist
+            if (!quillSpecs || !quillSpecs.root) {
+                console.warn('quillSpecs not initialized, skipping manifest render');
+                return;
+            }
+            
             if (!manifest.specs || manifest.specs.length < 50) quillSpecs.root.innerHTML = `<h3>General Dimensions</h3><ul><li><strong>LOA:</strong> 14.99m (49.18ft)</li><li><strong>Beam:</strong> 4.58m (15.03ft)</li><li><strong>Draft:</strong> 2.15m (7.05ft)</li><li><strong>Displacement:</strong> 17,500kg</li></ul><h3>Engine & Propulsion</h3><ul><li><strong>Engine:</strong> Yanmar 4JH4-HTE (110hp)</li><li><strong>Propeller:</strong> MaxProp 3-blade feathering</li><li><strong>Gearbox:</strong> Kanzaki KM4A</li><li><strong>Bow Thruster:</strong> MaxPower 24V</li></ul><h3>Electrical Systems</h3><ul><li><strong>Generator:</strong> Mastervolt Whisper 6</li><li><strong>House Bank:</strong> 24V System</li></ul><h3>Water & Plumbing</h3><ul><li><strong>Watermaker:</strong> Schenker Ready 60</li><li><strong>Water Tank:</strong> 700L</li><li><strong>Fuel Tank:</strong> 600L</li></ul><h3>Navigation Equipment</h3><ul><li><strong>Instruments:</strong> B&G H5000</li><li><strong>Radar:</strong> B&G Halo 20+</li><li><strong>Chartplotter:</strong> B&G Zeus 3S</li><li><strong>VHF:</strong> B&G V60-B</li><li><strong>Autopilot:</strong> B&G NAC-3</li></ul><h3>Sails & Rigging</h3><ul><li><strong>Rig Type:</strong> Sloop / Cutter</li><li><strong>Mast:</strong> Seldén Aluminum</li><li><strong>Furling:</strong> In-mast Furling</li><li><strong>Sails:</strong> North Sails Dacron</li><li><strong>Winches:</strong> Lewmar Electric</li></ul>`; else quillSpecs.root.innerHTML = manifest.specs;
-            document.getElementById('specs-view').innerHTML = generateAccordionHTML(quillSpecs.root.innerHTML);
+            
+            const specsView = document.getElementById('specs-view');
+            if (specsView && quillSpecs.root.innerHTML) {
+                specsView.innerHTML = generateAccordionHTML(quillSpecs.root.innerHTML);
+            }
         }
         function generateAccordionHTML(html) { const d=document.createElement('div'); d.innerHTML=html; let out='', content='', header=''; Array.from(d.childNodes).forEach(n=>{ if(n.nodeName==='H3'){ if(header){ out+=`<div class="acc-item"><div class="acc-header" onclick="toggleAcc(this)">${header} <span class="toggle-icon">▼</span></div><div class="acc-content">${content}</div></div>`; content=''; } header=n.innerText; } else { if(n.nodeType===1) content+=n.outerHTML; else if(n.nodeType===3) content+=n.textContent; } }); if(header) out+=`<div class="acc-item"><div class="acc-header" onclick="toggleAcc(this)">${header} <span class="toggle-icon">▼</span></div><div class="acc-content">${content}</div></div>`; return out||html; }
         window.toggleAcc = function(h) { const c=h.nextElementSibling; const open=c.style.display==='block'; c.style.display=open?'none':'block'; h.querySelector('.toggle-icon').innerText=open?'▼':'▲'; }
@@ -1956,7 +2019,7 @@
             if (adminLock) {
                 adminLock.classList.toggle('admin-active', a);
             }
-            document.getElementById('log-header').style.display = a ? 'block' : 'none'; 
+            // log-header doesn't exist in magazine layout - removed this line
             document.querySelectorAll('.admin-only').forEach(e => {
                 if(e.classList.contains('entry-actions')) {
                     e.style.display = a ? 'flex' : 'none';
@@ -1966,15 +2029,27 @@
                     e.style.display = a ? 'inline-block' : 'none';
                 }
             }); 
-            if(a) {
-                document.getElementById('specs-view').style.display = 'none';
-                document.getElementById('specs-editor-container').style.display = 'block';
-            } else {
-                document.getElementById('specs-view').style.display = 'block';
-                document.getElementById('specs-editor-container').style.display = 'none'; 
-                if(quillSpecs.root.innerHTML) document.getElementById('specs-view').innerHTML = generateAccordionHTML(quillSpecs.root.innerHTML);
+            
+            // Safely handle specs editor visibility
+            const specsView = document.getElementById('specs-view');
+            const specsEditor = document.getElementById('specs-editor-container');
+            if (specsView && specsEditor) {
+                if(a) {
+                    specsView.style.display = 'none';
+                    specsEditor.style.display = 'block';
+                } else {
+                    specsView.style.display = 'block';
+                    specsEditor.style.display = 'none'; 
+                    if(quillSpecs && quillSpecs.root && quillSpecs.root.innerHTML) {
+                        specsView.innerHTML = generateAccordionHTML(quillSpecs.root.innerHTML);
+                    }
+                }
             }
-            quillSpecs.enable(a);
+            
+            // Safely enable/disable Quill
+            if(quillSpecs && quillSpecs.enable) {
+                quillSpecs.enable(a);
+            }
         }
         
         // Check admin status on page load
@@ -1982,7 +2057,13 @@
             checkAdmin();
         });
 
-        function switchTab(t) { document.querySelectorAll('.view-container').forEach(e=>e.classList.remove('active')); document.querySelectorAll('.tab').forEach(e=>e.classList.remove('active')); document.getElementById(`view-${t}`).classList.add('active'); document.querySelector(`.tab[onclick="switchTab('${t}')"]`).classList.add('active'); if(t==='logbook') map.invalidateSize(); }
+        function switchTab(t) { 
+            document.querySelectorAll('.view-container').forEach(e=>e.classList.remove('active')); 
+            document.querySelectorAll('.tab').forEach(e=>e.classList.remove('active')); 
+            document.getElementById(`view-${t}`).classList.add('active'); 
+            document.querySelector(`.tab[onclick="switchTab('${t}')"]`).classList.add('active'); 
+            // Magazine layout doesn't use the old map variable - removed map.invalidateSize() call
+        }
         function toggleForm(id) { 
             const f=document.getElementById(id); 
             if(id==='entry-form'){
