@@ -2155,6 +2155,12 @@
                     if (currentRoute.length > 1) {
                         L.polyline(currentRoute, {color: '#3498db', weight: 3}).addTo(entryFormMap);
                     }
+                    // Fit map to show entire route
+                    setTimeout(() => {
+                        if (entryFormMap && currentRoute.length > 0) {
+                            entryFormMap.fitBounds(currentRoute, {padding: [30, 30]});
+                        }
+                    }, 150);
                 }
             } catch(e) {
                 console.error('Error initializing entry form map:', e);
@@ -2165,7 +2171,30 @@
         async function saveManifestToGitHub(silent=false) { manifest.specs=quillSpecs.root.innerHTML; const s=await ghPut('manifest.json', JSON.stringify(manifest,null,2), "Upd Manifest", (await ghGet('manifest.json'))?.sha); if(!silent && s) alert("Saved!"); }
         async function deleteTrip(d,t){if(!confirm("Del?"))return;const c=await ghGet('trips.json');await ghPut('trips.json',JSON.stringify(c.content.filter(x=>!(x.date===d&&x.title===t)),null,2),"Del Trip",c.sha);loadData();}
         async function saveEntryToGitHub() { const t=document.getElementById('title').value, d=document.getElementById('date').value; if(!t||!d) return alert("Missing"); const f=document.getElementById('photoInput'); let img=editingTrip?editingTrip.image:null; if(f.files[0]) img=await ghUploadImage(f.files[0]); const c=await ghGet('trips.json'); let list=c?c.content:[]; if(editingTrip) list=list.filter(x=>!(x.date===editingTrip.date&&x.title===editingTrip.title)); list.push({title:t,date:d,text:document.getElementById('narrative').value,miles:document.getElementById('miles').value,image:img,route:currentRoute,startCoords:currentRoute[0]}); if(await ghPut('trips.json',JSON.stringify(list,null,2),"Save Trip",c?c.sha:null)){alert("Saved");toggleForm('entry-form');loadData();} }
-        function editTrip(d,t){const tr=trips.find(x=>x.date===d&&x.title===t);if(!tr)return;editingTrip=tr;document.getElementById('title').value=tr.title;document.getElementById('date').value=tr.date;document.getElementById('miles').value=tr.miles||'';document.getElementById('narrative').value=tr.text;currentRoute=getTripPoints(tr);updateRouteDisplay();document.getElementById('form-title').innerText="Edit";toggleForm('entry-form');}
+        function editTrip(d,t){
+            const tr=trips.find(x=>x.date===d&&x.title===t);
+            if(!tr)return;
+            editingTrip=tr;
+            document.getElementById('title').value=tr.title;
+            document.getElementById('date').value=tr.date;
+            document.getElementById('miles').value=tr.miles||'';
+            document.getElementById('narrative').value=tr.text;
+            currentRoute=getTripPoints(tr);
+            
+            // Update the route text display immediately
+            const e=document.getElementById('route-display');
+            if(!currentRoute.length) {
+                e.innerHTML='<em>Click map...</em>';
+            } else {
+                e.innerHTML=currentRoute.map((p,i)=>`<div>Pt ${i+1}: ${p[0].toFixed(2)}, ${p[1].toFixed(2)}</div>`).join('');
+            }
+            
+            document.getElementById('form-title').innerText="Edit";
+            toggleForm('entry-form');
+            
+            // Draw route on map after it initializes
+            setTimeout(updateRouteDisplay, 300);
+        }
         function clearRouteInput(){
             currentRoute=[];
             updateRouteDisplay();
@@ -2181,10 +2210,24 @@
             const e=document.getElementById('route-display');
             if(!currentRoute.length) e.innerHTML='<em>Click map...</em>';
             else e.innerHTML=currentRoute.map((p,i)=>`<div>Pt ${i+1}: ${p[0].toFixed(2)}, ${p[1].toFixed(2)}</div>`).join('');
-            activeLayerGroup.clearLayers();
-            if(currentRoute.length && typeof L !== 'undefined'){
-                L.polyline(currentRoute,{color:'var(--accent)',dashArray:'5,5'}).addTo(activeLayerGroup);
-                currentRoute.forEach(p=>L.circleMarker(p,{radius:4,color:'var(--accent)'}).addTo(activeLayerGroup));
+            
+            // Draw on the entry form map (not the old activeLayerGroup)
+            if(entryFormMap && currentRoute.length && typeof L !== 'undefined'){
+                // Clear existing route layers
+                entryFormMap.eachLayer(layer => {
+                    if (layer instanceof L.CircleMarker || layer instanceof L.Polyline) {
+                        entryFormMap.removeLayer(layer);
+                    }
+                });
+                
+                // Draw new route
+                L.polyline(currentRoute,{color:'#3498db',weight:3}).addTo(entryFormMap);
+                currentRoute.forEach(p=>L.circleMarker(p,{radius:5,color:'#2c3e50',fillColor:'#3498db',fillOpacity:1}).addTo(entryFormMap));
+                
+                // Fit map to route bounds
+                if(currentRoute.length > 0) {
+                    entryFormMap.fitBounds(currentRoute, {padding: [30, 30]});
+                }
             }
         }
         
