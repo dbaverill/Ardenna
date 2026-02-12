@@ -197,6 +197,13 @@
             transform: translateY(-8px);
             box-shadow: 0 8px 24px rgba(0,0,0,0.15);
         }
+        body.is-admin .masonry-card {
+            cursor: pointer;
+        }
+        body.is-admin .masonry-card:hover {
+            box-shadow: 0 8px 24px rgba(52, 152, 219, 0.3);
+            border: 2px solid #3498db;
+        }
         .masonry-map {
             height: 200px;
             background: #f5f7fa;
@@ -947,6 +954,11 @@
                     <div class="filter-pill" data-filter="passages" onclick="setMasonryFilter('passages')">Passages</div>
                 </div>
                 
+                <!-- Admin Hint -->
+                <div class="admin-only" style="display:none; text-align:center; padding:10px; margin-bottom:20px; background:#e3f2fd; border-radius:8px; color:#1976d2; font-size:0.9rem;">
+                    💡 <strong>Admin Mode:</strong> Click any card to edit, or hover for quick edit/delete buttons
+                </div>
+                
                 <!-- Masonry Grid (will be populated by renderMasonryLog) -->
                 <div id="masonry-grid" class="masonry-grid"></div>
             </div>
@@ -1027,13 +1039,8 @@
             <div class="contact-container">
                 <div class="contact-header">
                     <h1>Get in Touch</h1>
-                    <p class="contact-subtitle">We'd love to hear from you</p>
+                    <p class="contact-subtitle">We'll get back to you as soon as we have internet access</p>
                 </div>
-                
-                <p class="contact-intro">
-                    Planning a sailing adventure or have questions about our journey? 
-                    Drop us a message and we'll get back to you as soon as we have internet access!
-                </p>
                 
                 <div class="form-success" id="contact-success">
                     ✓ Message sent successfully! We'll get back to you soon.
@@ -1807,6 +1814,13 @@
                         </div>
                     </div>
                 `;
+                
+                // Make card clickable in admin mode
+                if (isAdmin) {
+                    card.onclick = function() {
+                        editTrip(trip.date, trip.title);
+                    };
+                }
                 
                 gridContainer.appendChild(card);
                 setTimeout(() => initMasonryMap(trip, `map-${trip.date}`), 100 + (index * 50));
