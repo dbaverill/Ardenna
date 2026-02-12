@@ -1028,7 +1028,10 @@
                 <h2 class="modal-title" id="modal-entry-title"></h2>
                 <div class="modal-meta" id="modal-entry-meta"></div>
             </div>
-            <div class="modal-map-container">
+            <div id="modal-photo-container" style="display:none; width:100%; max-height:500px; overflow:hidden;">
+                <img id="modal-photo" style="width:100%; height:100%; object-fit:cover;" onclick="openLightbox(this.src)">
+            </div>
+            <div class="modal-map-container" id="modal-map-section">
                 <div id="modal-map"></div>
             </div>
             <div class="modal-body">
@@ -1066,7 +1069,14 @@
                         </div>
                         <div id="route-display" style="font-size:0.9em; color:#666;"><em>Click map below to set route points...</em></div>
                     </div>
-                    <input type="file" id="photoInput" accept="image/*">
+                    <div style="margin-bottom:15px;">
+                        <label style="display:block; margin-bottom:5px; font-weight:600; color:#2c3e50;">Photo (optional)</label>
+                        <div id="photo-preview" style="display:none; margin-bottom:10px; position:relative;">
+                            <img id="photo-preview-img" style="max-width:100%; max-height:200px; border-radius:8px; border:1px solid #eee;">
+                            <div style="margin-top:5px; font-size:0.85em; color:#7f8c8d;">Current photo - upload a new one to replace</div>
+                        </div>
+                        <input type="file" id="photoInput" accept="image/*">
+                    </div>
                     <div style="display:flex; gap:10px; margin-top:20px;">
                         <button class="primary" onclick="saveEntryToGitHub()">Save Entry</button>
                         <button style="background:#e0e0e0; color:#666; border:none; padding:10px; border-radius:6px; cursor:pointer; flex:1;" onclick="toggleForm('entry-form')">Cancel</button>
@@ -1946,9 +1956,15 @@
                         <button class="masonry-admin-btn masonry-edit-btn" onclick="event.stopPropagation();editTrip('${trip.date}','${trip.title.replace("'", "\'")}')">✎</button>
                         <button class="masonry-admin-btn masonry-delete-btn" onclick="event.stopPropagation();deleteTrip('${trip.date}','${trip.title.replace("'", "\'")}')">✕</button>
                     </div>
+                    ${trip.image ? `
+                    <div style="position:relative; height:200px; overflow:hidden; cursor:pointer;" onclick="event.stopPropagation(); openLightbox('${getImgUrl(trip.image)}')">
+                        <img src="${getImgUrl(trip.image)}" style="width:100%; height:100%; object-fit:cover;" alt="${trip.title}">
+                    </div>
+                    ` : `
                     <div class="masonry-map">
                         <div id="map-${trip.date}" class="masonry-map-container"></div>
                     </div>
+                    `}
                     <div class="masonry-content">
                         <div class="masonry-date">${new Date(trip.date).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'}).toUpperCase()}</div>
                         <h3 class="masonry-title">${trip.title}</h3>
@@ -1970,7 +1986,11 @@
                 };
                 
                 gridContainer.appendChild(card);
-                setTimeout(() => initMasonryMap(trip, `map-${trip.date}`), 100 + (index * 50));
+                
+                // Only initialize map if no photo
+                if (!trip.image) {
+                    setTimeout(() => initMasonryMap(trip, `map-${trip.date}`), 100 + (index * 50));
+                }
             });
             
             checkAdmin();
@@ -2137,14 +2157,26 @@
             if (trip.isPassage) metaHtml += `<span style="color:#3498db; font-weight:600;">⛵ Passage</span>`;
             document.getElementById('modal-entry-meta').innerHTML = metaHtml;
             
+            // Show photo if exists, otherwise show map
+            const photoContainer = document.getElementById('modal-photo-container');
+            const mapSection = document.getElementById('modal-map-section');
+            
+            if (trip.image) {
+                document.getElementById('modal-photo').src = getImgUrl(trip.image);
+                photoContainer.style.display = 'block';
+                mapSection.style.display = 'none';
+            } else {
+                photoContainer.style.display = 'none';
+                mapSection.style.display = 'block';
+                // Initialize map after modal is visible
+                setTimeout(() => initModalMap(trip), 100);
+            }
+            
             document.getElementById('modal-entry-narrative').textContent = trip.text;
             
             // Show modal
             document.getElementById('entry-modal').classList.add('active');
             document.body.style.overflow = 'hidden'; // Prevent background scrolling
-            
-            // Initialize map after modal is visible
-            setTimeout(() => initModalMap(trip), 100);
         }
         
         function closeEntryModal(event) {
@@ -2345,6 +2377,8 @@
                     document.getElementById('date').value=new Date().toISOString().split('T')[0];
                     document.getElementById('isPassage').checked=false;
                     document.getElementById('form-title').innerText="New Entry";
+                    document.getElementById('photo-preview').style.display='none';
+                    document.getElementById('photoInput').value='';
                     clearRouteInput();
                 }
                 f.style.display=f.style.display==='block'?'none':'block';
@@ -2511,6 +2545,19 @@
             document.getElementById('narrative').value=tr.text;
             document.getElementById('isPassage').checked=tr.isPassage||false;
             currentRoute=getTripPoints(tr);
+            
+            // Show existing photo if present
+            const photoPreview = document.getElementById('photo-preview');
+            const photoPreviewImg = document.getElementById('photo-preview-img');
+            if (tr.image) {
+                photoPreviewImg.src = getImgUrl(tr.image);
+                photoPreview.style.display = 'block';
+            } else {
+                photoPreview.style.display = 'none';
+            }
+            
+            // Clear file input
+            document.getElementById('photoInput').value = '';
             
             // Update the route text display immediately
             const e=document.getElementById('route-display');
