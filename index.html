@@ -19,17 +19,54 @@
         }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; background: var(--bg-color); color: var(--text-main); }
         
-        /* Minimal Nav */
-        nav { background: var(--sidebar-bg); padding: 0 20px; display: flex; align-items: center; height: 60px; flex-shrink: 0; justify-content: space-between; border-bottom: 1px solid var(--border); }
-        .nav-left { display: flex; align-items: center; overflow-x: auto; gap: 20px; }
-        nav h1 { color: var(--accent); margin: 0; font-size: 1.2rem; font-weight: 700; letter-spacing: -0.5px; white-space: nowrap; }
-        .tab { color: var(--text-light); padding: 8px 12px; cursor: pointer; font-size: 0.85rem; font-weight: 500; border-radius: 6px; transition: all 0.2s; white-space: nowrap; }
-        .tab:hover { color: var(--accent); background: #f5f5f5; }
-        .tab.active { color: var(--accent); background: var(--active-tab); font-weight: 600; }
+        /* Classic Horizontal Nav */
+        nav { 
+            background: white; 
+            padding: 20px 40px; 
+            display: flex; 
+            align-items: center; 
+            height: auto;
+            flex-shrink: 0; 
+            justify-content: space-between; 
+            border-bottom: 1px solid #ecf0f1;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+        }
+        .nav-brand { 
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 0;
+        }
+        .nav-left { 
+            display: flex; 
+            align-items: center; 
+            gap: 30px;
+        }
+        .tab { 
+            color: #7f8c8d;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 6px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .tab:hover { 
+            color: #3498db;
+            background: #f8f9fa;
+        }
+        .tab.active { 
+            color: #3498db;
+            background: #e3f2fd;
+        }
         .tab-calendar { color: #3498db; }
         .tab-calendar:hover { color: #2980b9; background: #e8f4f8; }
         .tab-calendar.active { color: #3498db; background: #d6eaf8; }
-        .admin-lock { cursor: pointer; opacity: 0.2; font-size: 1.1rem; margin-left: 15px; transition: opacity 0.2s; }
+        .admin-lock { cursor: pointer; opacity: 0.3; font-size: 1.2rem; transition: opacity 0.2s; }
         .admin-lock:hover { opacity: 1; }
         .admin-active { opacity: 1; color: #27ae60; }
 
@@ -108,6 +145,232 @@
             margin-top: 12px;
             display: block;
             border: 1px solid var(--border);
+        }
+        
+        /* Magazine Layout for Logbook */
+        .logbook-magazine-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        .filter-pills {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .filter-pill {
+            padding: 8px 16px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 20px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .filter-pill:hover {
+            border-color: #3498db;
+            color: #3498db;
+        }
+        .filter-pill.active {
+            background: #3498db;
+            border-color: #3498db;
+            color: white;
+        }
+        .magazine-featured {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 450px;
+            margin-bottom: 40px;
+            transition: all 0.3s;
+        }
+        .magazine-featured:hover {
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            transform: translateY(-4px);
+        }
+        .magazine-featured-map {
+            position: relative;
+            background: #f5f7fa;
+        }
+        .magazine-featured-map #featured-map {
+            width: 100%;
+            height: 100%;
+        }
+        .magazine-featured-content {
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .magazine-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            background: #3498db;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            letter-spacing: 0.5px;
+            width: fit-content;
+        }
+        .magazine-featured-title {
+            font-size: 2.2rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .magazine-featured-meta {
+            color: #7f8c8d;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .magazine-featured-meta span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .magazine-featured-excerpt {
+            color: #5a6c7d;
+            line-height: 1.7;
+            font-size: 1.05rem;
+            margin-bottom: 25px;
+        }
+        .magazine-section-header {
+            margin: 40px 0 25px 0;
+        }
+        .magazine-section-title {
+            font-size: 1.6rem;
+            color: #2c3e50;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .magazine-section-subtitle {
+            color: #7f8c8d;
+            font-size: 1rem;
+        }
+        .magazine-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+        }
+        .magazine-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transition: all 0.3s;
+            cursor: pointer;
+            border-left: 4px solid transparent;
+            position: relative;
+        }
+        .magazine-card:hover {
+            border-left-color: #3498db;
+            box-shadow: 0 4px 16px rgba(52, 152, 219, 0.2);
+            transform: translateX(5px);
+        }
+        .magazine-card-date {
+            color: #3498db;
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .magazine-card-title {
+            font-size: 1.3rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        .magazine-card-meta {
+            color: #95a5a6;
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+            display: flex;
+            gap: 12px;
+        }
+        .magazine-card-excerpt {
+            color: #7f8c8d;
+            line-height: 1.6;
+            font-size: 0.9rem;
+        }
+        .magazine-admin-actions {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: none;
+            gap: 8px;
+        }
+        body.is-admin .magazine-card:hover .magazine-admin-actions {
+            display: flex;
+        }
+        .magazine-admin-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .magazine-edit-btn {
+            background: #3498db;
+            color: white;
+        }
+        .magazine-edit-btn:hover {
+            background: #2980b9;
+        }
+        .magazine-delete-btn {
+            background: #e74c3c;
+            color: white;
+        }
+        .magazine-delete-btn:hover {
+            background: #c0392b;
+        }
+        .admin-add-entry-btn {
+            display: none;
+            margin-bottom: 30px;
+            padding: 14px 28px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .admin-add-entry-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+        body.is-admin .admin-add-entry-btn {
+            display: inline-block;
+        }
+        @media (max-width: 968px) {
+            .magazine-featured {
+                grid-template-columns: 1fr;
+            }
+            .magazine-featured-content {
+                padding: 30px;
+            }
+            .magazine-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         /* General Content & Forms */
@@ -692,8 +955,8 @@
 <body>
 
     <nav>
+        <div class="nav-brand">s/v Ardenna</div>
         <div class="nav-left">
-            <h1>s/v Ardenna</h1>
             <div class="tab active" onclick="switchTab('logbook')">Logbook</div>
             <div class="tab" onclick="switchTab('updates')">Updates</div>
             <div class="tab" onclick="switchTab('gallery')">Gallery</div>
@@ -701,8 +964,8 @@
             <div class="tab" onclick="switchTab('specs')">Specs</div>
             <div class="tab" onclick="switchTab('contact')">Contact</div>
             <div class="tab tab-calendar" onclick="switchTab('calendar')">Calendar</div>
+            <span class="admin-lock" onclick="promptAdmin()">🔒</span>
         </div>
-        <div class="admin-lock" onclick="promptAdmin()">🔒</div>
     </nav>
 
     <div id="loading"><div class="spinner"></div><span style="font-weight:500; color:#555;">Syncing...</span></div>
@@ -711,31 +974,56 @@
     <input type="file" id="gallery-upload-input" accept="image/*" style="display:none">
 
     <div id="view-logbook" class="view-container active">
-        <div id="sidebar">
-            <div class="sidebar-header" id="log-header"><button class="primary admin-only" onclick="toggleForm('entry-form')" style="display:none;">+ New Log Entry</button></div>
-            <div class="filter-bar">
-                <select id="log-filter" onchange="renderLog()">
-                    <option value="all">All Time</option>
-                    <option value="30">Last 30 Days</option>
-                    <option value="90">Last 90 Days</option>
-                </select>
-            </div>
-            <div id="entry-form" style="display:none; padding:20px; background:#fff; border-bottom:1px solid #eee;">
-                <h3 id="form-title" style="margin-top:0">New Entry</h3>
-                <input type="text" id="title" placeholder="Trip Title" required>
-                <input type="date" id="date" required>
-                <input type="number" id="miles" placeholder="Distance (nm)" step="0.1">
-                <textarea id="narrative" rows="3" placeholder="Notes..." required></textarea>
-                <div style="margin-bottom:10px; border:1px solid #eee; padding:10px; border-radius:4px;">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><small style="font-weight:bold;">Route (Max 5)</small><span style="color:blue; cursor:pointer; font-size:0.8em;" onclick="clearRouteInput()">Reset</span></div>
-                    <div id="route-display" style="font-size:0.85em; color:#666;"><em>Click map to set points...</em></div>
+        <div class="scroll-container">
+            <div class="logbook-magazine-container">
+                <!-- Admin Add Entry Button -->
+                <button class="admin-add-entry-btn" onclick="toggleForm('entry-form')">+ New Log Entry</button>
+                
+                <!-- Entry Form (hidden by default, shown when editing/creating) -->
+                <div id="entry-form" style="display:none; background:#fff; padding:30px; border-radius:12px; margin-bottom:30px; box-shadow: 0 2px 12px rgba(0,0,0,0.08);">
+                    <h3 id="form-title" style="margin-top:0; color:#2c3e50;">New Entry</h3>
+                    <input type="text" id="title" placeholder="Trip Title" required>
+                    <input type="date" id="date" required>
+                    <input type="number" id="miles" placeholder="Distance (nm)" step="0.1">
+                    <textarea id="narrative" rows="5" placeholder="Your story..." required></textarea>
+                    <div style="margin-bottom:15px; border:1px solid #eee; padding:15px; border-radius:8px; background:#f8f9fa;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                            <small style="font-weight:bold; color:#2c3e50;">Route (Max 5 points)</small>
+                            <span style="color:#3498db; cursor:pointer; font-size:0.85em;" onclick="clearRouteInput()">Reset</span>
+                        </div>
+                        <div id="route-display" style="font-size:0.9em; color:#666;"><em>Click map below to set route points...</em></div>
+                    </div>
+                    <input type="file" id="photoInput" accept="image/*">
+                    <div style="display:flex; gap:10px; margin-top:20px;">
+                        <button class="primary" onclick="saveEntryToGitHub()">Save Entry</button>
+                        <button style="background:#e0e0e0; color:#666; border:none; padding:10px; border-radius:6px; cursor:pointer; flex:1;" onclick="toggleForm('entry-form')">Cancel</button>
+                    </div>
                 </div>
-                <input type="file" id="photoInput" accept="image/*">
-                <div style="display:flex; gap:10px; margin-top:15px;"><button class="primary" onclick="saveEntryToGitHub()">Save</button><button style="background:#eee; color:#333; border:none; padding:10px; border-radius:6px; cursor:pointer; flex:1;" onclick="toggleForm('entry-form')">Cancel</button></div>
+                
+                <!-- Map for route selection (shown when form is open) -->
+                <div id="entry-form-map" style="display:none; height:400px; margin-bottom:30px; border-radius:12px; overflow:hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.08);"></div>
+                
+                <!-- Filter Pills -->
+                <div class="filter-pills">
+                    <div class="filter-pill active" data-filter="all" onclick="setMagazineFilter('all')">All Entries</div>
+                    <div class="filter-pill" data-filter="2026" onclick="setMagazineFilter('2026')">2026</div>
+                    <div class="filter-pill" data-filter="2025" onclick="setMagazineFilter('2025')">2025</div>
+                    <div class="filter-pill" data-filter="passages" onclick="setMagazineFilter('passages')">Passages</div>
+                </div>
+                
+                <!-- Featured Entry (will be populated by renderMagazineLog) -->
+                <div id="magazine-featured"></div>
+                
+                <!-- Section Header -->
+                <div class="magazine-section-header">
+                    <h3 class="magazine-section-title">Recent Entries</h3>
+                    <p class="magazine-section-subtitle">Our latest sailing adventures and boat projects</p>
+                </div>
+                
+                <!-- Grid of Recent Entries (will be populated by renderMagazineLog) -->
+                <div id="magazine-grid" class="magazine-grid"></div>
             </div>
-            <div id="entries-container"></div>
         </div>
-        <div id="map"><button class="map-reset-btn" onclick="resetMap()">Reset Map</button></div>
     </div>
 
     <div id="view-updates" class="view-container">
@@ -815,7 +1103,8 @@
                     <p class="contact-subtitle">We'd love to hear from you</p>
                 </div>
                 
-                <p class="contact-intro"> 
+                <p class="contact-intro">
+                    Planning a sailing adventure or have questions about our journey? 
                     Drop us a message and we'll get back to you as soon as we have internet access!
                 </p>
                 
@@ -823,7 +1112,7 @@
                     ✓ Message sent successfully! We'll get back to you soon.
                 </div>
                 
-                <form class="contact-form" action="https://formspree.io/f/xkovojyy" method="POST" onsubmit="handleFormSubmit(event)">
+                <form class="contact-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST" onsubmit="handleFormSubmit(event)">
                     <div class="form-field">
                         <label for="contact-name">Name *</label>
                         <input type="text" id="contact-name" name="name" required placeholder="Your name">
@@ -925,7 +1214,7 @@
 
         let GH_TOKEN = localStorage.getItem('gh_token');
         const ADMIN_SESSION_KEY = 'ardenna_admin_session';
-        const PASSPHRASE_HASH = '89642ddd9c9f6a49673629c3de650c02706cec8128e12b0d5c299d94c75016d6'; // Generate using passphrase_generator.html
+        const PASSPHRASE_HASH = 'REPLACE_WITH_YOUR_HASH'; // Generate using passphrase_generator.html
         let isAdmin = localStorage.getItem(ADMIN_SESSION_KEY) === 'true';
         let trips = [], maintLog = [], fuelLog = [], updates = [], manifest = { specs: "", crew: [], gallery: [] };
         let activeLayerGroup, currentRoute = [], editingTrip = null, editingFuel = null, editingMaint = null, activeQuill = null; 
@@ -1466,82 +1755,140 @@
         function generateAccordionHTML(html) { const d=document.createElement('div'); d.innerHTML=html; let out='', content='', header=''; Array.from(d.childNodes).forEach(n=>{ if(n.nodeName==='H3'){ if(header){ out+=`<div class="acc-item"><div class="acc-header" onclick="toggleAcc(this)">${header} <span class="toggle-icon">▼</span></div><div class="acc-content">${content}</div></div>`; content=''; } header=n.innerText; } else { if(n.nodeType===1) content+=n.outerHTML; else if(n.nodeType===3) content+=n.textContent; } }); if(header) out+=`<div class="acc-item"><div class="acc-header" onclick="toggleAcc(this)">${header} <span class="toggle-icon">▼</span></div><div class="acc-content">${content}</div></div>`; return out||html; }
         window.toggleAcc = function(h) { const c=h.nextElementSibling; const open=c.style.display==='block'; c.style.display=open?'none':'block'; h.querySelector('.toggle-icon').innerText=open?'▼':'▲'; }
 
+        let currentMagazineFilter = 'all';
+        let featuredMap = null;
+        
+        function setMagazineFilter(filter) {
+            currentMagazineFilter = filter;
+            document.querySelectorAll('.filter-pill').forEach(pill => {
+                pill.classList.toggle('active', pill.dataset.filter === filter);
+            });
+            renderMagazineLog();
+        }
+        
         function renderLog() {
-            const c=document.getElementById('entries-container'); c.innerHTML=''; 
-            if(typeof L !== 'undefined' && map) {
-                map.eachLayer(l=>{if(!!l.toGeoJSON&&l!==activeLayerGroup)map.removeLayer(l)}); 
-                activeLayerGroup.clearLayers();
+            renderMagazineLog();
+        }
+        
+        function renderMagazineLog() {
+            if(!Array.isArray(trips)) trips=[];
+            
+            // Sort trips by date (newest first)
+            const sortedTrips = [...trips].sort((a,b) => new Date(b.date) - new Date(a.date));
+            
+            // Apply filter
+            let filteredTrips = sortedTrips;
+            if (currentMagazineFilter !== 'all') {
+                if (currentMagazineFilter === 'passages') {
+                    filteredTrips = sortedTrips.filter(t => (t.miles && parseFloat(t.miles) > 10));
+                } else {
+                    // Year filter
+                    filteredTrips = sortedTrips.filter(t => t.date.startsWith(currentMagazineFilter));
+                }
             }
-            if(!Array.isArray(trips)) trips=[]; trips.sort((a,b)=>new Date(a.date)-new Date(b.date));
-            const filter=document.getElementById('log-filter').value; const now=new Date();
-            const filtered=trips.filter(t=> {
-                if(filter === 'all') return true;
-                const days = (now - new Date(t.date))/(1000*60*60*24);
-                if(filter === '30') return days <= 30;
-                if(filter === '90') return days <= 90;
-                return false; 
-            });
-            const allCoords=[];
-            if(typeof L !== 'undefined' && map) {
-                filtered.forEach(t=>{ const pts=getTripPoints(t); if(pts.length){ L.polyline(pts,{color:'#3498db',weight:3,dashArray:'5,5'}).addTo(map); pts.forEach(p=>{L.circleMarker(p,{radius:4,color:'#2c3e50',fillColor:'#fff',fillOpacity:1}).addTo(map); allCoords.push(p)}); } });
-                if(allCoords.length) map.fitBounds(allCoords);
-            }
-            const groups={}; [...filtered].sort((a,b)=>new Date(b.date)-new Date(a.date)).forEach(t=>{ const k=new Date(t.date).toLocaleString('default',{month:'long',year:'numeric'}); if(!groups[k]) groups[k]=[]; groups[k].push(t); });
-            Object.keys(groups).forEach((m,i)=>{
-                const monthSection = document.createElement('div');
-                monthSection.className = 'month-section';
-                
-                const h=document.createElement('div'); 
-                h.className='month-header'; 
-                h.innerHTML=`<span>${m}</span> <span class="toggle-icon">${i===0?'▼':'▶'}</span>`;
-                
-                const entriesContainer=document.createElement('div'); 
-                entriesContainer.style.display=i===0?'block':'none';
-                
-                h.onclick=()=>{ 
-                    const o=entriesContainer.style.display!=='none'; 
-                    entriesContainer.style.display=o?'none':'block'; 
-                    h.querySelector('.toggle-icon').innerText=o?'▶':'▼'; 
-                };
-                
-                monthSection.appendChild(h);
-                monthSection.appendChild(entriesContainer);
-                c.appendChild(monthSection);
-                
-                groups[m].forEach(t=>{
-                    const e=document.createElement('div'); 
-                    e.className='log-entry'; 
-                    e.id=`entry-${t.date}`;
-                    e.innerHTML=`
-                        <div class="entry-actions admin-only">
-                            <button class="action-btn-round edit-btn" onclick="event.stopPropagation();editTrip('${t.date}','${t.title.replace(/'/g,"\\'")}')">✎</button>
-                            <button class="action-btn-round delete-btn" onclick="event.stopPropagation();deleteTrip('${t.date}','${t.title.replace(/'/g,"\\'")}')">✕</button>
+            
+            // Render featured entry (most recent)
+            const featuredContainer = document.getElementById('magazine-featured');
+            if (filteredTrips.length > 0) {
+                const featured = filteredTrips[0];
+                featuredContainer.innerHTML = `
+                    <div class="magazine-featured-map" id="featured-map-container"></div>
+                    <div class="magazine-featured-content">
+                        <span class="magazine-badge">Latest Entry</span>
+                        <h2 class="magazine-featured-title">${featured.title}</h2>
+                        <div class="magazine-featured-meta">
+                            <span>📅 ${new Date(featured.date).toLocaleDateString('en-US', {month: 'long', day: 'numeric', year: 'numeric'})}</span>
+                            ${featured.miles ? `<span>⛵ ${featured.miles} nm</span>` : ''}
                         </div>
-                        <div class="log-date">${new Date(t.date).toLocaleDateString('en-US', {weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'})}</div>
-                        <h3>${t.title}</h3>
-                        <div class="log-stats">${t.miles||0} nm</div>
-                        <p>${t.text}</p>
-                        ${t.image?`<img src="${getImgUrl(t.image)}" class="log-img">`:``}
+                        <p class="magazine-featured-excerpt">${featured.text.substring(0, 300)}${featured.text.length > 300 ? '...' : ''}</p>
+                        ${isAdmin ? `
+                        <div style="display:flex; gap:10px; margin-top:20px;">
+                            <button style="padding:10px 20px; background:#3498db; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:600;" onclick="editTrip('${featured.date}','${featured.title.replace(/'/g,"\\'")}')">✎ Edit</button>
+                            <button style="padding:10px 20px; background:#e74c3c; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:600;" onclick="deleteTrip('${featured.date}','${featured.title.replace(/'/g,"\\'")}')">✕ Delete</button>
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+                
+                // Initialize featured map
+                setTimeout(() => initFeaturedMap(featured), 100);
+            } else {
+                featuredContainer.innerHTML = '<div style="padding:40px; text-align:center; color:#999;">No entries yet. Start your logbook!</div>';
+            }
+            
+            // Render grid of remaining entries
+            const gridContainer = document.getElementById('magazine-grid');
+            gridContainer.innerHTML = '';
+            
+            const remainingTrips = filteredTrips.slice(1);  // Skip the featured entry
+            
+            if (remainingTrips.length === 0 && filteredTrips.length > 0) {
+                gridContainer.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px; color:#999;">No more entries to show.</div>';
+            } else {
+                remainingTrips.forEach(trip => {
+                    const card = document.createElement('div');
+                    card.className = 'magazine-card';
+                    card.innerHTML = `
+                        <div class="magazine-admin-actions">
+                            <button class="magazine-admin-btn magazine-edit-btn" onclick="event.stopPropagation();editTrip('${trip.date}','${trip.title.replace(/'/g,"\\'")}')">✎</button>
+                            <button class="magazine-admin-btn magazine-delete-btn" onclick="event.stopPropagation();deleteTrip('${trip.date}','${trip.title.replace(/'/g,"\\'")}')">✕</button>
+                        </div>
+                        <div class="magazine-card-date">${new Date(trip.date).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'}).toUpperCase()}</div>
+                        <h3 class="magazine-card-title">${trip.title}</h3>
+                        <div class="magazine-card-meta">
+                            ${trip.miles ? `<span>⛵ ${trip.miles} nm</span>` : ''}
+                        </div>
+                        <p class="magazine-card-excerpt">${trip.text.substring(0, 150)}${trip.text.length > 150 ? '...' : ''}</p>
                     `;
-                    e.onclick=()=>highlightTrip(t, e); 
-                    entriesContainer.appendChild(e);
+                    gridContainer.appendChild(card);
                 });
-            });
+            }
+            
             checkAdmin();
         }
-        function highlightTrip(t, el) { 
-            activeLayerGroup.clearLayers(); 
-            document.querySelectorAll('.log-entry').forEach(x=>x.classList.remove('active-trip')); 
-            el.classList.add('active-trip'); 
-            const pts=getTripPoints(t); 
-            if(pts.length && typeof L !== 'undefined' && map) { 
-                L.polyline(pts,{color:'#e74c3c',weight:4}).addTo(activeLayerGroup); 
-                pts.forEach(p=>L.circleMarker(p,{radius:5,color:'#e74c3c',fillColor:'#fff',fillOpacity:1}).addTo(activeLayerGroup)); 
-                map.flyToBounds(pts,{padding:[50,50],maxZoom:10}); 
-            } 
+        
+        function initFeaturedMap(trip) {
+            const container = document.getElementById('featured-map-container');
+            if (!container || typeof L === 'undefined') return;
+            
+            // Destroy existing map if any
+            if (featuredMap) {
+                featuredMap.remove();
+                featuredMap = null;
+            }
+            
+            // Create new map
+            featuredMap = L.map('featured-map-container', {
+                zoomControl: false,
+                attributionControl: false
+            }).setView([41.49, -71.31], 8);
+            
+            L.tileLayer(`https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png?api_key=${STADIA_API_KEY}`, {
+                maxZoom: 20
+            }).addTo(featuredMap);
+            
+            // Add route if exists
+            const pts = getTripPoints(trip);
+            if (pts.length) {
+                L.polyline(pts, {color:'#3498db', weight:4}).addTo(featuredMap);
+                pts.forEach(p => L.circleMarker(p, {radius:5, color:'#2c3e50', fillColor:'#fff', fillOpacity:1}).addTo(featuredMap));
+                featuredMap.fitBounds(pts, {padding: [30, 30]});
+            }
         }
-        function resetMap() { activeLayerGroup.clearLayers(); document.querySelectorAll('.log-entry').forEach(x=>x.classList.remove('active-trip')); renderLog(); }
+        
+        function highlightTrip(t, el) { 
+            // Magazine layout doesn't use the old highlight function
+            // Could be extended if needed
+        }
+        function resetMap() { 
+            if (featuredMap) {
+                featuredMap.remove();
+                featuredMap = null;
+            }
+            renderMagazineLog(); 
+        }
         function getTripPoints(t) { return (t.route && t.route.length) ? t.route : (t.startCoords ? [t.startCoords, t.endCoords] : []); }
+        
         
         // --- FIREBASE AUTH FUNCTIONS ---
         // Simple hash function for passphrase
@@ -1638,12 +1985,88 @@
         function switchTab(t) { document.querySelectorAll('.view-container').forEach(e=>e.classList.remove('active')); document.querySelectorAll('.tab').forEach(e=>e.classList.remove('active')); document.getElementById(`view-${t}`).classList.add('active'); document.querySelector(`.tab[onclick="switchTab('${t}')"]`).classList.add('active'); if(t==='logbook') map.invalidateSize(); }
         function toggleForm(id) { 
             const f=document.getElementById(id); 
-            if(id==='entry-form'){if(f.style.display==='none'&&!editingTrip){document.getElementById('title').value='';document.getElementById('narrative').value='';document.getElementById('miles').value='';document.getElementById('date').value=new Date().toISOString().split('T')[0];document.getElementById('form-title').innerText="New Entry";clearRouteInput();}f.style.display=f.style.display==='block'?'none':'block';if(f.style.display==='none')editingTrip=null;}
+            if(id==='entry-form'){
+                if(f.style.display==='none'&&!editingTrip){
+                    document.getElementById('title').value='';
+                    document.getElementById('narrative').value='';
+                    document.getElementById('miles').value='';
+                    document.getElementById('date').value=new Date().toISOString().split('T')[0];
+                    document.getElementById('form-title').innerText="New Entry";
+                    clearRouteInput();
+                }
+                f.style.display=f.style.display==='block'?'none':'block';
+                
+                // Show/hide the map for route selection
+                const formMap = document.getElementById('entry-form-map');
+                if (formMap) {
+                    formMap.style.display = f.style.display;
+                    if (f.style.display === 'block') {
+                        // Initialize or reinitialize the map
+                        setTimeout(initEntryFormMap, 100);
+                    }
+                }
+                
+                if(f.style.display==='none') editingTrip=null;
+            }
             else if(id==='update-form'){
                 f.style.display = f.style.display==='flex'?'none':'flex';
                 if(f.style.display==='flex') { document.getElementById('u-date').value = new Date().toISOString().split('T')[0]; }
             }
-            map.invalidateSize();
+        }
+        
+        let entryFormMap = null;
+        function initEntryFormMap() {
+            const container = document.getElementById('entry-form-map');
+            if (!container || typeof L === 'undefined') return;
+            
+            // Destroy existing map if any
+            if (entryFormMap) {
+                entryFormMap.remove();
+                entryFormMap = null;
+            }
+            
+            // Create new map
+            entryFormMap = L.map('entry-form-map').setView([41.49, -71.31], 8);
+            
+            L.tileLayer(`https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png?api_key=${STADIA_API_KEY}`, {
+                maxZoom: 20
+            }).addTo(entryFormMap);
+            
+            // Add click handler for route points
+            entryFormMap.on('click', function(e) {
+                if (currentRoute.length < 5) {
+                    currentRoute.push([e.latlng.lat, e.latlng.lng]);
+                    L.circleMarker([e.latlng.lat, e.latlng.lng], {
+                        radius: 5,
+                        color: '#2c3e50',
+                        fillColor: '#3498db',
+                        fillOpacity: 1
+                    }).addTo(entryFormMap);
+                    
+                    if (currentRoute.length > 1) {
+                        L.polyline(currentRoute, {color: '#3498db', weight: 3}).addTo(entryFormMap);
+                    }
+                    
+                    updateRouteDisplay();
+                } else {
+                    alert('Maximum 5 route points');
+                }
+            });
+            
+            // Draw existing route if editing
+            if (currentRoute.length > 0) {
+                currentRoute.forEach(p => {
+                    L.circleMarker(p, {
+                        radius: 5,
+                        color: '#2c3e50',
+                        fillColor: '#3498db',
+                        fillOpacity: 1
+                    }).addTo(entryFormMap);
+                });
+                if (currentRoute.length > 1) {
+                    L.polyline(currentRoute, {color: '#3498db', weight: 3}).addTo(entryFormMap);
+                }
+            }
         }
         function populateFilter() { const s=document.getElementById('log-filter'); while(s.options.length>3)s.remove(3); [...new Set(trips.map(t=>t.date.split('-')[0]))].sort().reverse().forEach(y=>{const o=document.createElement('option');o.value=y;o.innerText=y;s.appendChild(o)}); }
 
@@ -1651,7 +2074,17 @@
         async function deleteTrip(d,t){if(!confirm("Del?"))return;const c=await ghGet('trips.json');await ghPut('trips.json',JSON.stringify(c.content.filter(x=>!(x.date===d&&x.title===t)),null,2),"Del Trip",c.sha);loadData();}
         async function saveEntryToGitHub() { const t=document.getElementById('title').value, d=document.getElementById('date').value; if(!t||!d) return alert("Missing"); const f=document.getElementById('photoInput'); let img=editingTrip?editingTrip.image:null; if(f.files[0]) img=await ghUploadImage(f.files[0]); const c=await ghGet('trips.json'); let list=c?c.content:[]; if(editingTrip) list=list.filter(x=>!(x.date===editingTrip.date&&x.title===editingTrip.title)); list.push({title:t,date:d,text:document.getElementById('narrative').value,miles:document.getElementById('miles').value,image:img,route:currentRoute,startCoords:currentRoute[0]}); if(await ghPut('trips.json',JSON.stringify(list,null,2),"Save Trip",c?c.sha:null)){alert("Saved");toggleForm('entry-form');loadData();} }
         function editTrip(d,t){const tr=trips.find(x=>x.date===d&&x.title===t);if(!tr)return;editingTrip=tr;document.getElementById('title').value=tr.title;document.getElementById('date').value=tr.date;document.getElementById('miles').value=tr.miles||'';document.getElementById('narrative').value=tr.text;currentRoute=getTripPoints(tr);updateRouteDisplay();document.getElementById('form-title').innerText="Edit";toggleForm('entry-form');}
-        function clearRouteInput(){currentRoute=[];updateRouteDisplay();} 
+        function clearRouteInput(){
+            currentRoute=[];
+            updateRouteDisplay();
+            if (entryFormMap) {
+                entryFormMap.eachLayer(layer => {
+                    if (layer instanceof L.CircleMarker || layer instanceof L.Polyline) {
+                        entryFormMap.removeLayer(layer);
+                    }
+                });
+            }
+        } 
         function updateRouteDisplay(){
             const e=document.getElementById('route-display');
             if(!currentRoute.length) e.innerHTML='<em>Click map...</em>';
