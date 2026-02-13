@@ -1,38 +1,5 @@
 [
   {
-    "title": "test 2",
-    "date": "2026-02-12",
-    "text": "test 2",
-    "miles": "20",
-    "image": null,
-    "route": [
-      [
-        42.51574923272469,
-        -70.87451934814455
-      ],
-      [
-        42.54883601386979,
-        -70.80636978149415
-      ],
-      [
-        42.538058052182045,
-        -70.81709861755373
-      ],
-      [
-        42.532239471975814,
-        -70.85349082946779
-      ],
-      [
-        42.515033542409434,
-        -70.8706569671631
-      ]
-    ],
-    "startCoords": [
-      42.51574923272469,
-      -70.87451934814455
-    ]
-  },
-  {
     "title": "[Placeholder] Salem, MA to Roque Island, ME",
     "date": "2026-02-06",
     "text": "[Placeholder entry] We left the mooring a Safe Harbor Hawthorne Cove at about 0830 under light rain and 60F.  It was a long slog downeast but mostly clear of the lobster pots.",
