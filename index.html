@@ -217,6 +217,7 @@
             height: 200px;
             background: #f5f7fa;
             position: relative;
+            isolation: isolate;
         }
         .masonry-map-container {
             width: 100%;
@@ -266,7 +267,7 @@
             right: 15px;
             display: none;
             gap: 8px;
-            z-index: 10;
+            z-index: 100;
         }
         body.is-admin .masonry-card:hover .masonry-admin-actions {
             display: flex;
