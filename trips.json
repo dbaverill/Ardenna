@@ -31,6 +31,9 @@
       38.16911413556086,
       -72.81738281250001
     ],
-    "isPassage": false
+    "isPassage": true,
+    "passageName": "Newport to Salem",
+    "passageId": "newport-to-salem-2026-02-06",
+    "passageStart": true
   }
 ]
