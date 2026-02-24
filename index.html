@@ -1097,10 +1097,25 @@
                     <input type="number" id="miles" placeholder="Distance (nm)" step="0.1">
                     <div style="margin-bottom:15px; padding:12px; background:#f8f9fa; border-radius:6px;">
                         <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
-                            <input type="checkbox" id="isPassage" style="width:auto; margin:0;">
+                            <input type="checkbox" id="isPassage" style="width:auto; margin:0;" onchange="togglePassageFields()">
                             <span style="font-weight:600; color:#2c3e50;">Mark as Passage</span>
                             <span style="font-size:0.85em; color:#7f8c8d;">(Offshore voyage or significant coastal trip)</span>
                         </label>
+                        <div id="passage-fields" style="display:none; margin-top:12px; padding-top:12px; border-top:1px solid #dde;">
+                            <label style="display:block; margin-bottom:4px; font-size:0.85em; font-weight:600; color:#2c3e50;">Passage Name</label>
+                            <input type="text" id="passageName" list="passage-names-list" placeholder="e.g. Newport to Saman" style="width:100%; box-sizing:border-box; margin-bottom:10px;">
+                            <datalist id="passage-names-list"></datalist>
+                            <div style="display:flex; gap:20px;">
+                                <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:0.9em;">
+                                    <input type="checkbox" id="passageStart" style="width:auto; margin:0;">
+                                    <span>Passage start</span>
+                                </label>
+                                <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:0.9em;">
+                                    <input type="checkbox" id="passageEnd" style="width:auto; margin:0;">
+                                    <span>Passage end</span>
+                                </label>
+                            </div>
+                        </div>
                     </div>
                     <textarea id="narrative" rows="5" placeholder="Your story..." required></textarea>
                     <div style="margin-bottom:15px; border:1px solid #eee; padding:15px; border-radius:8px; background:#f8f9fa;">
@@ -1133,6 +1148,7 @@
                     <div class="filter-pill" data-filter="2026" onclick="setMasonryFilter('2026')">2026</div>
                     <div class="filter-pill" data-filter="2025" onclick="setMasonryFilter('2025')">2025</div>
                     <div class="filter-pill" data-filter="passages" onclick="setMasonryFilter('passages')">Passages</div>
+                    <span id="passage-pills-container"></span>
                 </div>
                 
                 <!-- Admin Hint -->
@@ -1185,7 +1201,7 @@
         <div class="scroll-container">
             <div class="crew-page-header">
                 <h1>The Crew</h1>
-                <p>Next in the news, a family with Maine ties...</p>
+                <p>The team behind s/v Ardenna's adventures</p>
                 <button class="add-crew-btn" onclick="toggleCrewForm()">+ Add Crew Member</button>
             </div>
             
@@ -2060,13 +2076,31 @@
         
         function renderMasonryLog() {
             if(!Array.isArray(trips)) trips=[];
-            
+
             const sortedTrips = [...trips].sort((a,b) => new Date(b.date) - new Date(a.date));
-            
+
+            // Build dynamic passage filter pills
+            const pillsContainer = document.getElementById('passage-pills-container');
+            if (pillsContainer) {
+                const passageMap = new Map();
+                trips.forEach(t => {
+                    if (t.passageId && t.passageName && !passageMap.has(t.passageId)) {
+                        passageMap.set(t.passageId, { id: t.passageId, name: t.passageName, year: t.date.substring(0, 4) });
+                    }
+                });
+                pillsContainer.innerHTML = [...passageMap.values()]
+                    .sort((a, b) => b.year - a.year)
+                    .map(p => `<div class="filter-pill" data-filter="passage:${p.id}" onclick="setMasonryFilter('passage:${p.id}')">${p.name} '${p.year.slice(2)}</div>`)
+                    .join('');
+            }
+
             let filteredTrips = sortedTrips;
             if (currentMasonryFilter !== 'all') {
                 if (currentMasonryFilter === 'passages') {
                     filteredTrips = sortedTrips.filter(t => t.isPassage === true);
+                } else if (currentMasonryFilter.startsWith('passage:')) {
+                    const pid = currentMasonryFilter.slice(8);
+                    filteredTrips = sortedTrips.filter(t => t.passageId === pid);
                 } else {
                     filteredTrips = sortedTrips.filter(t => t.date.startsWith(currentMasonryFilter));
                 }
@@ -2122,6 +2156,7 @@
                                 Photo
                             </span>` : ''}
                         </div>
+                        ${trip.passageName ? `<div style="margin-top:8px; font-size:0.8em; color:#8e44ad; font-weight:600;">⚓ ${trip.passageName}${trip.passageStart ? ' &middot; Departure' : ''}${trip.passageEnd ? ' &middot; Arrival' : ''}</div>` : ''}
                     </div>
                 `;
                 
@@ -2302,6 +2337,12 @@
             if (trip.miles) metaHtml += `<span>${trip.miles} nm</span>`;
             if (trip.route && trip.route.length > 0) metaHtml += `<span>${trip.route.length} waypoints</span>`;
             if (trip.isPassage) metaHtml += `<span style="color:#3498db; font-weight:600;">⛵ Passage</span>`;
+            if (trip.passageName) {
+                let passageLabel = `⚓ ${trip.passageName}`;
+                if (trip.passageStart) passageLabel += ' &middot; Departure';
+                if (trip.passageEnd)   passageLabel += ' &middot; Arrival';
+                metaHtml += `<span style="color:#8e44ad; font-weight:600;">${passageLabel}</span>`;
+            }
             document.getElementById('modal-entry-meta').innerHTML = metaHtml;
             
             // Show photo if exists
@@ -2525,6 +2566,10 @@
                     document.getElementById('miles').value='';
                     document.getElementById('date').value=new Date().toISOString().split('T')[0];
                     document.getElementById('isPassage').checked=false;
+                    document.getElementById('passageName').value='';
+                    document.getElementById('passageStart').checked=false;
+                    document.getElementById('passageEnd').checked=false;
+                    document.getElementById('passage-fields').style.display='none';
                     document.getElementById('form-title').innerText="New Entry";
                     document.getElementById('photo-preview').style.display='none';
                     document.getElementById('photoInput').value='';
@@ -2666,25 +2711,58 @@
 
         async function saveManifestToGitHub(silent=false) { manifest.specs=quillSpecs.root.innerHTML; const s=await ghPut('manifest.json', JSON.stringify(manifest,null,2), "Upd Manifest", (await ghGet('manifest.json'))?.sha); if(!silent && s) alert("Saved!"); }
         async function deleteTrip(d,t){if(!confirm("Del?"))return;const c=await ghGet('trips.json');await ghPut('trips.json',JSON.stringify(c.content.filter(x=>!(x.date===d&&x.title===t)),null,2),"Del Trip",c.sha);loadData();}
-        async function saveEntryToGitHub() { 
+        function slugify(str) {
+            return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        }
+
+        function togglePassageFields() {
+            const checked = document.getElementById('isPassage').checked;
+            document.getElementById('passage-fields').style.display = checked ? 'block' : 'none';
+            if (checked) {
+                const names = [...new Set(trips.filter(t => t.passageName).map(t => t.passageName))];
+                const dl = document.getElementById('passage-names-list');
+                dl.innerHTML = names.map(n => `<option value="${n}">`).join('');
+            }
+        }
+
+        async function saveEntryToGitHub() {
             const t=document.getElementById('title').value;
-            const d=document.getElementById('date').value; 
-            
-            if(!t||!d) return alert("Title and date are required"); 
-            
-            const f=document.getElementById('photoInput'); 
-            let img=editingTrip?editingTrip.image:null; 
-            
-            if(f.files[0]) img=await ghUploadImage(f.files[0]); 
-            
-            const c=await ghGet('trips.json'); 
-            let list=c?c.content:[]; 
-            
+            const d=document.getElementById('date').value;
+
+            if(!t||!d) return alert("Title and date are required");
+
+            const f=document.getElementById('photoInput');
+            let img=editingTrip?editingTrip.image:null;
+
+            if(f.files[0]) img=await ghUploadImage(f.files[0]);
+
+            const c=await ghGet('trips.json');
+            let list=c?c.content:[];
+
             if(editingTrip) {
                 list=list.filter(x=>!(x.date===editingTrip.date&&x.title===editingTrip.title));
             }
-            
-            list.push({
+
+            const isPassage = document.getElementById('isPassage').checked;
+            const passageName = document.getElementById('passageName').value.trim();
+            const passageStart = document.getElementById('passageStart').checked;
+            const passageEnd = document.getElementById('passageEnd').checked;
+
+            // Resolve passageId: preserve existing when editing, otherwise derive from data
+            let passageId = editingTrip?.passageId || null;
+            if (isPassage && passageName && !passageId) {
+                if (passageStart) {
+                    passageId = slugify(passageName) + '-' + d;
+                } else {
+                    // Find the most recent open passage with this name (started, not ended)
+                    const openPassage = trips
+                        .filter(t => t.passageName === passageName && t.passageStart)
+                        .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+                    passageId = openPassage?.passageId || (slugify(passageName) + '-' + d);
+                }
+            }
+
+            const entry = {
                 title:t,
                 date:d,
                 text:document.getElementById('narrative').value,
@@ -2692,9 +2770,15 @@
                 image:img,
                 route:currentRoute,
                 startCoords:currentRoute[0],
-                isPassage:document.getElementById('isPassage').checked
-            }); 
-            
+                isPassage:isPassage
+            };
+            if (passageName) entry.passageName = passageName;
+            if (passageId)   entry.passageId   = passageId;
+            if (passageStart) entry.passageStart = true;
+            if (passageEnd)   entry.passageEnd   = true;
+
+            list.push(entry);
+
             if(await ghPut('trips.json',JSON.stringify(list,null,2),"Save Trip",c?c.sha:null)){
                 alert("Saved");
                 toggleForm('entry-form');
@@ -2712,6 +2796,10 @@
             document.getElementById('miles').value=tr.miles||'';
             document.getElementById('narrative').value=tr.text;
             document.getElementById('isPassage').checked=tr.isPassage||false;
+            document.getElementById('passageName').value=tr.passageName||'';
+            document.getElementById('passageStart').checked=tr.passageStart||false;
+            document.getElementById('passageEnd').checked=tr.passageEnd||false;
+            document.getElementById('passage-fields').style.display=(tr.isPassage&&tr.passageName)?'block':'none';
             currentRoute=getTripPoints(tr);
             
             // Show existing photo if present
