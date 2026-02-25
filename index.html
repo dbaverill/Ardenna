@@ -2509,9 +2509,16 @@
             }
         }
         
-        function checkAdmin() { 
-            const a = isAdmin; 
+        function checkAdmin() {
+            const a = isAdmin;
             document.body.classList.toggle('is-admin', a);
+            // The update form is shown via CSS for admins (no toggleForm call), so pre-fill the date
+            if (a) {
+                const uDate = document.getElementById('u-date');
+                if (uDate && !uDate.value) {
+                    uDate.value = new Date().toISOString().split('T')[0];
+                }
+            }
             const adminLock = document.querySelector('.admin-lock');
             if (adminLock) {
                 adminLock.classList.toggle('admin-active', a);
