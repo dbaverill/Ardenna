@@ -1102,12 +1102,9 @@
                             <span style="font-size:0.85em; color:#7f8c8d;">(Offshore voyage or significant coastal trip)</span>
                         </label>
                         <div id="passage-fields" style="display:none; margin-top:12px; padding-top:12px; border-top:1px solid #dde;">
-                            <label style="display:block; margin-bottom:4px; font-size:0.85em; font-weight:600; color:#2c3e50;">Passage Name</label>
-                            <input type="text" id="passageName" list="passage-names-list" placeholder="e.g. Newport to Saman" style="width:100%; box-sizing:border-box; margin-bottom:10px;">
-                            <datalist id="passage-names-list"></datalist>
-                            <div style="display:flex; gap:20px;">
+                            <div style="display:flex; gap:20px; margin-bottom:10px;">
                                 <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:0.9em;">
-                                    <input type="checkbox" id="passageStart" style="width:auto; margin:0;">
+                                    <input type="checkbox" id="passageStart" style="width:auto; margin:0;" onchange="updatePassageNameUI()">
                                     <span>Passage start</span>
                                 </label>
                                 <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:0.9em;">
@@ -1115,6 +1112,13 @@
                                     <span>Passage end</span>
                                 </label>
                             </div>
+                            <label id="passage-name-label" style="display:block; margin-bottom:4px; font-size:0.85em; font-weight:600; color:#2c3e50;">Passage Name</label>
+                            <!-- Shown when Passage Start is checked: free text for a new passage -->
+                            <input type="text" id="passageName" placeholder="e.g. Newport to Bermuda" style="width:100%; box-sizing:border-box; margin-bottom:10px; display:none;">
+                            <!-- Shown when Passage Start is NOT checked: pick an existing passage -->
+                            <select id="passageSelect" style="width:100%; box-sizing:border-box; margin-bottom:10px; display:none;">
+                                <option value="">— Select a passage —</option>
+                            </select>
                         </div>
                     </div>
                     <textarea id="narrative" rows="5" placeholder="Your story..." required></textarea>
@@ -2719,9 +2723,48 @@
             const checked = document.getElementById('isPassage').checked;
             document.getElementById('passage-fields').style.display = checked ? 'block' : 'none';
             if (checked) {
-                const names = [...new Set(trips.filter(t => t.passageName).map(t => t.passageName))];
-                const dl = document.getElementById('passage-names-list');
-                dl.innerHTML = names.map(n => `<option value="${n}">`).join('');
+                updatePassageNameUI();
+            }
+        }
+
+        function updatePassageNameUI() {
+            const isStart = document.getElementById('passageStart').checked;
+            const nameInput = document.getElementById('passageName');
+            const passageSelect = document.getElementById('passageSelect');
+            const label = document.getElementById('passage-name-label');
+
+            if (isStart) {
+                // New passage: free-text input
+                nameInput.style.display = 'block';
+                passageSelect.style.display = 'none';
+                label.textContent = 'New Passage Name';
+            } else {
+                // Continuing an existing passage: select from known passages
+                nameInput.style.display = 'none';
+                passageSelect.style.display = 'block';
+                label.textContent = 'Passage';
+
+                // Build deduplicated list of passage starts, newest first
+                const seen = new Set();
+                const passages = trips
+                    .filter(t => t.passageStart && t.passageName && t.passageId)
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))
+                    .filter(t => { if (seen.has(t.passageId)) return false; seen.add(t.passageId); return true; });
+
+                const currentValue = passageSelect.value;
+                passageSelect.innerHTML = '<option value="">— Select a passage —</option>';
+                passages.forEach(p => {
+                    const dt = new Date(p.date + 'T12:00:00');
+                    const label = dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    const opt = document.createElement('option');
+                    opt.value = p.passageId;
+                    opt.dataset.name = p.passageName;
+                    opt.textContent = `${p.passageName} — started ${label}`;
+                    passageSelect.appendChild(opt);
+                });
+
+                // Restore previous selection if it still exists
+                if (currentValue) passageSelect.value = currentValue;
             }
         }
 
@@ -2744,21 +2787,28 @@
             }
 
             const isPassage = document.getElementById('isPassage').checked;
-            const passageName = document.getElementById('passageName').value.trim();
             const passageStart = document.getElementById('passageStart').checked;
             const passageEnd = document.getElementById('passageEnd').checked;
 
-            // Resolve passageId: preserve existing when editing, otherwise derive from data
+            // Resolve passageName and passageId based on whether this is a new or continuing passage
+            let passageName = '';
             let passageId = editingTrip?.passageId || null;
-            if (isPassage && passageName && !passageId) {
+
+            if (isPassage) {
                 if (passageStart) {
-                    passageId = slugify(passageName) + '-' + d;
+                    // New passage: name comes from the text input, generate a new passageId
+                    passageName = document.getElementById('passageName').value.trim();
+                    if (passageName && !passageId) {
+                        passageId = slugify(passageName) + '-' + d;
+                    }
                 } else {
-                    // Find the most recent open passage with this name (started, not ended)
-                    const openPassage = trips
-                        .filter(t => t.passageName === passageName && t.passageStart)
-                        .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-                    passageId = openPassage?.passageId || (slugify(passageName) + '-' + d);
+                    // Continuing passage: name and passageId come from the select
+                    const sel = document.getElementById('passageSelect');
+                    const selectedOpt = sel.options[sel.selectedIndex];
+                    if (sel.value && selectedOpt) {
+                        passageName = selectedOpt.dataset.name || '';
+                        if (!passageId) passageId = sel.value;
+                    }
                 }
             }
 
@@ -2796,10 +2846,19 @@
             document.getElementById('miles').value=tr.miles||'';
             document.getElementById('narrative').value=tr.text;
             document.getElementById('isPassage').checked=tr.isPassage||false;
-            document.getElementById('passageName').value=tr.passageName||'';
             document.getElementById('passageStart').checked=tr.passageStart||false;
             document.getElementById('passageEnd').checked=tr.passageEnd||false;
-            document.getElementById('passage-fields').style.display=(tr.isPassage&&tr.passageName)?'block':'none';
+            document.getElementById('passageName').value=tr.passageName||'';
+            if (tr.isPassage && tr.passageName) {
+                document.getElementById('passage-fields').style.display='block';
+                updatePassageNameUI();
+                // For continuing entries, pre-select the correct passage in the dropdown
+                if (!tr.passageStart && tr.passageId) {
+                    document.getElementById('passageSelect').value = tr.passageId;
+                }
+            } else {
+                document.getElementById('passage-fields').style.display='none';
+            }
             currentRoute=getTripPoints(tr);
             
             // Show existing photo if present
