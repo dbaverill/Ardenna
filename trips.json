@@ -31,6 +31,20 @@
       38.16911413556086,
       -72.81738281250001
     ],
-    "isPassage": true
+    "isPassage": true,
+    "passageName": "Newport to Salem",
+    "passageId": "newport-to-salem-2026-02-06",
+    "passageStart": true
+  },
+  {
+    "title": "Test 2",
+    "date": "2026-02-24",
+    "text": "Test",
+    "miles": "100",
+    "image": null,
+    "route": [],
+    "isPassage": true,
+    "passageName": "Newport to Salem",
+    "passageId": "newport-to-salem-2026-02-06"
   }
 ]
