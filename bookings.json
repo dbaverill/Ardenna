@@ -5,5 +5,12 @@
     "endDate": "2026-05-20",
     "location": "Maine Yacht Center",
     "status": "confirmed"
+  },
+  {
+    "guest": "Portland to Salem",
+    "startDate": "2026-05-23",
+    "endDate": "2026-05-24",
+    "location": "Portland ME",
+    "status": "confirmed"
   }
 ]
