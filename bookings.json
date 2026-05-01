@@ -5,12 +5,5 @@
     "endDate": "2026-05-20",
     "location": "Maine Yacht Center",
     "status": "confirmed"
-  },
-  {
-    "guest": "Splash",
-    "startDate": "2026-05-19",
-    "endDate": "2026-05-19",
-    "location": "Maine Yacht Center",
-    "status": "tentative"
   }
 ]
