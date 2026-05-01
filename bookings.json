@@ -33,5 +33,12 @@
     "endDate": "2026-09-13",
     "location": "Edgartown, MA",
     "status": "confirmed"
+  },
+  {
+    "guest": "Winter vacation",
+    "startDate": "2027-01-01",
+    "endDate": "2027-01-10",
+    "location": "Samaná, DR",
+    "status": "confirmed"
   }
 ]
