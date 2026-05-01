@@ -1855,6 +1855,11 @@
         let bookings = [];
         let currentFilter = 'all';
         let editingBooking = null;
+
+        function parseLocalDate(str) {
+            const [y, m, d] = str.split('-').map(Number);
+            return new Date(y, m - 1, d);
+        }
         
         function filterCalendar(filter) {
             currentFilter = filter;
@@ -1872,7 +1877,7 @@
             // Apply filter
             if (currentFilter === 'upcoming') {
                 const today = new Date();
-                filteredIndices = filteredIndices.filter(i => new Date(bookings[i].startDate) >= today);
+                filteredIndices = filteredIndices.filter(i => parseLocalDate(bookings[i].startDate) >= today);
             } else if (currentFilter === '2026' || currentFilter === '2027') {
                 filteredIndices = filteredIndices.filter(i => bookings[i].startDate.startsWith(currentFilter));
             }
@@ -1890,7 +1895,7 @@
 
             // Sort by date, preserving original bookings indices
             const sortedIndices = [...filteredIndices].sort((a, b) =>
-                new Date(bookings[a].startDate) - new Date(bookings[b].startDate)
+                parseLocalDate(bookings[a].startDate) - parseLocalDate(bookings[b].startDate)
             );
 
             // Group by month
@@ -1898,8 +1903,8 @@
 
             sortedIndices.forEach((idx) => {
                 const booking = bookings[idx];
-                const startDate = new Date(booking.startDate);
-                const endDate = new Date(booking.endDate);
+                const startDate = parseLocalDate(booking.startDate);
+                const endDate = parseLocalDate(booking.endDate);
                 const monthYear = startDate.toLocaleDateString('en-US', { 
                     month: 'long', 
                     year: 'numeric' 
