@@ -1149,8 +1149,7 @@
                 <!-- Filter Pills -->
                 <div class="filter-pills">
                     <div class="filter-pill active" data-filter="all" onclick="setMasonryFilter('all')">All Entries</div>
-                    <div class="filter-pill" data-filter="2026" onclick="setMasonryFilter('2026')">2026</div>
-                    <div class="filter-pill" data-filter="2025" onclick="setMasonryFilter('2025')">2025</div>
+                    <span id="year-pills-container"></span>
                     <div class="filter-pill" data-filter="passages" onclick="setMasonryFilter('passages')">Passages</div>
                     <span id="passage-pills-container"></span>
                 </div>
@@ -1868,17 +1867,17 @@
             const container = document.getElementById('calendar-bookings-container');
             container.innerHTML = '';
             
-            let filteredBookings = bookings;
-            
+            let filteredIndices = bookings.map((_, i) => i);
+
             // Apply filter
             if (currentFilter === 'upcoming') {
                 const today = new Date();
-                filteredBookings = bookings.filter(b => new Date(b.startDate) >= today);
+                filteredIndices = filteredIndices.filter(i => new Date(bookings[i].startDate) >= today);
             } else if (currentFilter === '2026' || currentFilter === '2027') {
-                filteredBookings = bookings.filter(b => b.startDate.startsWith(currentFilter));
+                filteredIndices = filteredIndices.filter(i => bookings[i].startDate.startsWith(currentFilter));
             }
-            
-            if (filteredBookings.length === 0) {
+
+            if (filteredIndices.length === 0) {
                 container.innerHTML = `
                     <div class="empty-calendar-state">
                         <div class="empty-calendar-icon">🌊</div>
@@ -1888,16 +1887,17 @@
                 `;
                 return;
             }
-            
-            // Sort by date
-            const sorted = [...filteredBookings].sort((a, b) => 
-                new Date(a.startDate) - new Date(b.startDate)
+
+            // Sort by date, preserving original bookings indices
+            const sortedIndices = [...filteredIndices].sort((a, b) =>
+                new Date(bookings[a].startDate) - new Date(bookings[b].startDate)
             );
-            
+
             // Group by month
             let currentMonth = null;
-            
-            sorted.forEach((booking, idx) => {
+
+            sortedIndices.forEach((idx) => {
+                const booking = bookings[idx];
                 const startDate = new Date(booking.startDate);
                 const endDate = new Date(booking.endDate);
                 const monthYear = startDate.toLocaleDateString('en-US', { 
@@ -2082,6 +2082,15 @@
             if(!Array.isArray(trips)) trips=[];
 
             const sortedTrips = [...trips].sort((a,b) => new Date(b.date) - new Date(a.date));
+
+            // Build dynamic year filter pills
+            const yearPillsContainer = document.getElementById('year-pills-container');
+            if (yearPillsContainer) {
+                const years = [...new Set(trips.map(t => t.date.substring(0, 4)))].sort().reverse();
+                yearPillsContainer.innerHTML = years
+                    .map(y => `<div class="filter-pill" data-filter="${y}" onclick="setMasonryFilter('${y}')">${y}</div>`)
+                    .join('');
+            }
 
             // Build dynamic passage filter pills
             const pillsContainer = document.getElementById('passage-pills-container');
