@@ -47,5 +47,12 @@
     "endDate": "2027-05-08",
     "location": "Samaná to Salem",
     "status": "trip"
+  },
+  {
+    "guest": "Splash",
+    "startDate": "2026-05-19",
+    "endDate": "2026-05-19",
+    "location": "Maine Yacht Center",
+    "status": "confirmed"
   }
 ]
