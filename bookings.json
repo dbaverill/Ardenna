@@ -1,10 +1,10 @@
 [
   {
-    "guest": "Sail to Bermuda",
-    "startDate": "2026-06-19",
-    "endDate": "2026-06-23",
-    "location": "Hamilton, Bermuda",
-    "status": "trip"
+    "guest": "Splash",
+    "startDate": "2026-05-19",
+    "endDate": "2026-05-20",
+    "location": "Maine Yacht Center",
+    "status": "confirmed"
   },
   {
     "guest": "Sail from DR to USA",
