@@ -1149,8 +1149,7 @@
                 <!-- Filter Pills -->
                 <div class="filter-pills">
                     <div class="filter-pill active" data-filter="all" onclick="setMasonryFilter('all')">All Entries</div>
-                    <div class="filter-pill" data-filter="2026" onclick="setMasonryFilter('2026')">2026</div>
-                    <div class="filter-pill" data-filter="2025" onclick="setMasonryFilter('2025')">2025</div>
+                    <span id="year-pills-container"></span>
                     <div class="filter-pill" data-filter="passages" onclick="setMasonryFilter('passages')">Passages</div>
                     <span id="passage-pills-container"></span>
                 </div>
@@ -2083,6 +2082,15 @@
             if(!Array.isArray(trips)) trips=[];
 
             const sortedTrips = [...trips].sort((a,b) => new Date(b.date) - new Date(a.date));
+
+            // Build dynamic year filter pills
+            const yearPillsContainer = document.getElementById('year-pills-container');
+            if (yearPillsContainer) {
+                const years = [...new Set(trips.map(t => t.date.substring(0, 4)))].sort().reverse();
+                yearPillsContainer.innerHTML = years
+                    .map(y => `<div class="filter-pill" data-filter="${y}" onclick="setMasonryFilter('${y}')">${y}</div>`)
+                    .join('');
+            }
 
             // Build dynamic passage filter pills
             const pillsContainer = document.getElementById('passage-pills-container');
