@@ -1,1 +1,36 @@
-[]
+[
+  {
+    "title": "Repositioning",
+    "date": "2026-06-13",
+    "text": "A long day repositioning from Maine Yacht Center, Portland to Salem, MA. We were off the dock by 0430 and motoring through dense fog until it broke about 1000.  Got to try the new code sail for a bit and mixed the day up with some sailing and motor sailing.  The winds were all over the place but always on our bow.  Glad to be back on the home mooring. ",
+    "miles": "75",
+    "image": null,
+    "route": [
+      [
+        43.67677641150943,
+        -70.24572372436525
+      ],
+      [
+        43.556370422456574,
+        -70.16487121582033
+      ],
+      [
+        42.61520175023598,
+        -70.52124023437501
+      ],
+      [
+        42.51636606421012,
+        -70.75881958007814
+      ],
+      [
+        42.52594198735731,
+        -70.86044311523439
+      ]
+    ],
+    "startCoords": [
+      43.67677641150943,
+      -70.24572372436525
+    ],
+    "isPassage": false
+  }
+]
