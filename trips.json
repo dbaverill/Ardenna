@@ -32,5 +32,39 @@
       -70.24572372436525
     ],
     "isPassage": false
+  },
+  {
+    "title": "Sea trials",
+    "date": "2026-06-19",
+    "text": "Out and back and around Salem, Manchester, and Marblehead. We spent a while in 25-32kt winds running the new jib through its paces, tuning the inner forestry and runners to match.  It’s a really nice upgrade from the excellent but blown out North 3Di. It’s got a higher clew which is great for seeing lobster pots and broader shoulders giving us a lot of options with car position.  ",
+    "miles": "18",
+    "image": null,
+    "route": [
+      [
+        42.52713590954803,
+        -70.85632324218751
+      ],
+      [
+        42.48258953825775,
+        -70.79795837402345
+      ],
+      [
+        42.51126515932069,
+        -70.74989318847658
+      ],
+      [
+        42.55477949881778,
+        -70.71933746337892
+      ],
+      [
+        42.550480013138454,
+        -70.79143524169923
+      ]
+    ],
+    "startCoords": [
+      42.52713590954803,
+      -70.85632324218751
+    ],
+    "isPassage": false
   }
 ]
