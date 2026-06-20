@@ -47,5 +47,12 @@
     "endDate": "2026-11-01",
     "location": "Newport Yachting Center",
     "status": "confirmed"
+  },
+  {
+    "guest": "Lucases",
+    "startDate": "2026-07-18",
+    "endDate": "2026-07-19",
+    "location": "Midcoast Maine, potentially MDI, North Haven",
+    "status": "tentative"
   }
 ]
