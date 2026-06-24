@@ -1128,12 +1128,20 @@
                             <span style="color:#3498db; cursor:pointer; font-size:0.85em;" onclick="clearRouteInput()">Reset</span>
                         </div>
                         <div id="route-display" style="font-size:0.9em; color:#666;"><em>Click map below to set route points...</em></div>
+                        <div style="display:flex; gap:8px; margin-top:10px; align-items:center;">
+                            <input type="number" id="manualLat" placeholder="Latitude" step="0.0001" style="flex:1; padding:6px; border:1px solid #ddd; border-radius:4px; font-size:0.85em;">
+                            <input type="number" id="manualLng" placeholder="Longitude" step="0.0001" style="flex:1; padding:6px; border:1px solid #ddd; border-radius:4px; font-size:0.85em;">
+                            <button type="button" onclick="addManualPoint()" style="background:#3498db; color:#fff; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-size:0.85em; white-space:nowrap;">Add point</button>
+                        </div>
                     </div>
                     <div style="margin-bottom:15px;">
                         <label style="display:block; margin-bottom:5px; font-weight:600; color:#2c3e50;">Photo (optional)</label>
                         <div id="photo-preview" style="display:none; margin-bottom:10px; position:relative;">
                             <img id="photo-preview-img" style="max-width:100%; max-height:200px; border-radius:8px; border:1px solid #eee;">
-                            <div style="margin-top:5px; font-size:0.85em; color:#7f8c8d;">Current photo - upload a new one to replace</div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
+                                <span style="font-size:0.85em; color:#7f8c8d;">Current photo - upload a new one to replace</span>
+                                <button type="button" onclick="removeEntryPhoto()" style="background:#e74c3c; color:#fff; border:none; padding:4px 10px; border-radius:4px; cursor:pointer; font-size:0.8em;">✕ Remove photo</button>
+                            </div>
                         </div>
                         <input type="file" id="photoInput" accept="image/*">
                     </div>
@@ -1355,7 +1363,7 @@
         const PASSPHRASE_HASH = '89642ddd9c9f6a49673629c3de650c02706cec8128e12b0d5c299d94c75016d6';
         let isAdmin = localStorage.getItem(ADMIN_SESSION_KEY) === 'true';
         let trips = [], maintLog = [], fuelLog = [], updates = [], manifest = { specs: "", crew: [], gallery: [] };
-        let activeLayerGroup, currentRoute = [], editingTrip = null, editingFuel = null, editingMaint = null, activeQuill = null; 
+        let activeLayerGroup, currentRoute = [], editingTrip = null, editingFuel = null, editingMaint = null, activeQuill = null, removeEntryPhotoFlag = false;
         let map;
         
         // --- INITIALIZE MAP (only if element exists - old layout) ---
@@ -2255,9 +2263,14 @@
                         const pts = getTripPoints(trip);
                         if (pts.length) {
                             console.log('Drawing route with', pts.length, 'points for', containerId);
-                            L.polyline(pts, {color:'#3498db', weight:3}).addTo(mapInstance);
-                            pts.forEach(p => L.circleMarker(p, {radius:4, color:'#2c3e50', fillColor:'#fff', fillOpacity:1}).addTo(mapInstance));
-                            mapInstance.fitBounds(pts, {padding: [20, 20]});
+                            if (pts.length === 1) {
+                                L.circleMarker(pts[0], {radius:8, color:'#2c3e50', fillColor:'#3498db', fillOpacity:0.9}).addTo(mapInstance);
+                                mapInstance.setView(pts[0], 8);
+                            } else {
+                                L.polyline(pts, {color:'#3498db', weight:3}).addTo(mapInstance);
+                                pts.forEach(p => L.circleMarker(p, {radius:4, color:'#2c3e50', fillColor:'#fff', fillOpacity:1}).addTo(mapInstance));
+                                mapInstance.fitBounds(pts, {padding: [20, 20]});
+                            }
                         } else {
                             console.log('No route points for', containerId);
                         }
@@ -2317,9 +2330,14 @@
                         const pts = getTripPoints(trip);
                         if (pts.length) {
                             console.log('Adding route with', pts.length, 'points');
-                            L.polyline(pts, {color:'#3498db', weight:4}).addTo(featuredMap);
-                            pts.forEach(p => L.circleMarker(p, {radius:5, color:'#2c3e50', fillColor:'#fff', fillOpacity:1}).addTo(featuredMap));
-                            featuredMap.fitBounds(pts, {padding: [30, 30]});
+                            if (pts.length === 1) {
+                                L.circleMarker(pts[0], {radius:10, color:'#2c3e50', fillColor:'#3498db', fillOpacity:0.9}).addTo(featuredMap);
+                                featuredMap.setView(pts[0], 8);
+                            } else {
+                                L.polyline(pts, {color:'#3498db', weight:4}).addTo(featuredMap);
+                                pts.forEach(p => L.circleMarker(p, {radius:5, color:'#2c3e50', fillColor:'#fff', fillOpacity:1}).addTo(featuredMap));
+                                featuredMap.fitBounds(pts, {padding: [30, 30]});
+                            }
                         } else {
                             console.log('No route points for this trip');
                         }
@@ -2439,15 +2457,20 @@
                         // Add route if exists
                         const pts = getTripPoints(trip);
                         if (pts.length) {
-                            L.polyline(pts, {color:'#3498db', weight:4}).addTo(modalMap);
-                            pts.forEach(p => L.circleMarker(p, {
-                                radius:6, 
-                                color:'#2c3e50', 
-                                fillColor:'#fff', 
-                                fillOpacity:1,
-                                weight: 2
-                            }).addTo(modalMap));
-                            modalMap.fitBounds(pts, {padding: [40, 40]});
+                            if (pts.length === 1) {
+                                L.circleMarker(pts[0], {radius:10, color:'#2c3e50', fillColor:'#3498db', fillOpacity:0.9}).addTo(modalMap);
+                                modalMap.setView(pts[0], 8);
+                            } else {
+                                L.polyline(pts, {color:'#3498db', weight:4}).addTo(modalMap);
+                                pts.forEach(p => L.circleMarker(p, {
+                                    radius:6,
+                                    color:'#2c3e50',
+                                    fillColor:'#fff',
+                                    fillOpacity:1,
+                                    weight: 2
+                                }).addTo(modalMap));
+                                modalMap.fitBounds(pts, {padding: [40, 40]});
+                            }
                         }
                     }
                 }, 100);
@@ -2598,6 +2621,7 @@
                     document.getElementById('form-title').innerText="New Entry";
                     document.getElementById('photo-preview').style.display='none';
                     document.getElementById('photoInput').value='';
+                    removeEntryPhotoFlag = false;
                     clearRouteInput();
                 }
                 f.style.display=f.style.display==='block'?'none':'block';
@@ -2798,6 +2822,7 @@
             const f=document.getElementById('photoInput');
             let img=editingTrip?editingTrip.image:null;
 
+            if(removeEntryPhotoFlag) img=null;
             if(f.files[0]) img=await ghUploadImage(f.files[0]);
 
             const c=await ghGet('trips.json');
@@ -2909,6 +2934,30 @@
             // Draw route on map after it initializes
             setTimeout(updateRouteDisplay, 300);
         }
+        function removeEntryPhoto() {
+            removeEntryPhotoFlag = true;
+            document.getElementById('photo-preview').style.display = 'none';
+            document.getElementById('photo-preview-img').src = '';
+            document.getElementById('photoInput').value = '';
+        }
+
+        function addManualPoint() {
+            const lat = parseFloat(document.getElementById('manualLat').value);
+            const lng = parseFloat(document.getElementById('manualLng').value);
+            if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+                alert('Enter valid decimal coordinates (lat -90 to 90, lng -180 to 180)');
+                return;
+            }
+            if (currentRoute.length >= 5) {
+                alert('Maximum 5 route points reached. Reset to start over.');
+                return;
+            }
+            currentRoute.push([lat, lng]);
+            document.getElementById('manualLat').value = '';
+            document.getElementById('manualLng').value = '';
+            updateRouteDisplay();
+        }
+
         function clearRouteInput(){
             currentRoute=[];
             updateRouteDisplay();
@@ -2935,8 +2984,10 @@
                 });
                 
                 // Draw new route
-                L.polyline(currentRoute,{color:'#3498db',weight:3}).addTo(entryFormMap);
-                currentRoute.forEach(p=>L.circleMarker(p,{radius:5,color:'#2c3e50',fillColor:'#3498db',fillOpacity:1}).addTo(entryFormMap));
+                if (currentRoute.length > 1) {
+                    L.polyline(currentRoute,{color:'#3498db',weight:3}).addTo(entryFormMap);
+                }
+                currentRoute.forEach((p,i)=>L.circleMarker(p,{radius: currentRoute.length===1 ? 10 : 5,color:'#2c3e50',fillColor:'#3498db',fillOpacity:1}).addTo(entryFormMap));
                 
                 // Fit map to route bounds (only if 2+ points to avoid zoom-in bug)
                 if(currentRoute.length > 1) {
