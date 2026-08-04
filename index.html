@@ -1493,13 +1493,37 @@
                 checkAdmin();
                 
                 console.log('All data loaded successfully!');
-            } catch(e) { 
+                checkHashRoute();
+            } catch(e) {
                 console.error('Data load error:', e);
                 console.error('Error stack:', e.stack);
                 alert("Data Load Error: " + e.message + ". Check console for details."); 
             } finally { 
                 showLoading(false); 
             }
+        }
+
+        function copyUpdateLink(date) {
+            const url = window.location.origin + window.location.pathname + '#updates/' + date;
+            navigator.clipboard.writeText(url);
+        }
+
+        function navigateToUpdate(date) {
+            switchTab('updates');
+            const el = document.getElementById('update-' + date);
+            if (!el) return;
+            el.scrollIntoView({behavior: 'smooth', block: 'start'});
+            if (el.dataset.isExpanded !== 'true') {
+                el.classList.add('expanded');
+                el.dataset.isExpanded = 'true';
+                const excerptEl = el.querySelector('.update-excerpt, .update-card-excerpt');
+                if (excerptEl) excerptEl.textContent = el.dataset.fullText;
+            }
+        }
+
+        function checkHashRoute() {
+            const match = window.location.hash.match(/^#updates\/(.+)$/);
+            if (match) navigateToUpdate(match[1]);
         }
 
         // --- UPDATES (MAGAZINE STYLE) ---
@@ -1519,14 +1543,15 @@
                 const hero = sorted[0];
                 const heroDiv = document.createElement('div');
                 heroDiv.className = 'hero-update';
-                
+                heroDiv.id = `update-${hero.date}`;
+
                 const excerpt = hero.text.length > 300 ? hero.text.substring(0, 300) + '...' : hero.text;
                 const hasMore = hero.text.length > 300;
-                
+
                 // Store the raw text for expand/collapse
                 heroDiv.dataset.fullText = hero.text;
                 heroDiv.dataset.isExpanded = 'false';
-                
+
                 heroDiv.innerHTML = `
                     <div class="post-actions">
                         <button class="action-btn-round edit-btn" onclick="event.stopPropagation(); editUpdate(0)" title="Edit">✎</button>
@@ -1537,6 +1562,7 @@
                         <div class="update-meta">
                             <span>${hero.date}</span>
                             <span>by ${hero.author || 'Captain'}</span>
+                            <span onclick="event.stopPropagation(); copyUpdateLink('${hero.date}')" title="Copy link" style="cursor:pointer; color:#3498db;">🔗</span>
                         </div>
                         <h2>${escapeHtml(hero.title || hero.text.split('\n')[0].substring(0, 80))}</h2>
                         <p class="update-excerpt">${escapeHtml(excerpt)}</p>
@@ -1583,14 +1609,15 @@
                 sorted.slice(1).forEach((u, idx) => {
                     const card = document.createElement('div');
                     card.className = 'update-card-mag';
-                    
+                    card.id = `update-${u.date}`;
+
                     const excerpt = u.text.length > 150 ? u.text.substring(0, 150) + '...' : u.text;
                     const hasMore = u.text.length > 150;
-                    
+
                     // Store the raw text for expand/collapse
                     card.dataset.fullText = u.text;
                     card.dataset.isExpanded = 'false';
-                    
+
                     card.innerHTML = `
                         <div class="post-actions">
                             <button class="action-btn-round edit-btn" onclick="event.stopPropagation(); editUpdate(${idx + 1})" title="Edit">✎</button>
@@ -1601,6 +1628,7 @@
                             <div class="update-meta">
                                 <span>${u.date}</span>
                                 <span>by ${u.author || 'Captain'}</span>
+                                <span onclick="event.stopPropagation(); copyUpdateLink('${u.date}')" title="Copy link" style="cursor:pointer; color:#3498db;">🔗</span>
                             </div>
                             <h3>${escapeHtml(u.title || u.text.split('\n')[0].substring(0, 60))}</h3>
                             <p class="update-card-excerpt">${escapeHtml(excerpt)}</p>
