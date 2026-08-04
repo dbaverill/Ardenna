@@ -61,5 +61,12 @@
     "endDate": "2026-09-13",
     "location": "Cuttyhunk Island",
     "status": "confirmed"
+  },
+  {
+    "guest": "Provincetown",
+    "startDate": "2026-09-05",
+    "endDate": "2026-09-06",
+    "location": "Inner Harbor anchor",
+    "status": "confirmed"
   }
 ]
