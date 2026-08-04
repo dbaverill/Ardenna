@@ -1053,6 +1053,7 @@
             <div class="tab" onclick="switchTab('specs')">Specs</div>
             <div class="tab" onclick="switchTab('contact')">Contact</div>
             <div class="tab tab-calendar" onclick="switchTab('calendar')">Calendar</div>
+            <div class="tab" onclick="switchTab('tracking')">Tracking</div>
         </div>
         <span class="admin-lock" onclick="promptAdmin()">🔒</span>
     </nav>
@@ -3059,5 +3060,15 @@
             }
         });
     </script>
+
+    <div id="view-tracking" class="view-container">
+        <iframe
+            src="https://www.predictwind.com/tracking/Ardenna"
+            style="width:100%; height:100%; border:none; display:block;"
+            allowfullscreen
+            title="Ardenna live tracking">
+        </iframe>
+    </div>
+
 </body>
 </html>
