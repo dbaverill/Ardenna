@@ -101,5 +101,39 @@
     ],
     "isPassage": false,
     "passageStart": true
+  },
+  {
+    "title": "Pen Bay transit",
+    "date": "2026-07-23",
+    "text": "Mostly motoring with almost no wind transiting Pen Bay through the middle of North Haven and Vinalhaven. Cold but sunny and enoug pots that I'm really ready for a break from northern new england.  Free mooring at Safe Harbor Rockland, the cleanest and friendliest place in Maine (alright Hinckley is tied for first).",
+    "miles": "35",
+    "image": null,
+    "route": [
+      [
+        44.28032760176511,
+        -68.30543518066408
+      ],
+      [
+        44.217370153301445,
+        -68.2848358154297
+      ],
+      [
+        44.11259431389218,
+        -68.6030960083008
+      ],
+      [
+        44.12836798903188,
+        -68.96770477294923
+      ],
+      [
+        44.094350752431815,
+        -69.09679412841798
+      ]
+    ],
+    "startCoords": [
+      44.28032760176511,
+      -68.30543518066408
+    ],
+    "isPassage": false
   }
 ]
