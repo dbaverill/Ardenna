@@ -89,5 +89,12 @@
     "endDate": "2027-02-28",
     "location": "Samaná, DR",
     "status": "tentative"
+  },
+  {
+    "guest": "Samaná to Salem, MA, USA",
+    "startDate": "2027-04-04",
+    "endDate": "2027-04-18",
+    "location": "Salem, MA",
+    "status": "trip"
   }
 ]
