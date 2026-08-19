@@ -1711,7 +1711,7 @@
             list.push({ title, date, text, author, image: img });
             
             if(await ghPut('updates.json', JSON.stringify(list, null, 2), editingUpdate ? "Update Post" : "New Update", c ? c.sha : null)) {
-                alert(editingUpdate ? "Updated!" : "Posted!");
+                // alert(editingUpdate ? "Updated!" : "Posted!");
                 toggleForm('update-form');
                 document.getElementById('u-title').value = '';
                 document.getElementById('u-date').value = '';
@@ -1755,7 +1755,7 @@
         }
 
         async function deleteUpdate(idx) {
-            if(!confirm("Delete update?")) return;
+            // if(!confirm("Delete update?")) return;
             const c = await ghGet('updates.json');
             const sorted = [...c.content].sort((a,b) => new Date(b.date) - new Date(a.date));
             const itemToDelete = sorted[idx];
@@ -1864,7 +1864,7 @@
             }
             
             if(await saveManifestToGitHub(true)) {
-                alert(editingCrew ? "Crew member updated!" : "Crew member added!");
+                // alert(editingCrew ? "Crew member updated!" : "Crew member added!");
                 toggleCrewForm();
                 renderCrew();
             }
@@ -1892,7 +1892,7 @@
         }
 
         async function deleteCrew(idx) {
-            if(!confirm("Delete crew member?")) return;
+            // if(!confirm("Delete crew member?")) return;
             manifest.crew.splice(idx, 1);
             await saveManifestToGitHub(true);
             renderCrew();
@@ -2047,7 +2047,7 @@
         }
         
         async function deleteBooking(idx) {
-            if (!confirm('Delete this booking?')) return;
+            // if (!confirm('Delete this booking?')) return;
             bookings.splice(idx, 1);
             await saveBookingsToGitHub();
             renderCalendar();
@@ -2083,7 +2083,7 @@
             }
             
             if (await saveBookingsToGitHub()) {
-                alert(editingBooking ? 'Booking updated!' : 'Booking added!');
+                // alert(editingBooking ? 'Booking updated!' : 'Booking added!');
                 hideBookingForm();
                 renderCalendar();
             }
@@ -2096,7 +2096,7 @@
         }
 
         function renderGallery() { const c = document.getElementById('gallery-grid'); c.innerHTML = ''; if (manifest.gallery && manifest.gallery.length) { [...manifest.gallery].reverse().forEach((img, idx) => { const originalIdx = manifest.gallery.length - 1 - idx; const div = document.createElement('div'); div.className = 'gallery-item'; div.onclick = () => openLightbox(getImgUrl(img.url)); div.innerHTML = `<img src="${getImgUrl(img.url)}" loading="lazy"><div class="gallery-del admin-only" onclick="event.stopPropagation(); deleteGalleryPhoto(${originalIdx})">✕</div>`; c.appendChild(div); }); } else c.innerHTML = '<p style="color:#aaa; grid-column:1/-1; text-align:center;">No photos uploaded.</p>'; }
-        async function deleteGalleryPhoto(idx) { if(!confirm("Delete?")) return; manifest.gallery.splice(idx, 1); await saveManifestToGitHub(true); renderGallery(); }
+        async function deleteGalleryPhoto(idx) { /* if(!confirm("Delete?")) return; */ manifest.gallery.splice(idx, 1); await saveManifestToGitHub(true); renderGallery(); }
 
         function renderManifest() {
             // Ensure quillSpecs and root exist
@@ -2539,14 +2539,14 @@
         async function promptAdmin() {
             if (isAdmin) {
                 // Already admin - offer logout
-                if (confirm('Logout from admin mode?')) {
+                // if (confirm('Logout from admin mode?')) {
                     isAdmin = false;
                     localStorage.removeItem(ADMIN_SESSION_KEY);
                     localStorage.removeItem('gh_token');
                     GH_TOKEN = null;
                     document.querySelector('.admin-lock').classList.remove('admin-active');
                     checkAdmin();
-                }
+                // }
             } else {
                 // Prompt for passphrase
                 const pass = prompt('Enter admin passphrase:');
@@ -2797,8 +2797,8 @@
         }
         function populateFilter() { const s=document.getElementById('log-filter'); while(s.options.length>3)s.remove(3); [...new Set(trips.map(t=>t.date.split('-')[0]))].sort().reverse().forEach(y=>{const o=document.createElement('option');o.value=y;o.innerText=y;s.appendChild(o)}); }
 
-        async function saveManifestToGitHub(silent=false) { manifest.specs=quillSpecs.root.innerHTML; const s=await ghPut('manifest.json', JSON.stringify(manifest,null,2), "Upd Manifest", (await ghGet('manifest.json'))?.sha); if(!silent && s) alert("Saved!"); return s; }
-        async function deleteTrip(d,t){if(!confirm("Del?"))return;const c=await ghGet('trips.json');await ghPut('trips.json',JSON.stringify(c.content.filter(x=>!(x.date===d&&x.title===t)),null,2),"Del Trip",c.sha);loadData();}
+        async function saveManifestToGitHub(silent=false) { manifest.specs=quillSpecs.root.innerHTML; const s=await ghPut('manifest.json', JSON.stringify(manifest,null,2), "Upd Manifest", (await ghGet('manifest.json'))?.sha); // if(!silent && s) alert("Saved!"); return s; }
+        async function deleteTrip(d,t){/* if(!confirm("Del?"))return; */const c=await ghGet('trips.json');await ghPut('trips.json',JSON.stringify(c.content.filter(x=>!(x.date===d&&x.title===t)),null,2),"Del Trip",c.sha);loadData();}
         function slugify(str) {
             return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
         }
@@ -2915,7 +2915,7 @@
             list.push(entry);
 
             if(await ghPut('trips.json',JSON.stringify(list,null,2),"Save Trip",c?c.sha:null)){
-                alert("Saved");
+                // alert("Saved");
                 toggleForm('entry-form');
                 console.log('Entry saved, reloading data...');
                 await loadData();
