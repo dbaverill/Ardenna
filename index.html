@@ -2797,7 +2797,7 @@
         }
         function populateFilter() { const s=document.getElementById('log-filter'); while(s.options.length>3)s.remove(3); [...new Set(trips.map(t=>t.date.split('-')[0]))].sort().reverse().forEach(y=>{const o=document.createElement('option');o.value=y;o.innerText=y;s.appendChild(o)}); }
 
-        async function saveManifestToGitHub(silent=false) { manifest.specs=quillSpecs.root.innerHTML; const s=await ghPut('manifest.json', JSON.stringify(manifest,null,2), "Upd Manifest", (await ghGet('manifest.json'))?.sha); // if(!silent && s) alert("Saved!"); return s; }
+        async function saveManifestToGitHub(silent=false) { manifest.specs=quillSpecs.root.innerHTML; const s=await ghPut('manifest.json', JSON.stringify(manifest,null,2), "Upd Manifest", (await ghGet('manifest.json'))?.sha); /* if(!silent && s) alert("Saved!"); */ return s; }
         async function deleteTrip(d,t){/* if(!confirm("Del?"))return; */const c=await ghGet('trips.json');await ghPut('trips.json',JSON.stringify(c.content.filter(x=>!(x.date===d&&x.title===t)),null,2),"Del Trip",c.sha);loadData();}
         function slugify(str) {
             return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
