@@ -82,5 +82,12 @@
     "endDate": "2026-10-03",
     "location": "Salem Harbor",
     "status": "confirmed"
+  },
+  {
+    "guest": "Remote working",
+    "startDate": "2027-01-24",
+    "endDate": "2027-02-28",
+    "location": "Samaná, DR",
+    "status": "tentative"
   }
 ]
