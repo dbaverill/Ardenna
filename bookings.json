@@ -110,5 +110,12 @@
     "endDate": "2027-04-24",
     "location": "Samaná, DR",
     "status": "tentative"
+  },
+  {
+    "guest": "Live aboard",
+    "startDate": "2026-08-26",
+    "endDate": "2026-08-30",
+    "location": "Salem, MA",
+    "status": "tentative"
   }
 ]
