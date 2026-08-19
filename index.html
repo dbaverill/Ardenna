@@ -1309,8 +1309,8 @@
             </div>
             
             <div class="filter-pills">
-                <div class="pill active" data-filter="all" onclick="filterCalendar('all')">All</div>
-                <div class="pill" data-filter="upcoming" onclick="filterCalendar('upcoming')">Upcoming</div>
+                <div class="pill" data-filter="all" onclick="filterCalendar('all')">All</div>
+                <div class="pill active" data-filter="upcoming" onclick="filterCalendar('upcoming')">Upcoming</div>
                 <div class="pill" data-filter="2026" onclick="filterCalendar('2026')">2026</div>
                 <div class="pill" data-filter="2027" onclick="filterCalendar('2027')">2027</div>
             </div>
@@ -1900,7 +1900,7 @@
 
         // --- CALENDAR FUNCTIONS ---
         let bookings = [];
-        let currentFilter = 'all';
+        let currentFilter = 'upcoming';
         let editingBooking = null;
 
         function parseLocalDate(str) {
