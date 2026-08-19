@@ -68,41 +68,6 @@
     "isPassage": false
   },
   {
-    "title": "Overnight to Somes Sound, MDI",
-    "date": "2026-08-19",
-    "text": "Overnight run to MDI.  It was a nice overnight broad reach but died at sunrise once Cadillac and pots came into view",
-    "miles": "185",
-    "image": null,
-    "route": [
-      [
-        42.51029238135475,
-        -70.8116912841797
-      ],
-      [
-        42.81731423643951,
-        -69.93347167968751
-      ],
-      [
-        43.67072749862282,
-        -68.51348876953126
-      ],
-      [
-        44.20260475354683,
-        -68.19969177246095
-      ],
-      [
-        44.343217660260954,
-        -68.31642150878908
-      ]
-    ],
-    "startCoords": [
-      42.51029238135475,
-      -70.8116912841797
-    ],
-    "isPassage": false,
-    "passageStart": true
-  },
-  {
     "title": "Pen Bay transit",
     "date": "2026-07-23",
     "text": "Mostly motoring with almost no wind transiting Pen Bay through the middle of North Haven and Vinalhaven. Cold but sunny and enoug pots that I'm really ready for a break from northern new england.  Free mooring at Safe Harbor Rockland, the cleanest and friendliest place in Maine (alright Hinckley is tied for first).",
@@ -135,5 +100,40 @@
       -68.30543518066408
     ],
     "isPassage": false
+  },
+  {
+    "title": "Overnight to Somes Sound, MDI",
+    "date": "2026-07-18",
+    "text": "Overnight run to MDI.  It was a nice overnight broad reach but died at sunrise once Cadillac and pots came into view",
+    "miles": "185",
+    "image": null,
+    "route": [
+      [
+        42.51029238135475,
+        -70.8116912841797
+      ],
+      [
+        42.81731423643951,
+        -69.93347167968751
+      ],
+      [
+        43.67072749862282,
+        -68.51348876953126
+      ],
+      [
+        44.20260475354683,
+        -68.19969177246095
+      ],
+      [
+        44.343217660260954,
+        -68.31642150878908
+      ]
+    ],
+    "startCoords": [
+      42.51029238135475,
+      -70.8116912841797
+    ],
+    "isPassage": false,
+    "passageStart": true
   }
 ]
