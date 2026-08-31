@@ -169,5 +169,39 @@
       -69.03671264648439
     ],
     "isPassage": false
+  },
+  {
+    "title": "Marella and friends",
+    "date": "2026-08-29",
+    "text": "Marella, Michelle, and Nina got to enjoy the sun and Doug got to have a relaxing sail around Salem Harbor. ",
+    "miles": "10",
+    "image": null,
+    "route": [
+      [
+        42.518006964480925,
+        -70.87220191955568
+      ],
+      [
+        42.52230868641453,
+        -70.83941459655763
+      ],
+      [
+        42.49683802147278,
+        -70.8087730407715
+      ],
+      [
+        42.52736915658314,
+        -70.77589988708498
+      ],
+      [
+        42.52091698525593,
+        -70.86945533752443
+      ]
+    ],
+    "startCoords": [
+      42.518006964480925,
+      -70.87220191955568
+    ],
+    "isPassage": false
   }
 ]
