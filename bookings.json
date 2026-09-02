@@ -124,5 +124,12 @@
     "endDate": "2026-09-14",
     "location": "Provincetown, MA anchorage",
     "status": "confirmed"
+  },
+  {
+    "guest": "Johnson's visit",
+    "startDate": "2027-03-13",
+    "endDate": "2027-03-21",
+    "location": "Samaná, DR",
+    "status": "tentative"
   }
 ]
