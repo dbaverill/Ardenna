@@ -117,5 +117,12 @@
     "endDate": "2026-08-30",
     "location": "Salem, MA",
     "status": "tentative"
+  },
+  {
+    "guest": "Cuttyhunk to P-Town to Salem",
+    "startDate": "2026-09-13",
+    "endDate": "2026-09-14",
+    "location": "Provincetown, MA anchorage",
+    "status": "confirmed"
   }
 ]
