@@ -203,5 +203,39 @@
       -70.87220191955568
     ],
     "isPassage": false
+  },
+  {
+    "title": "Salem to Provincetown and a whale",
+    "date": "2026-09-06",
+    "text": "Got a 0745 start and a cold but wicked fast day sailing to P-Town.  We made a steady 8.5kts on a broad reach carrying the full main and code in 14-16 kites.  The waves picked up as we got closer to the destination making sure we were swing a lot once we got to the anchorage.  The Spade anchor set the second it hit the bottom but with quits overnight we left 5:1 including the snubber.  The exciting part is we nearly hit a right wale (we have video to prove) and I het to divert course and lay on the horn to avoid a collision. ",
+    "miles": "58",
+    "image": null,
+    "route": [
+      [
+        42.529666000362205,
+        -70.83435058593751
+      ],
+      [
+        42.05410446392339,
+        -70.29052734375001
+      ],
+      [
+        41.99329253999874,
+        -70.18821716308595
+      ],
+      [
+        42.01472282619203,
+        -70.13397216796876
+      ],
+      [
+        42.051232549173164,
+        -70.13920783996583
+      ]
+    ],
+    "startCoords": [
+      42.529666000362205,
+      -70.83435058593751
+    ],
+    "isPassage": false
   }
 ]
