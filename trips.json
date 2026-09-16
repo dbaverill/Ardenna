@@ -369,5 +369,39 @@
       -70.90988159179689
     ],
     "isPassage": false
+  },
+  {
+    "title": "Provincetown to Salem - force 6-7",
+    "date": "2026-09-14",
+    "text": "Oh boy, what a sail 😳.  We again left at 0545 from Provincetown Marina, motored to the outer lighthouse and shook out the jib and a half main.  The wind was building and the angle was terrible.  Everything was lining up to prevent progress home.  We took a tack almost due north out to Stellwagen Bank leaving us about 20nm off Boston Harbor, tacked to what should have been Nahant but by the time we get 5 miles from shore turned into Scituate.  We motored most of the way home concerned we'd run out of daylight.  I came closer to being ill than I've ever been on a boat but Marella prevented the vomiting by telling me I'm not allowed.  The wave were really tough at 4-5 but 3.5-4 seconds and from two separate angles.  Ardenna really got slammed.  No going down below for about four hours until we got close enough to shore the fetch shortened the chop.",
+    "miles": "68",
+    "image": "images/1789592132998-IMG_4692.jpg",
+    "route": [
+      [
+        42.02321959399964,
+        -70.13809204101564
+      ],
+      [
+        42.04973878351055,
+        -70.27542114257814
+      ],
+      [
+        42.35898788385505,
+        -70.47592163085939
+      ],
+      [
+        42.28972295821865,
+        -70.79933166503908
+      ],
+      [
+        42.53104169423122,
+        -70.85289001464845
+      ]
+    ],
+    "startCoords": [
+      42.02321959399964,
+      -70.13809204101564
+    ],
+    "isPassage": false
   }
 ]
