@@ -301,5 +301,39 @@
       -70.50270080566408
     ],
     "isPassage": false
+  },
+  {
+    "title": "Edgartown to Cuttyhunk",
+    "date": "2026-09-12",
+    "text": "Cool, sunny, and current filled day of sailign when we could and motoring the rest.  We needed to get to Cuttyhunk in time to get in a hike and stretch legs before nighfall. It was a fun location - smalled town by population in Massachusetts.  Saw it all in 45 minutes. Moorings were tight but people were nice and there is a raw bar that you can hail on channel 71 who will rock up with fresh seafood.  ",
+    "miles": "35",
+    "image": null,
+    "route": [
+      [
+        41.430042075497695,
+        -70.47266006469728
+      ],
+      [
+        41.499505870917616,
+        -70.6058692932129
+      ],
+      [
+        41.41176331378507,
+        -70.81014633178712
+      ],
+      [
+        41.459123015110166,
+        -70.85374832153322
+      ],
+      [
+        41.425187281217696,
+        -70.92730522155763
+      ]
+    ],
+    "startCoords": [
+      41.430042075497695,
+      -70.47266006469728
+    ],
+    "isPassage": false
   }
 ]
