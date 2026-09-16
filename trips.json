@@ -237,5 +237,35 @@
       -70.83435058593751
     ],
     "isPassage": false
+  },
+  {
+    "title": "PTown to Sandwich",
+    "date": "2026-09-07",
+    "text": "Pretty quiet day across Cape Cod bay to time the channel pretty well.  We topped off on fuel at $5.99 a gallon (40 gallons) and got 1.2 gallons of gas in the jerry can for the dinghy. The slips in Sandwich are always crazy tight but this worked out fine.  Marella and I ate at Seafood Sam's for dinner at the recommendation of the fuel dock manager.  It was a good call but really rich.  Too many beers might have been the problem too, who knows. I ordered a new macerator pump before our trip South because no head would be a bad thing. ",
+    "miles": "20",
+    "image": "images/1789590454053-IMG_4677.jpg",
+    "route": [
+      [
+        42.03472747640327,
+        -70.13465881347658
+      ],
+      [
+        41.84983994202072,
+        -70.30494689941408
+      ],
+      [
+        41.78126498415042,
+        -70.48347473144533
+      ],
+      [
+        41.77303201561332,
+        -70.50561904907228
+      ]
+    ],
+    "startCoords": [
+      42.03472747640327,
+      -70.13465881347658
+    ],
+    "isPassage": false
   }
 ]
