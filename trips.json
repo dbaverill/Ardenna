@@ -269,40 +269,6 @@
     "isPassage": false
   },
   {
-    "title": "Sandwich to Edgartown",
-    "date": "2026-09-16",
-    "text": "A reasonable 8am start from Sandwich to time the canal right.  We ended up going down Buzzards Bay under jib so as not to get to Wood's Hole until the current switched and even then we had to sail about at the entrace for an hour or two.  We were hailed by Steve Ricci from Pouchy who had just come from Hadley Harbor which was not even a location I knew - better place to hang for the hour or night.  It was a white knuckle run though Broadway at Woods Hole but I've done it enough it was fine.  As soon as we were through we were hailed by another boat still back in Buzzards Bay looking for a PIREP on current conditions.  Honestly, and don't tell anyone, but Vineyard Sound is a lousy sailing location.  Shoals everywhere, silly currents and Steamship Authority vessels all over the place.  We managed to broad reach to the entrance of Edgartown and settle in to mooring 32.  Dang do I love Edgartown.",
-    "miles": "50",
-    "image": "images/1789590943644-IMG_4684.JPG",
-    "route": [
-      [
-        41.773072022874814,
-        -70.50270080566408
-      ],
-      [
-        41.71159145445631,
-        -70.63316345214845
-      ],
-      [
-        41.52539905875402,
-        -70.6959915161133
-      ],
-      [
-        41.403306037058336,
-        -70.49034118652345
-      ],
-      [
-        41.3826510914628,
-        -70.50643444061281
-      ]
-    ],
-    "startCoords": [
-      41.773072022874814,
-      -70.50270080566408
-    ],
-    "isPassage": false
-  },
-  {
     "title": "Edgartown to Cuttyhunk",
     "date": "2026-09-12",
     "text": "Cool, sunny, and current filled day of sailign when we could and motoring the rest.  We needed to get to Cuttyhunk in time to get in a hike and stretch legs before nighfall. It was a fun location - smalled town by population in Massachusetts.  Saw it all in 45 minutes. Moorings were tight but people were nice and there is a raw bar that you can hail on channel 71 who will rock up with fresh seafood.  ",
@@ -333,6 +299,40 @@
     "startCoords": [
       41.430042075497695,
       -70.47266006469728
+    ],
+    "isPassage": false
+  },
+  {
+    "title": "Sandwich to Edgartown",
+    "date": "2026-09-08",
+    "text": "A reasonable 8am start from Sandwich to time the canal right.  We ended up going down Buzzards Bay under jib so as not to get to Wood's Hole until the current switched and even then we had to sail about at the entrace for an hour or two.  We were hailed by Steve Ricci from Pouchy who had just come from Hadley Harbor which was not even a location I knew - better place to hang for the hour or night.  It was a white knuckle run though Broadway at Woods Hole but I've done it enough it was fine.  As soon as we were through we were hailed by another boat still back in Buzzards Bay looking for a PIREP on current conditions.  Honestly, and don't tell anyone, but Vineyard Sound is a lousy sailing location.  Shoals everywhere, silly currents and Steamship Authority vessels all over the place.  We managed to broad reach to the entrance of Edgartown and settle in to mooring 32.  Dang do I love Edgartown.",
+    "miles": "50",
+    "image": "images/1789590943644-IMG_4684.JPG",
+    "route": [
+      [
+        41.773072022874814,
+        -70.50270080566408
+      ],
+      [
+        41.71159145445631,
+        -70.63316345214845
+      ],
+      [
+        41.52539905875402,
+        -70.6959915161133
+      ],
+      [
+        41.403306037058336,
+        -70.49034118652345
+      ],
+      [
+        41.3826510914628,
+        -70.50643444061281
+      ]
+    ],
+    "startCoords": [
+      41.773072022874814,
+      -70.50270080566408
     ],
     "isPassage": false
   }
