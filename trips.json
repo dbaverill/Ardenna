@@ -424,5 +424,25 @@
     "passageName": "Qunicy to Samaná",
     "passageId": "qunicy-to-saman-2026-09-21",
     "passageStart": true
+  },
+  {
+    "title": "test 2",
+    "date": "2026-09-22",
+    "text": "test 2",
+    "miles": "",
+    "image": null,
+    "route": [
+      [
+        41.11544338467082,
+        -69.06555175781251
+      ]
+    ],
+    "startCoords": [
+      41.11544338467082,
+      -69.06555175781251
+    ],
+    "isPassage": true,
+    "passageName": "Qunicy to Samaná",
+    "passageId": "qunicy-to-saman-2026-09-21"
   }
 ]
