@@ -353,7 +353,14 @@
         
         .update-form { display: none; flex-direction: column; gap:10px; margin-bottom:30px; background:#fff; padding:25px; border-radius:8px; border:1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
         body.is-admin .update-form { display: flex; }
-        
+        #u-photo-preview { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+        #u-photo-preview img { width: 80px; height: 80px; object-fit: cover; border-radius: 4px; position: relative; cursor: pointer; border: 2px solid transparent; }
+        #u-photo-preview img:hover { border-color: #3498db; opacity: 0.8; }
+
+        .update-photo-gallery { display: flex; gap: 10px; overflow-x: auto; margin-top: 15px; padding-bottom: 10px; }
+        .update-photo-gallery img { width: 120px; height: 120px; object-fit: cover; border-radius: 6px; cursor: pointer; flex-shrink: 0; }
+        .update-photo-gallery img:hover { opacity: 0.8; }
+
         .add-update-fab { display: none; position: fixed; bottom: 30px; right: 30px; width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: white; border: none; font-size: 1.5rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 100; transition: transform 0.2s; }
         .add-update-fab:hover { transform: scale(1.1); }
         body.is-admin .add-update-fab { display: block; }
@@ -1196,7 +1203,20 @@
                     <input type="text" id="u-author" placeholder="Author (e.g. Captain)">
                 </div>
                 <textarea id="u-text" rows="5" placeholder="Write your update..."></textarea>
-                <input type="file" id="u-photo" accept="image/*">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; align-items:end;">
+                    <div>
+                        <label style="display:block; margin-bottom:5px; font-size:0.9rem; color:#666;">Photos (multiple allowed)</label>
+                        <input type="file" id="u-photos" accept="image/*" multiple style="width:100%;">
+                    </div>
+                    <div>
+                        <label style="display:block; margin-bottom:5px; font-size:0.9rem; color:#666;">Hero Image</label>
+                        <select id="u-heroType" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
+                            <option value="map">Map</option>
+                            <option value="photo">First Photo</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="u-photo-preview" style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;"></div>
                 <div style="display:flex; gap:10px;">
                     <button class="primary" onclick="saveUpdateToGitHub()" style="flex:1">Post Update</button>
                     <button style="background:#e0e0e0; color:#666; border:none; padding:10px; border-radius:6px; cursor:pointer; flex:1;" onclick="toggleForm('update-form')">Cancel</button>
@@ -1455,6 +1475,20 @@
         document.getElementById('quill-image-upload').onchange = async function() { if (this.files[0]) { const url = await ghUploadImage(this.files[0]); if (url) activeQuill.insertEmbed(activeQuill.getSelection().index, 'image', getImgUrl(url)); } this.value = ''; };
         document.getElementById('gallery-upload-input').onchange = async function() { if (this.files[0]) { const url = await ghUploadImage(this.files[0]); if (url) { if(!manifest.gallery) manifest.gallery = []; manifest.gallery.push({url: url, date: new Date().toISOString()}); await saveManifestToGitHub(true); renderGallery(); } } this.value = ''; };
 
+        document.getElementById('u-photos').onchange = function() {
+            const preview = document.getElementById('u-photo-preview');
+            preview.innerHTML = '';
+            for(let file of this.files) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    preview.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
         function openLightbox(url) { document.getElementById('lightbox-img').src = url; document.getElementById('lightbox').style.display = 'flex'; }
         function closeLightbox() { document.getElementById('lightbox').style.display = 'none'; }
 
@@ -1541,14 +1575,14 @@
         function renderUpdates() {
             const container = document.getElementById('updates-container');
             container.innerHTML = '';
-            
+
             if(!updates || !updates.length) {
                 container.innerHTML = '<div style="text-align:center; padding:60px; color:#999;">No updates yet.</div>';
                 return;
             }
-            
+
             const sorted = [...updates].sort((a,b) => new Date(b.date) - new Date(a.date));
-            
+
             // Hero Post (most recent)
             if(sorted.length > 0) {
                 const hero = sorted[0];
@@ -1563,12 +1597,16 @@
                 heroDiv.dataset.fullText = hero.text;
                 heroDiv.dataset.isExpanded = 'false';
 
+                // Determine hero image - use first photo if heroType is "photo" and images exist
+                const heroType = hero.heroType || 'map';
+                const heroImage = heroType === 'photo' && hero.images && hero.images.length > 0 ? hero.images[0] : null;
+
                 heroDiv.innerHTML = `
                     <div class="post-actions">
                         <button class="action-btn-round edit-btn" onclick="event.stopPropagation(); editUpdate(0)" title="Edit">✎</button>
                         <button class="action-btn-round delete-btn" onclick="event.stopPropagation(); deleteUpdate(0)" title="Delete">✕</button>
                     </div>
-                    ${hero.image ? `<img src="${getImgUrl(hero.image)}" class="hero-update-image" onclick="event.stopPropagation(); openLightbox(this.src)">` : ''}
+                    ${heroImage ? `<img src="${getImgUrl(heroImage)}" class="hero-update-image" onclick="event.stopPropagation(); openLightbox(this.src)">` : ''}
                     <div class="hero-update-content">
                         <div class="update-meta">
                             <span>${hero.date}</span>
@@ -1580,20 +1618,33 @@
                         ${hasMore ? '<span class="read-more-indicator">Read more</span>' : ''}
                     </div>
                 `;
-                
+
+                // Add photo gallery if there are multiple images
+                if(hero.images && hero.images.length > 1) {
+                    const galleryDiv = document.createElement('div');
+                    galleryDiv.className = 'update-photo-gallery';
+                    hero.images.forEach(img => {
+                        const galleryImg = document.createElement('img');
+                        galleryImg.src = getImgUrl(img);
+                        galleryImg.onclick = (e) => { e.stopPropagation(); openLightbox(galleryImg.src); };
+                        galleryDiv.appendChild(galleryImg);
+                    });
+                    heroDiv.appendChild(galleryDiv);
+                }
+
                 // Add click handler to hero card
                 if (hasMore) {
                     heroDiv.style.cursor = 'pointer';
                     heroDiv.addEventListener('click', function(e) {
                         // Don't expand if clicking admin buttons or image
-                        if (e.target.closest('.post-actions') || e.target.classList.contains('hero-update-image')) {
+                        if (e.target.closest('.post-actions') || e.target.classList.contains('hero-update-image') || e.target.classList.contains('update-photo-gallery')) {
                             return;
                         }
-                        
+
                         const excerptEl = this.querySelector('.update-excerpt');
                         const fullText = this.dataset.fullText;
                         const isExpanded = this.dataset.isExpanded === 'true';
-                        
+
                         if (isExpanded) {
                             // Collapse - show excerpt
                             this.classList.remove('expanded');
@@ -1608,15 +1659,15 @@
                         }
                     });
                 }
-                
+
                 container.appendChild(heroDiv);
             }
-            
+
             // Grid of older posts
             if(sorted.length > 1) {
                 const grid = document.createElement('div');
                 grid.className = 'updates-grid';
-                
+
                 sorted.slice(1).forEach((u, idx) => {
                     const card = document.createElement('div');
                     card.className = 'update-card-mag';
@@ -1629,12 +1680,15 @@
                     card.dataset.fullText = u.text;
                     card.dataset.isExpanded = 'false';
 
+                    // Get first image if available
+                    const cardImage = u.images && u.images.length > 0 ? u.images[0] : null;
+
                     card.innerHTML = `
                         <div class="post-actions">
                             <button class="action-btn-round edit-btn" onclick="event.stopPropagation(); editUpdate(${idx + 1})" title="Edit">✎</button>
                             <button class="action-btn-round delete-btn" onclick="event.stopPropagation(); deleteUpdate(${idx + 1})" title="Delete">✕</button>
                         </div>
-                        ${u.image ? `<img src="${getImgUrl(u.image)}" class="update-thumbnail" onclick="event.stopPropagation(); openLightbox(this.src)">` : ''}
+                        ${cardImage ? `<img src="${getImgUrl(cardImage)}" class="update-thumbnail" onclick="event.stopPropagation(); openLightbox(this.src)">` : ''}
                         <div class="update-card-content">
                             <div class="update-meta">
                                 <span>${u.date}</span>
@@ -1646,7 +1700,7 @@
                             ${hasMore ? '<span class="read-more-indicator">Read more</span>' : ''}
                         </div>
                     `;
-                    
+
                     // Add click handler to toggle expansion
                     if (hasMore) {
                         card.addEventListener('click', function(e) {
@@ -1654,11 +1708,11 @@
                             if (e.target.closest('.post-actions') || e.target.classList.contains('update-thumbnail')) {
                                 return;
                             }
-                            
+
                             const excerptEl = this.querySelector('.update-card-excerpt');
                             const fullText = this.dataset.fullText;
                             const isExpanded = this.dataset.isExpanded === 'true';
-                            
+
                             if (isExpanded) {
                                 // Collapse - show excerpt
                                 this.classList.remove('expanded');
@@ -1673,13 +1727,13 @@
                             }
                         });
                     }
-                    
+
                     grid.appendChild(card);
                 });
-                
+
                 container.appendChild(grid);
             }
-            
+
             checkAdmin();
         }
 
@@ -1694,38 +1748,47 @@
             const date = document.getElementById('u-date').value;
             const text = document.getElementById('u-text').value;
             const author = document.getElementById('u-author').value;
+            const heroType = document.getElementById('u-heroType').value;
             if(!title || !date || !text) return alert("Title, Date and Text required.");
-            
-            const f = document.getElementById('u-photo'); 
-            let img = editingUpdate ? editingUpdate.image : null;
-            if(f.files[0]) img = await ghUploadImage(f.files[0]);
-            
+
+            const filesInput = document.getElementById('u-photos');
+            let images = editingUpdate ? editingUpdate.images || [] : [];
+
+            if(filesInput.files.length > 0) {
+                images = [];
+                for(let file of filesInput.files) {
+                    const img = await ghUploadImage(file);
+                    if(img) images.push(img);
+                }
+            }
+
             const c = await ghGet('updates.json');
             let list = c ? c.content : [];
-            
+
             // If editing, remove the old version
             if(editingUpdate) {
                 list = list.filter(u => !(u.date === editingUpdate.date && u.text === editingUpdate.text && u.author === editingUpdate.author));
             }
-            
-            list.push({ title, date, text, author, image: img });
-            
+
+            list.push({ title, date, text, author, images: images.length > 0 ? images : undefined, heroType });
+
             if(await ghPut('updates.json', JSON.stringify(list, null, 2), editingUpdate ? "Update Post" : "New Update", c ? c.sha : null)) {
-                // alert(editingUpdate ? "Updated!" : "Posted!");
                 toggleForm('update-form');
                 document.getElementById('u-title').value = '';
                 document.getElementById('u-date').value = '';
                 document.getElementById('u-text').value = '';
                 document.getElementById('u-author').value = '';
-                document.getElementById('u-photo').value = '';
+                document.getElementById('u-photos').value = '';
+                document.getElementById('u-heroType').value = 'map';
+                document.getElementById('u-photo-preview').innerHTML = '';
                 editingUpdate = null;
-                
+
                 // Reset form title and button text
                 document.getElementById('update-form-title').textContent = 'New Post';
                 const form = document.getElementById('update-form');
                 const btn = form.querySelector('button.primary');
                 btn.textContent = 'Post Update';
-                
+
                 loadData();
             }
         }
@@ -1734,22 +1797,34 @@
             const sorted = [...updates].sort((a,b) => new Date(b.date) - new Date(a.date));
             const update = sorted[idx];
             if(!update) return;
-            
+
             editingUpdate = update;
             document.getElementById('u-title').value = update.title || '';
             document.getElementById('u-date').value = update.date;
             document.getElementById('u-text').value = update.text;
             document.getElementById('u-author').value = update.author || '';
-            
+            document.getElementById('u-heroType').value = update.heroType || 'map';
+
+            // Show existing images in preview
+            const preview = document.getElementById('u-photo-preview');
+            preview.innerHTML = '';
+            if(update.images && update.images.length > 0) {
+                update.images.forEach(imgPath => {
+                    const img = document.createElement('img');
+                    img.src = getImgUrl(imgPath);
+                    preview.appendChild(img);
+                });
+            }
+
             // Show form
             const form = document.getElementById('update-form');
             form.style.display = 'flex';
-            
+
             // Change title and button text
             document.getElementById('update-form-title').textContent = 'Edit Post';
             const btn = form.querySelector('button.primary');
             btn.textContent = 'Update Post';
-            
+
             // Scroll to form
             form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
@@ -2684,17 +2759,26 @@
                     document.getElementById('u-date').value = new Date().toISOString().split('T')[0];
                     document.getElementById('u-text').value = '';
                     document.getElementById('u-author').value = '';
-                    document.getElementById('u-photo').value = '';
+                    document.getElementById('u-photos').value = '';
+                    document.getElementById('u-heroType').value = 'map';
+                    document.getElementById('u-photo-preview').innerHTML = '';
                     document.getElementById('update-form-title').textContent = 'New Post';
                     const btn = f.querySelector('button.primary');
                     btn.textContent = 'Post Update';
                 }
-                
+
                 f.style.display = f.style.display==='flex'?'none':'flex';
-                
+
                 // Clear editing state when closing
                 if(f.style.display === 'none') {
                     editingUpdate = null;
+                    document.getElementById('u-title').value = '';
+                    document.getElementById('u-date').value = '';
+                    document.getElementById('u-text').value = '';
+                    document.getElementById('u-author').value = '';
+                    document.getElementById('u-photos').value = '';
+                    document.getElementById('u-heroType').value = 'map';
+                    document.getElementById('u-photo-preview').innerHTML = '';
                     document.getElementById('update-form-title').textContent = 'New Post';
                     const btn = f.querySelector('button.primary');
                     btn.textContent = 'Post Update';
