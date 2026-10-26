@@ -403,5 +403,39 @@
       -70.13809204101564
     ],
     "isPassage": false
+  },
+  {
+    "title": "Salem to Quincy repositioning",
+    "date": "2026-10-25",
+    "text": "Aviva and I repositioned Ardenna to Marina Bay, Quincy in prepration for a DR departure later in the week.  It was a beautiful day although cold but unfortunately the 7-8 knots was right on the nose so it was mostly motoring. When we got to Marina Bay we went straight to the fuel dock where only the high speed pump was working.  Even with Aviva's help in calling out the gallons from the pump I made a hell of a mess.  I think we eventualyl went through a donzen fuel pads to clean up and some even came out the port side deck vent.  From there it was a quick reverse into the face dock right across from our old slip, D39.",
+    "miles": "18",
+    "image": null,
+    "route": [
+      [
+        42.52055719383396,
+        -70.86971282958986
+      ],
+      [
+        42.52106327348341,
+        -70.82302093505861
+      ],
+      [
+        42.45321207624518,
+        -70.78182220458986
+      ],
+      [
+        42.33690468456082,
+        -70.95296859741212
+      ],
+      [
+        42.30305119480452,
+        -71.02635383605958
+      ]
+    ],
+    "startCoords": [
+      42.52055719383396,
+      -70.86971282958986
+    ],
+    "isPassage": false
   }
 ]
