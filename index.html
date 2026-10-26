@@ -1411,6 +1411,7 @@
         let activeLayerGroup, currentRoute = [], editingTrip = null, editingFuel = null, editingMaint = null, activeQuill = null, removeEntryPhotoFlag = false;
         let map;
         let lightboxImages = [], lightboxCurrentIndex = 0;
+        let removedPhotoIndices = new Set();
         
         // --- INITIALIZE MAP (only if element exists - old layout) ---
         if (typeof L !== 'undefined' && document.getElementById('map')) {
@@ -2836,6 +2837,7 @@
                     document.getElementById('photo-preview').innerHTML='';
                     document.getElementById('existing-photos').innerHTML='';
                     removeEntryPhotoFlag = false;
+                    removedPhotoIndices = new Set();
                     clearRouteInput();
                 }
                 f.style.display=f.style.display==='block'?'none':'block';
@@ -3045,9 +3047,15 @@
             const f=document.getElementById('photoInput');
             let images=editingTrip?editingTrip.images||[]:[];
 
-            if(removeEntryPhotoFlag) images=[];
+            if(removeEntryPhotoFlag) {
+                images=[];
+            } else if(editingTrip && removedPhotoIndices.size > 0) {
+                // Filter out removed photos
+                images = images.filter((_, idx) => !removedPhotoIndices.has(idx));
+            }
+
             if(f.files.length > 0) {
-                images = [];
+                // Add newly uploaded photos
                 for(let file of f.files) {
                     const img = await ghUploadImage(file);
                     if(img) images.push(img);
@@ -3140,12 +3148,22 @@
             const existingPhotosDiv = document.getElementById('existing-photos');
             existingPhotosDiv.innerHTML = '';
             const photos = tr.images || (tr.image ? [tr.image] : []);
+            removedPhotoIndices = new Set();
             photos.forEach((photoPath, idx) => {
                 const thumb = document.createElement('div');
                 thumb.className = 'photo-thumb';
+                thumb.id = `photo-thumb-${idx}`;
                 const img = document.createElement('img');
                 img.src = getImgUrl(photoPath);
                 thumb.appendChild(img);
+
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'remove-photo';
+                removeBtn.type = 'button';
+                removeBtn.innerHTML = '✕';
+                removeBtn.onclick = (e) => { e.preventDefault(); removeExistingPhoto(idx); };
+                thumb.appendChild(removeBtn);
+
                 existingPhotosDiv.appendChild(thumb);
             });
 
@@ -3167,6 +3185,15 @@
             // Draw route on map after it initializes
             setTimeout(updateRouteDisplay, 300);
         }
+        function removeExistingPhoto(idx) {
+            removedPhotoIndices.add(idx);
+            const thumb = document.getElementById(`photo-thumb-${idx}`);
+            if (thumb) {
+                thumb.style.opacity = '0.5';
+                thumb.style.textDecoration = 'line-through';
+            }
+        }
+
         function removeEntryPhoto() {
             removeEntryPhotoFlag = true;
             document.getElementById('photo-preview').style.display = 'none';
