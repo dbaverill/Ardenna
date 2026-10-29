@@ -436,5 +436,16 @@
       -70.86971282958986
     ],
     "isPassage": false
+  },
+  {
+    "title": "Day 1 - It’s on!",
+    "date": "2026-10-29",
+    "text": "Day one and we’re on our way.  We left the dock exactly at 0700 and motored out through Boston Harbor entering the Bay the long way (it was very low, low tide). From there we set a line to Provincetown making 8.4 - 8.8 knots on a broad reach in 18-22kts true.  Along the way we dodged lobster pots and then dodged some more and saw whales. Cape Cod is really amazing and never gets old.  It was a happy day of hanging out together in the cockpit and getting acquainted with Ardenna.  She’s in her element on long passages. We’ve got a touch of early sea sickness going around but spirits are still high.  We’ve got to make time to cross the Gulf Stream in the wee hours of Saturday morning so it’s a bit of a grind.  ",
+    "miles": "",
+    "route": [],
+    "isPassage": true,
+    "passageName": "Boston to Samana",
+    "passageId": "boston-to-samana-2026-10-29",
+    "passageStart": true
   }
 ]
