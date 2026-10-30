@@ -459,5 +459,27 @@
     "passageName": "Boston to Samana",
     "passageId": "boston-to-samana-2026-10-29",
     "passageStart": true
+  },
+  {
+    "title": "Day 2 - Weather routers and a change of plans",
+    "date": "2026-10-30",
+    "text": "It’s an amazing day of sailing with jib and full main flying in 18-20kts averaging 8.2-8.5kts.  Everyone’s seasickness is gone and we’re starting to get into a crew groove.  For this trip we’ve hired a weather routers to support high level decision-making.  It’s especially helpful when you’re tired and felling a bit snow blind.  This morning I asked for an updated point of view on getting from our current position to Samaná and quickly decided to bail out for a day or two in Bermuda.  There is a big trough at 31N and a tropical storm forming in South Florida that is going to barrel up the coast so if we outrun it, and we probably would, then happy days.  If not, gale force winds, thunderstorms, etc.  Tonight we cross the Gulf Stream and then head to Bermuda.  Glad I still have the courtesy flag. ",
+    "miles": "190",
+    "images": [
+      "images/1793385784751-images.webp"
+    ],
+    "route": [
+      [
+        38.94979740456157,
+        -69.45556640625001
+      ]
+    ],
+    "startCoords": [
+      38.94979740456157,
+      -69.45556640625001
+    ],
+    "isPassage": true,
+    "passageName": "Boston to Samana",
+    "passageId": "boston-to-samana-2026-10-29"
   }
 ]
