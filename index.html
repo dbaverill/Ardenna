@@ -2305,7 +2305,7 @@
         function renderMasonryLog() {
             if(!Array.isArray(trips)) trips=[];
 
-            const sortedTrips = [...trips].sort((a,b) => new Date(b.date) - new Date(a.date));
+            const sortedTrips = [...trips].sort((a,b) => parseLocalDate(b.date) - parseLocalDate(a.date));
 
             // Build dynamic year filter pills
             const yearPillsContainer = document.getElementById('year-pills-container');
@@ -2382,7 +2382,7 @@
                         <div id="map-${trip.date}" class="masonry-map-container"></div>
                     </div>
                     <div class="masonry-content">
-                        <div class="masonry-date">${new Date(trip.date).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'}).toUpperCase()}</div>
+                        <div class="masonry-date">${parseLocalDate(trip.date).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'}).toUpperCase()}</div>
                         <h3 class="masonry-title">${trip.title}</h3>
                         <p class="masonry-excerpt">${trip.text.substring(0, 150)}${trip.text.length > 150 ? '...' : ''}</p>
                         <div class="masonry-stats">
@@ -2578,8 +2578,8 @@
         
         function openEntryModal(trip) {
             // Populate modal content
-            document.getElementById('modal-entry-date').textContent = 
-                new Date(trip.date).toLocaleDateString('en-US', {month: 'long', day: 'numeric', year: 'numeric'}).toUpperCase();
+            document.getElementById('modal-entry-date').textContent =
+                parseLocalDate(trip.date).toLocaleDateString('en-US', {month: 'long', day: 'numeric', year: 'numeric'}).toUpperCase();
             document.getElementById('modal-entry-title').textContent = trip.title;
             
             // Build meta info
