@@ -460,29 +460,6 @@
     "passageId": "boston-to-samana-2026-10-29"
   },
   {
-    "title": "Day 1 - It’s on!",
-    "date": "2026-10-29",
-    "text": "Day one and we’re on our way.  We left the dock exactly at 0700 and motored out through Boston Harbor entering the Bay the long way (it was very low, low tide). From there we set a line to Provincetown making 8.4 - 8.8 knots on a broad reach in 18-22kts true.  Along the way we dodged lobster pots and then dodged some more and saw whales. Cape Cod is really amazing and never gets old.  It was a happy day of hanging out together in the cockpit and getting acquainted with Ardenna.  She’s in her element on long passages. We’ve got a touch of early sea sickness going around but spirits are still high.  We’ve got to make time to cross the Gulf Stream in the wee hours of Saturday morning so it’s a bit of a grind.  ",
-    "miles": "",
-    "images": [
-      "images/1793312862157-IMG_1002.jpeg"
-    ],
-    "route": [
-      [
-        41.59843538718607,
-        -69.75219726562501
-      ]
-    ],
-    "startCoords": [
-      41.59843538718607,
-      -69.75219726562501
-    ],
-    "isPassage": true,
-    "passageName": "Boston to Samana",
-    "passageId": "boston-to-samana-2026-10-29",
-    "passageStart": true
-  },
-  {
     "title": "Day 3 - Halloween ghosts as we cross the Gulfstream",
     "date": "2026-10-31",
     "text": "It was a physically taxing day as we entered the Gulfstream overnight before the moon rose and experienced the power of wind and current together.  We have carefully planned with our weather router the entry point and timing but it was still, as Mike said, ‘full on.’  We had a nice day of sailing a broad reach with winds 20-25g30 under full main and jib (a 103).  The waves really were 8-10 with plenty of 12’ but the period was manageable.  The current was at just enough of an angle at we all found every hand hold in the boat.  James and Kathy reported 13.1kts on the back of a wave and Mike yelled out 14.2kts.  Ardenna is loving this and happy to chew up miles.  We set a boat record yesterday 217 miles in 24 hours.  \n\nThe crew is doing great.  Jake’s and Kathy are ready for their own Contest and Mike would rather hang out in the cockpit and take it all in.  Next stop Bermuda. ",
@@ -506,5 +483,29 @@
     "isPassage": true,
     "passageName": "Boston to Samana",
     "passageId": "boston-to-samana-2026-10-29"
+  },
+  {
+    "title": "Day 1 - It’s on!",
+    "date": "2026-10-29",
+    "text": "Day one and we’re on our way.  We left the dock exactly at 0700 and motored out through Boston Harbor entering the Bay the long way (it was very low, low tide). From there we set a line to Provincetown making 8.4 - 8.8 knots on a broad reach in 18-22kts true.  Along the way we dodged lobster pots and then dodged some more and saw whales. Cape Cod is really amazing and never gets old.  It was a happy day of hanging out together in the cockpit and getting acquainted with Ardenna.  She’s in her element on long passages. We’ve got a touch of early sea sickness going around but spirits are still high.  We’ve got to make time to cross the Gulf Stream in the wee hours of Saturday morning so it’s a bit of a grind.  ",
+    "miles": "",
+    "images": [
+      "images/1793312862157-IMG_1002.jpeg"
+    ],
+    "heroImage": true,
+    "route": [
+      [
+        41.59843538718607,
+        -69.75219726562501
+      ]
+    ],
+    "startCoords": [
+      41.59843538718607,
+      -69.75219726562501
+    ],
+    "isPassage": true,
+    "passageName": "Boston to Samana",
+    "passageId": "boston-to-samana-2026-10-29",
+    "passageStart": true
   }
 ]
