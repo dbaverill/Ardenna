@@ -481,5 +481,29 @@
     "passageName": "Boston to Samana",
     "passageId": "boston-to-samana-2026-10-29",
     "passageStart": true
+  },
+  {
+    "title": "Day 3 - Halloween ghosts as we cross the Gulfstream",
+    "date": "2026-11-01",
+    "text": "",
+    "miles": "217",
+    "images": [
+      "images/1793533295534-IMG_0747.jpeg",
+      "images/1793533299391-IMG_4905_Original.jpeg",
+      "images/1793533306696-IMG_4902_Original.jpeg"
+    ],
+    "route": [
+      [
+        38.26,
+        -69.42
+      ]
+    ],
+    "startCoords": [
+      38.26,
+      -69.42
+    ],
+    "isPassage": true,
+    "passageName": "Boston to Samana",
+    "passageId": "boston-to-samana-2026-10-29"
   }
 ]
