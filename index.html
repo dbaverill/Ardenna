@@ -233,6 +233,12 @@
             width: 100%;
             height: 100%;
         }
+        .masonry-hero-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
         .masonry-content {
             padding: 25px;
         }
@@ -1176,6 +1182,13 @@
                         <input type="file" id="photoInput" accept="image/*" multiple style="width:100%; margin-bottom:10px;">
                         <div id="photo-preview" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;"></div>
                         <div id="existing-photos" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;"></div>
+                        <div id="hero-image-toggle" style="padding:10px; background:#f0f4f8; border-radius:6px; border:1px solid #dde;">
+                            <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                                <input type="checkbox" id="heroImageCheck" style="width:auto; margin:0;">
+                                <span style="font-weight:600; color:#2c3e50;">Use first photo as hero</span>
+                                <span style="font-size:0.85em; color:#7f8c8d;">(replaces map on card)</span>
+                            </label>
+                        </div>
                     </div>
                     <div style="display:flex; gap:10px; margin-top:20px;">
                         <button class="primary" onclick="saveEntryToGitHub()">Save Entry</button>
@@ -2373,13 +2386,18 @@
                 card.className = 'masonry-card';
                 card.id = `card-${trip.date}`;
                 
+                const useHeroImg = trip.heroImage && trip.images && trip.images.length > 0;
+                const allImgUrls = useHeroImg ? trip.images.map(img => `'${getImgUrl(img)}'`).join(',') : '';
+
                 card.innerHTML = `
                     <div class="masonry-admin-actions">
                         <button class="masonry-admin-btn masonry-edit-btn" onclick="event.stopPropagation();editTrip('${trip.date}','${trip.title.replace("'", "\'")}')">✎</button>
                         <button class="masonry-admin-btn masonry-delete-btn" onclick="event.stopPropagation();deleteTrip('${trip.date}','${trip.title.replace("'", "\'")}')">✕</button>
                     </div>
                     <div class="masonry-map">
-                        <div id="map-${trip.date}" class="masonry-map-container"></div>
+                        ${useHeroImg
+                            ? `<img class="masonry-hero-img" src="${getImgUrl(trip.images[0])}" onclick="event.stopPropagation(); openLightbox([${allImgUrls}])">`
+                            : `<div id="map-${trip.date}" class="masonry-map-container"></div>`}
                     </div>
                     <div class="masonry-content">
                         <div class="masonry-date">${parseLocalDate(trip.date).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'}).toUpperCase()}</div>
@@ -2388,13 +2406,19 @@
                         <div class="masonry-stats">
                             ${trip.miles ? `<span>${trip.miles} nm</span>` : ''}
                             ${trip.route && trip.route.length > 0 ? `<span>${trip.route.length} waypoints</span>` : ''}
-                            ${trip.images && trip.images.length > 0 ? `<span style="display:flex; align-items:center; gap:5px; cursor:pointer;" onclick="event.stopPropagation(); openLightbox([${trip.images.map(img => "'" + getImgUrl(img) + "'").join(',')}])">
-                                <img src="${getImgUrl(trip.images[0])}" style="width:40px; height:40px; object-fit:cover; border-radius:4px; border:1px solid #ddd;">
-                                ${trip.images.length > 1 ? `${trip.images.length} Photos` : 'Photo'}
-                            </span>` : trip.image ? `<span style="display:flex; align-items:center; gap:5px; cursor:pointer;" onclick="event.stopPropagation(); openLightbox('${getImgUrl(trip.image)}')">
-                                <img src="${getImgUrl(trip.image)}" style="width:40px; height:40px; object-fit:cover; border-radius:4px; border:1px solid #ddd;">
-                                Photo
-                            </span>` : ''}
+                            ${trip.images && trip.images.length > 0
+                                ? useHeroImg && trip.images.length > 1
+                                    ? `<span style="cursor:pointer;" onclick="event.stopPropagation(); openLightbox([${allImgUrls}])">📷 ${trip.images.length} Photos</span>`
+                                    : !useHeroImg
+                                        ? `<span style="display:flex; align-items:center; gap:5px; cursor:pointer;" onclick="event.stopPropagation(); openLightbox([${allImgUrls}])">
+                                            <img src="${getImgUrl(trip.images[0])}" style="width:40px; height:40px; object-fit:cover; border-radius:4px; border:1px solid #ddd;">
+                                            ${trip.images.length > 1 ? `${trip.images.length} Photos` : 'Photo'}
+                                        </span>`
+                                        : ''
+                                : trip.image ? `<span style="display:flex; align-items:center; gap:5px; cursor:pointer;" onclick="event.stopPropagation(); openLightbox('${getImgUrl(trip.image)}')">
+                                    <img src="${getImgUrl(trip.image)}" style="width:40px; height:40px; object-fit:cover; border-radius:4px; border:1px solid #ddd;">
+                                    Photo
+                                </span>` : ''}
                         </div>
                         ${trip.passageName ? `<div style="margin-top:8px; font-size:0.8em; color:#8e44ad; font-weight:600;">⚓ ${trip.passageName}${trip.passageStart ? ' &middot; Departure' : ''}${trip.passageEnd ? ' &middot; Arrival' : ''}</div>` : ''}
                     </div>
@@ -2411,8 +2435,9 @@
                 
                 gridContainer.appendChild(card);
                 
-                // Always initialize map
-                setTimeout(() => initMasonryMap(trip, `map-${trip.date}`), 100 + (index * 50));
+                if (!useHeroImg) {
+                    setTimeout(() => initMasonryMap(trip, `map-${trip.date}`), 100 + (index * 50));
+                }
             });
             
             checkAdmin();
@@ -2595,17 +2620,23 @@
             }
             document.getElementById('modal-entry-meta').innerHTML = metaHtml;
             
-            // Show photo if exists
+            // Show hero image if flagged, otherwise fall back to legacy single image
             const photoContainer = document.getElementById('modal-photo-container');
             const mapSection = document.getElementById('modal-map-section');
-            
-            if (trip.image) {
-                document.getElementById('modal-photo').src = getImgUrl(trip.image);
+            const firstImage = (trip.images && trip.images.length > 0) ? trip.images[0] : trip.image;
+
+            if (trip.heroImage && firstImage) {
+                const modalPhoto = document.getElementById('modal-photo');
+                modalPhoto.src = getImgUrl(firstImage);
+                const allUrls = trip.images && trip.images.length > 1
+                    ? trip.images.map(img => getImgUrl(img))
+                    : getImgUrl(firstImage);
+                modalPhoto.onclick = () => openLightbox(allUrls);
                 photoContainer.style.display = 'block';
             } else {
                 photoContainer.style.display = 'none';
             }
-            
+
             // Always show map section
             mapSection.style.display = 'block';
             
@@ -2833,6 +2864,7 @@
                     document.getElementById('passageEnd').checked=false;
                     document.getElementById('passage-fields').style.display='none';
                     document.getElementById('form-title').innerText="New Entry";
+                    document.getElementById('heroImageCheck').checked=false;
                     document.getElementById('photoInput').value='';
                     document.getElementById('photo-preview').innerHTML='';
                     document.getElementById('existing-photos').innerHTML='';
@@ -3095,12 +3127,14 @@
                 }
             }
 
+            const heroImage = document.getElementById('heroImageCheck').checked;
             const entry = {
                 title:t,
                 date:d,
                 text:document.getElementById('narrative').value,
                 miles:document.getElementById('miles').value,
                 images:images.length > 0 ? images : undefined,
+                heroImage: heroImage || undefined,
                 route:currentRoute,
                 startCoords:currentRoute[0],
                 isPassage:isPassage
@@ -3166,6 +3200,8 @@
 
                 existingPhotosDiv.appendChild(thumb);
             });
+
+            document.getElementById('heroImageCheck').checked = tr.heroImage || false;
 
             // Clear file input
             document.getElementById('photoInput').value = '';
