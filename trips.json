@@ -513,6 +513,10 @@
     "date": "2026-11-01",
     "text": "",
     "miles": "",
+    "images": [
+      "images/1793578714506-IMG_4910_Original.jpeg"
+    ],
+    "heroImage": true,
     "route": [
       [
         33.46,
