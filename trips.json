@@ -507,5 +507,24 @@
     "passageName": "Boston to Samana",
     "passageId": "boston-to-samana-2026-10-29",
     "passageStart": true
+  },
+  {
+    "title": "Day 4 - the Gulf Stream payoff",
+    "date": "2026-11-01",
+    "text": "",
+    "miles": "",
+    "route": [
+      [
+        33.46,
+        -64.5
+      ]
+    ],
+    "startCoords": [
+      33.46,
+      -64.5
+    ],
+    "isPassage": true,
+    "passageName": "Boston to Samana",
+    "passageId": "boston-to-samana-2026-10-29"
   }
 ]
