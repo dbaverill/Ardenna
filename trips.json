@@ -530,5 +530,29 @@
     "isPassage": true,
     "passageName": "Boston to Samana",
     "passageId": "boston-to-samana-2026-10-29"
+  },
+  {
+    "title": "Day 5 - Land Ho!",
+    "date": "2026-11-03",
+    "text": "Temp",
+    "miles": "",
+    "images": [
+      "images/1793708320241-IMG_6599.jpeg",
+      "images/1793708406748-IMG_6605.jpeg"
+    ],
+    "heroImage": true,
+    "route": [
+      [
+        32.38033691492108,
+        -64.67331647872926
+      ]
+    ],
+    "startCoords": [
+      32.38033691492108,
+      -64.67331647872926
+    ],
+    "isPassage": true,
+    "passageName": "Boston to Samana",
+    "passageId": "boston-to-samana-2026-10-29"
   }
 ]
