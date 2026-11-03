@@ -358,12 +358,19 @@
         #u-photo-preview img:hover { border-color: #3498db; opacity: 0.8; }
 
         #photo-preview { display: flex; gap: 8px; flex-wrap: wrap; }
-        #photo-preview img { width: 80px; height: 80px; object-fit: cover; border-radius: 4px; border: 2px solid #3498db; }
         #existing-photos { display: flex; gap: 8px; flex-wrap: wrap; }
+        #photo-preview .photo-thumb,
         #existing-photos .photo-thumb { position: relative; }
-        #existing-photos img { width: 80px; height: 80px; object-fit: cover; border-radius: 4px; border: 2px solid #95a5a6; }
-        #existing-photos .remove-photo { position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; background: #e74c3c; color: white; border: none; border-radius: 50%; cursor: pointer; display: none; align-items: center; justify-content: center; font-size: 0.8em; }
-        #existing-photos .photo-thumb:hover .remove-photo { display: flex; }
+        #photo-preview .photo-thumb img,
+        #existing-photos .photo-thumb img { width: 80px; height: 80px; object-fit: cover; border-radius: 4px; border: 2px solid #95a5a6; display: block; }
+        #photo-preview .photo-thumb.is-first img,
+        #existing-photos .photo-thumb.is-first img { border-color: #f39c12; }
+        .remove-photo { position: absolute; top: -8px; right: -8px; width: 22px; height: 22px; background: #e74c3c; color: white; border: none; border-radius: 50%; cursor: pointer; display: none; align-items: center; justify-content: center; font-size: 0.75em; }
+        .photo-thumb:hover .remove-photo { display: flex; }
+        .set-hero-btn { position: absolute; bottom: -9px; left: 50%; transform: translateX(-50%); background: #95a5a6; color: white; border: none; border-radius: 8px; font-size: 0.6em; padding: 2px 5px; cursor: pointer; white-space: nowrap; display: none; }
+        .photo-thumb:hover .set-hero-btn { display: block; }
+        .photo-thumb.is-first .set-hero-btn { display: none !important; }
+        .photo-hero-badge { position: absolute; top: 2px; left: 2px; background: #f39c12; color: white; font-size: 0.6em; padding: 1px 5px; border-radius: 3px; font-weight: 700; pointer-events: none; }
 
         .update-photo-gallery { display: flex; gap: 10px; overflow-x: auto; margin-top: 15px; padding-bottom: 10px; }
         .update-photo-gallery img { width: 120px; height: 120px; object-fit: cover; border-radius: 6px; cursor: pointer; flex-shrink: 0; }
@@ -1176,6 +1183,13 @@
                         <input type="file" id="photoInput" accept="image/*" multiple style="width:100%; margin-bottom:10px;">
                         <div id="photo-preview" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;"></div>
                         <div id="existing-photos" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;"></div>
+                        <div id="hero-image-toggle" style="padding:10px; background:#f0f4f8; border-radius:6px; border:1px solid #dde;">
+                            <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                                <input type="checkbox" id="heroImageCheck" style="width:auto; margin:0;" onchange="renderNewPhotoPreviews(); renderExistingPhotos();">
+                                <span style="font-weight:600; color:#2c3e50;">Use first photo as hero</span>
+                                <span style="font-size:0.85em; color:#7f8c8d;">(replaces map on card)</span>
+                            </label>
+                        </div>
                     </div>
                     <div style="display:flex; gap:10px; margin-top:20px;">
                         <button class="primary" onclick="saveEntryToGitHub()">Save Entry</button>
@@ -1412,6 +1426,7 @@
         let map;
         let lightboxImages = [], lightboxCurrentIndex = 0;
         let removedPhotoIndices = new Set();
+        let newPhotoFiles = [];
         
         // --- INITIALIZE MAP (only if element exists - old layout) ---
         if (typeof L !== 'undefined' && document.getElementById('map')) {
@@ -1506,24 +1521,105 @@
         };
 
         document.getElementById('photoInput').onchange = function() {
-            const preview = document.getElementById('photo-preview');
-            preview.innerHTML = '';
-            const fileCount = this.files.length;
-            if(fileCount > 5) {
+            if(this.files.length > 5) {
                 alert('Maximum 5 photos allowed');
                 this.value = '';
                 return;
             }
-            for(let file of this.files) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-                    preview.appendChild(img);
-                };
-                reader.readAsDataURL(file);
-            }
+            newPhotoFiles = Array.from(this.files);
+            renderNewPhotoPreviews();
         };
+
+        function renderNewPhotoPreviews() {
+            const preview = document.getElementById('photo-preview');
+            preview.innerHTML = '';
+            const showHero = document.getElementById('heroImageCheck').checked;
+            newPhotoFiles.forEach((file, idx) => {
+                const thumb = document.createElement('div');
+                thumb.className = 'photo-thumb' + (idx === 0 ? ' is-first' : '');
+                const img = document.createElement('img');
+                const reader = new FileReader();
+                reader.onload = e => { img.src = e.target.result; };
+                reader.readAsDataURL(file);
+                thumb.appendChild(img);
+                if (showHero && idx === 0) {
+                    const badge = document.createElement('div');
+                    badge.className = 'photo-hero-badge';
+                    badge.textContent = '★ 1st';
+                    thumb.appendChild(badge);
+                }
+                if (newPhotoFiles.length > 1) {
+                    const starBtn = document.createElement('button');
+                    starBtn.className = 'set-hero-btn';
+                    starBtn.type = 'button';
+                    starBtn.textContent = '★ Set first';
+                    starBtn.onclick = (e) => { e.preventDefault(); setNewPhotoFirst(idx); };
+                    thumb.appendChild(starBtn);
+                }
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'remove-photo';
+                removeBtn.type = 'button';
+                removeBtn.innerHTML = '✕';
+                removeBtn.onclick = (e) => { e.preventDefault(); newPhotoFiles.splice(idx, 1); renderNewPhotoPreviews(); };
+                thumb.appendChild(removeBtn);
+                preview.appendChild(thumb);
+            });
+        }
+
+        function setNewPhotoFirst(idx) {
+            const [picked] = newPhotoFiles.splice(idx, 1);
+            newPhotoFiles.unshift(picked);
+            renderNewPhotoPreviews();
+        }
+
+        function renderExistingPhotos() {
+            const existingPhotosDiv = document.getElementById('existing-photos');
+            existingPhotosDiv.innerHTML = '';
+            const photos = (editingTrip?.images || (editingTrip?.image ? [editingTrip.image] : []))
+                .filter((_, idx) => !removedPhotoIndices.has(idx));
+            const showHero = document.getElementById('heroImageCheck').checked;
+            photos.forEach((photoPath, idx) => {
+                const thumb = document.createElement('div');
+                thumb.className = 'photo-thumb' + (idx === 0 ? ' is-first' : '');
+                const img = document.createElement('img');
+                img.src = getImgUrl(photoPath);
+                thumb.appendChild(img);
+                if (showHero && idx === 0) {
+                    const badge = document.createElement('div');
+                    badge.className = 'photo-hero-badge';
+                    badge.textContent = '★ 1st';
+                    thumb.appendChild(badge);
+                }
+                if (photos.length > 1) {
+                    const starBtn = document.createElement('button');
+                    starBtn.className = 'set-hero-btn';
+                    starBtn.type = 'button';
+                    starBtn.textContent = '★ Set first';
+                    starBtn.onclick = (e) => { e.preventDefault(); setExistingPhotoFirst(photoPath); };
+                    thumb.appendChild(starBtn);
+                }
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'remove-photo';
+                removeBtn.type = 'button';
+                removeBtn.innerHTML = '✕';
+                removeBtn.onclick = (e) => { e.preventDefault(); removeExistingPhoto(idx); };
+                thumb.appendChild(removeBtn);
+                existingPhotosDiv.appendChild(thumb);
+            });
+        }
+
+        function setExistingPhotoFirst(photoPath) {
+            if (!editingTrip) return;
+            const imgs = editingTrip.images || (editingTrip.image ? [editingTrip.image] : []);
+            const idx = imgs.indexOf(photoPath);
+            if (idx > 0) {
+                imgs.splice(idx, 1);
+                imgs.unshift(photoPath);
+                editingTrip.images = imgs;
+                removedPhotoIndices = new Set();
+            }
+            renderExistingPhotos();
+        }
 
         function openLightbox(urlOrArray) {
             // Handle both single URL (backward compatibility) and array of URLs
@@ -2836,6 +2932,7 @@
                     document.getElementById('photoInput').value='';
                     document.getElementById('photo-preview').innerHTML='';
                     document.getElementById('existing-photos').innerHTML='';
+                    newPhotoFiles = [];
                     removeEntryPhotoFlag = false;
                     removedPhotoIndices = new Set();
                     clearRouteInput();
@@ -3054,9 +3151,8 @@
                 images = images.filter((_, idx) => !removedPhotoIndices.has(idx));
             }
 
-            if(f.files.length > 0) {
-                // Add newly uploaded photos
-                for(let file of f.files) {
+            if(newPhotoFiles.length > 0) {
+                for(let file of newPhotoFiles) {
                     const img = await ghUploadImage(file);
                     if(img) images.push(img);
                 }
@@ -3144,33 +3240,15 @@
             }
             currentRoute=getTripPoints(tr);
 
-            // Show existing photos if present
-            const existingPhotosDiv = document.getElementById('existing-photos');
-            existingPhotosDiv.innerHTML = '';
-            const photos = tr.images || (tr.image ? [tr.image] : []);
             removedPhotoIndices = new Set();
-            photos.forEach((photoPath, idx) => {
-                const thumb = document.createElement('div');
-                thumb.className = 'photo-thumb';
-                thumb.id = `photo-thumb-${idx}`;
-                const img = document.createElement('img');
-                img.src = getImgUrl(photoPath);
-                thumb.appendChild(img);
-
-                const removeBtn = document.createElement('button');
-                removeBtn.className = 'remove-photo';
-                removeBtn.type = 'button';
-                removeBtn.innerHTML = '✕';
-                removeBtn.onclick = (e) => { e.preventDefault(); removeExistingPhoto(idx); };
-                thumb.appendChild(removeBtn);
-
-                existingPhotosDiv.appendChild(thumb);
-            });
+            document.getElementById('heroImageCheck').checked = tr.heroImage || false;
+            renderExistingPhotos();
 
             // Clear file input
             document.getElementById('photoInput').value = '';
             document.getElementById('photo-preview').innerHTML = '';
-            
+            newPhotoFiles = [];
+
             // Update the route text display immediately
             const e=document.getElementById('route-display');
             if(!currentRoute.length) {
@@ -3186,12 +3264,17 @@
             setTimeout(updateRouteDisplay, 300);
         }
         function removeExistingPhoto(idx) {
-            removedPhotoIndices.add(idx);
-            const thumb = document.getElementById(`photo-thumb-${idx}`);
-            if (thumb) {
-                thumb.style.opacity = '0.5';
-                thumb.style.textDecoration = 'line-through';
+            // idx here is the index in the currently-displayed (non-removed) photos,
+            // but removedPhotoIndices tracks indices in the original editingTrip.images.
+            // Re-map: find the original index by skipping already-removed slots.
+            const origPhotos = editingTrip?.images || (editingTrip?.image ? [editingTrip.image] : []);
+            let displayIdx = 0;
+            for (let i = 0; i < origPhotos.length; i++) {
+                if (removedPhotoIndices.has(i)) continue;
+                if (displayIdx === idx) { removedPhotoIndices.add(i); break; }
+                displayIdx++;
             }
+            renderExistingPhotos();
         }
 
         function removeEntryPhoto() {
