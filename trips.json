@@ -554,5 +554,16 @@
     "isPassage": true,
     "passageName": "Boston to Samana",
     "passageId": "boston-to-samana-2026-10-29"
+  },
+  {
+    "title": "Beers with King Charles",
+    "date": "2026-11-05",
+    "text": "",
+    "miles": "",
+    "images": [
+      "images/1793880323402-IMG_2099.HEIC"
+    ],
+    "route": [],
+    "isPassage": false
   }
 ]
