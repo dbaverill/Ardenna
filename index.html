@@ -1701,19 +1701,20 @@
             showLoading(true);
             try {
                 console.log('Loading data from GitHub...');
-                const tData = await ghGet('trips.json'); trips = (tData && Array.isArray(tData.content)) ? tData.content : [];
-                console.log('Trips loaded:', trips.length);
-                
-                const mData = await ghGet('manifest.json'); manifest = (mData && mData.content) ? mData.content : { specs: "", crew: [], gallery: [] };
+                const [tData, mData, upData, bookData] = await Promise.all([
+                    ghGet('trips.json'),
+                    ghGet('manifest.json'),
+                    ghGet('updates.json'),
+                    ghGet('bookings.json')
+                ]);
+
+                trips = (tData && Array.isArray(tData.content)) ? tData.content : [];
+                manifest = (mData && mData.content) ? mData.content : { specs: "", crew: [], gallery: [] };
                 if(!manifest.gallery) manifest.gallery = [];
                 if(!manifest.crew) manifest.crew = [];
-                console.log('Manifest loaded');
-                
-                const upData = await ghGet('updates.json'); updates = (upData && Array.isArray(upData.content)) ? upData.content : [];
-                console.log('Updates loaded:', updates.length);
-                
-                const bookData = await ghGet('bookings.json'); bookings = (bookData && Array.isArray(bookData.content)) ? bookData.content : [];
-                console.log('Bookings loaded:', bookings.length);
+                updates = (upData && Array.isArray(upData.content)) ? upData.content : [];
+                bookings = (bookData && Array.isArray(bookData.content)) ? bookData.content : [];
+                console.log('Data loaded — trips:', trips.length, 'updates:', updates.length, 'bookings:', bookings.length);
                 
                 console.log('Rendering logbook...');
                 renderLog();
