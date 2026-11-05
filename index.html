@@ -1691,7 +1691,24 @@
             }
         });
 
-        async function ghGet(path) { try { const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}?ref=${CONFIG.branch}&t=${Date.now()}`, { headers: GH_TOKEN ? { "Authorization": `token ${GH_TOKEN}` } : {}, cache: "no-store" }); if (!res.ok) return null; const data = await res.json(); return { sha: data.sha, content: JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(data.content), c => c.charCodeAt(0)))) }; } catch(e) { return null; } }
+        const _ghCache = {};
+        const _ghCacheTTL = 60000;
+        async function ghGet(path) {
+            const isAdmin = !!GH_TOKEN;
+            if (!isAdmin) {
+                const hit = _ghCache[path];
+                if (hit && (Date.now() - hit.ts < _ghCacheTTL)) return hit.data;
+            }
+            try {
+                const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}?ref=${CONFIG.branch}${isAdmin ? `&t=${Date.now()}` : ''}`;
+                const res = await fetch(url, { headers: GH_TOKEN ? { "Authorization": `token ${GH_TOKEN}` } : {}, cache: isAdmin ? "no-store" : "default" });
+                if (!res.ok) return null;
+                const data = await res.json();
+                const result = { sha: data.sha, content: JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(data.content), c => c.charCodeAt(0)))) };
+                if (!isAdmin) _ghCache[path] = { data: result, ts: Date.now() };
+                return result;
+            } catch(e) { return null; }
+        }
         async function ghPut(path, content, message, sha = null) { if (!GH_TOKEN) return alert("Admin Token Missing"); showLoading(true); try { const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}`, { method: 'PUT', headers: { "Authorization": `token ${GH_TOKEN}`, "Content-Type": "application/json" }, body: JSON.stringify({ message: message, content: btoa(String.fromCharCode(...new Uint8Array(new TextEncoder().encode(content)))), branch: CONFIG.branch, sha: sha }) }); showLoading(false); return res.ok; } catch(e) { showLoading(false); alert("Error saving: " + e.message); return false; } }
         async function ghUploadImage(file) { if (!GH_TOKEN) return null; showLoading(true); const filename = `images/${Date.now()}-${file.name.replace(/\s/g, '_')}`; const base64 = await new Promise(r => { const reader = new FileReader(); reader.onloadend = () => r(reader.result.split(',')[1]); reader.readAsDataURL(file); }); const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${filename}`, { method: 'PUT', headers: { "Authorization": `token ${GH_TOKEN}`, "Content-Type": "application/json" }, body: JSON.stringify({ message: `Upload ${filename}`, content: base64, branch: CONFIG.branch }) }); showLoading(false); return res.ok ? filename : null; }
         function getImgUrl(path) { return path ? (path.startsWith('http') ? path : `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${path}`) : ''; }
