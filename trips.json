@@ -584,9 +584,22 @@
   {
     "title": "A Royal English Breakfast",
     "date": "2026-11-04",
-    "text": "",
+    "text": "Started today with a Royal English Breakfast at a local place called the Spot.  Stuffed ourselves silly and after a quick trip to the hardware store, we spent the afternoon lounging off breakfast.  It was a much needed day of rest - and we rewarded ourselves with Guiness on the porch of the yacht club.  Dinner was aboard and bed was early.  ",
     "miles": "",
-    "route": [],
+    "images": [
+      "images/1793882590642-IMG_0550.jpeg"
+    ],
+    "heroImage": true,
+    "route": [
+      [
+        32.29085917704757,
+        -64.7752618789673
+      ]
+    ],
+    "startCoords": [
+      32.29085917704757,
+      -64.7752618789673
+    ],
     "isPassage": true,
     "passageName": "Boston to Samana",
     "passageId": "boston-to-samana-2026-10-29"
