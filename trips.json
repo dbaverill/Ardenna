@@ -580,5 +580,15 @@
     "isPassage": true,
     "passageName": "Boston to Samana",
     "passageId": "boston-to-samana-2026-10-29"
+  },
+  {
+    "title": "A Royal English Breakfast",
+    "date": "2026-11-04",
+    "text": "",
+    "miles": "",
+    "route": [],
+    "isPassage": true,
+    "passageName": "Boston to Samana",
+    "passageId": "boston-to-samana-2026-10-29"
   }
 ]
