@@ -554,5 +554,22 @@
     "isPassage": true,
     "passageName": "Boston to Samana",
     "passageId": "boston-to-samana-2026-10-29"
+  },
+  {
+    "title": "Beers with the king",
+    "date": "2026-11-03",
+    "text": "",
+    "miles": "",
+    "images": [
+      "images/1793881233452-IMG_2127.HEIC",
+      "images/1793881238142-IMG_2099.HEIC",
+      "images/1793881241114-IMG_2101.HEIC",
+      "images/1793881250942-IMG_2104.HEIC"
+    ],
+    "heroImage": true,
+    "route": [],
+    "isPassage": true,
+    "passageName": "Boston to Samana",
+    "passageId": "boston-to-samana-2026-10-29"
   }
 ]
