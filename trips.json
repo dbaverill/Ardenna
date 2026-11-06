@@ -603,5 +603,15 @@
     "isPassage": true,
     "passageName": "Boston to Samana",
     "passageId": "boston-to-samana-2026-10-29"
+  },
+  {
+    "title": "\"These roads are absolutely terrifying.\"",
+    "date": "2026-11-06",
+    "text": "",
+    "miles": "",
+    "route": [],
+    "isPassage": true,
+    "passageName": "Boston to Samana",
+    "passageId": "boston-to-samana-2026-10-29"
   }
 ]
