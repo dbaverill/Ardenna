@@ -648,6 +648,13 @@
     "date": "2026-11-06",
     "text": "",
     "miles": "",
+    "images": [
+      "images/1794057670864-IMG_2131.HEIC",
+      "images/1794057675268-IMG_2134.HEIC",
+      "images/1794057681886-IMG_2149.HEIC",
+      "images/1794057685856-IMG_2150.HEIC"
+    ],
+    "heroImage": true,
     "route": [],
     "isPassage": true,
     "passageName": "Boston to Samana",
