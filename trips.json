@@ -655,7 +655,16 @@
       "images/1794057685856-IMG_2150.HEIC"
     ],
     "heroImage": true,
-    "route": [],
+    "route": [
+      [
+        32.38079051148496,
+        -64.67187881469728
+      ]
+    ],
+    "startCoords": [
+      32.38079051148496,
+      -64.67187881469728
+    ],
     "isPassage": true,
     "passageName": "Boston to Samana",
     "passageId": "boston-to-samana-2026-10-29"
