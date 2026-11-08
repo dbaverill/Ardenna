@@ -668,5 +668,13 @@
     "isPassage": true,
     "passageName": "Boston to Samana",
     "passageId": "boston-to-samana-2026-10-29"
+  },
+  {
+    "title": "Day 10 - Last minute boat yoga and clear out",
+    "date": "2026-11-07",
+    "text": "",
+    "miles": "",
+    "route": [],
+    "isPassage": false
   }
 ]
