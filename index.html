@@ -2498,8 +2498,8 @@
 
                 card.innerHTML = `
                     <div class="masonry-admin-actions">
-                        <button class="masonry-admin-btn masonry-edit-btn" onclick="event.stopPropagation();editTrip('${trip.date}','${trip.title.replace("'", "\'")}')">✎</button>
-                        <button class="masonry-admin-btn masonry-delete-btn" onclick="event.stopPropagation();deleteTrip('${trip.date}','${trip.title.replace("'", "\'")}')">✕</button>
+                        <button class="masonry-admin-btn masonry-edit-btn">✎</button>
+                        <button class="masonry-admin-btn masonry-delete-btn">✕</button>
                     </div>
                     <div class="masonry-map">
                         ${useHeroImg
@@ -2531,6 +2531,16 @@
                     </div>
                 `;
                 
+                // Attach admin button handlers without string interpolation (avoids apostrophe escaping bugs)
+                card.querySelector('.masonry-edit-btn').addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    editTrip(trip.date, trip.title);
+                });
+                card.querySelector('.masonry-delete-btn').addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    deleteTrip(trip.date, trip.title);
+                });
+
                 // Make card clickable for everyone
                 card.onclick = function() {
                     if (isAdmin) {
