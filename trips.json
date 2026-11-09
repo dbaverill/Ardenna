@@ -704,7 +704,7 @@
   {
     "title": "Day 12 - Waiting for weather",
     "date": "2026-11-09",
-    "text": "Temp",
+    "text": "",
     "miles": "",
     "images": [
       "images/1794265491333-IMG_2166.jpeg",
@@ -712,7 +712,16 @@
       "images/1794265495351-IMG_4956_Copy.jpeg"
     ],
     "heroImage": true,
-    "route": [],
+    "route": [
+      [
+        26,
+        -65.7
+      ]
+    ],
+    "startCoords": [
+      26,
+      -65.7
+    ],
     "isPassage": true,
     "passageName": "Boston to Samana",
     "passageId": "boston-to-samana-2026-10-29"
