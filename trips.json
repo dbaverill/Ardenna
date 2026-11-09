@@ -700,5 +700,15 @@
     "isPassage": true,
     "passageName": "Boston to Samana",
     "passageId": "boston-to-samana-2026-10-29"
+  },
+  {
+    "title": "Day 12 - Waiting for weather",
+    "date": "2026-11-09",
+    "text": "Temp",
+    "miles": "",
+    "route": [],
+    "isPassage": true,
+    "passageName": "Boston to Samana",
+    "passageId": "boston-to-samana-2026-10-29"
   }
 ]
