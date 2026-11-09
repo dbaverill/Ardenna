@@ -706,6 +706,12 @@
     "date": "2026-11-09",
     "text": "Temp",
     "miles": "",
+    "images": [
+      "images/1794265491333-IMG_2166.jpeg",
+      "images/1794265493499-IMG_2165.jpeg",
+      "images/1794265495351-IMG_4956_Copy.jpeg"
+    ],
+    "heroImage": true,
     "route": [],
     "isPassage": true,
     "passageName": "Boston to Samana",
