@@ -735,7 +735,16 @@
       "images/1794350390920-IMG_4964_Original.jpeg"
     ],
     "heroImage": true,
-    "route": [],
+    "route": [
+      [
+        23.8,
+        -66.5
+      ]
+    ],
+    "startCoords": [
+      23.8,
+      -66.5
+    ],
     "isPassage": true,
     "passageName": "Boston to Samana",
     "passageId": "boston-to-samana-2026-10-29"
