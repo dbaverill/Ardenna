@@ -748,5 +748,20 @@
     "isPassage": true,
     "passageName": "Boston to Samana",
     "passageId": "boston-to-samana-2026-10-29"
+  },
+  {
+    "title": "Day 14 - Mahi Mahi on the line",
+    "date": "2026-11-11",
+    "text": "",
+    "miles": "",
+    "images": [
+      "images/1794434651695-IMG_4971_Original.jpeg",
+      "images/1794434666068-IMG_0827.jpeg"
+    ],
+    "heroImage": true,
+    "route": [],
+    "isPassage": true,
+    "passageName": "Boston to Samana",
+    "passageId": "boston-to-samana-2026-10-29"
   }
 ]
