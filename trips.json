@@ -762,12 +762,12 @@
     "route": [
       [
         21.05,
-        67.8
+        -67.8
       ]
     ],
     "startCoords": [
       21.05,
-      67.8
+      -67.8
     ],
     "isPassage": true,
     "passageName": "Boston to Samana",
