@@ -752,14 +752,23 @@
   {
     "title": "Day 14 - Mahi Mahi on the line",
     "date": "2026-11-11",
-    "text": "The started quietly other than the thrum of the engine which has been running for far too long.  The spreadsheet tallying the burn rate and Hobbs meter hours is always on the computer at the nav station.  Coffee was especially good today and the sunrise enjoyable.  We once again settled into the relaxing and zoning out.  Mike noted that time is completely lost these days.  \n\nAbout 8am the wind picked up and came around favorably allowing us to turn off the engine and haul out the full main and yankee.  Once again the lure went out and as Doug was checking the status of the dissipating trough in front of us, the cockpit yelled, ‘fish on!”  It was easy to land as he was, at best, snack sized.  And the woman who said Doug would never catch a fish, remembered to pack limes for ceviche. It was the perfect predinner appetizer and just amazing to think we all did that.  \n\nWe’re under 24 hours to landfall now and just focused on how many more watches to go and what we’ll do once we’re on land.  There will be at least one more log entry but today was a nice blur before the paperwork and hassle of clearing five people and one US flagged vessel into the Dominican Republic tomorrow. ",
+    "text": "The started quietly other than the thrum of the engine which has been running for far too long.  The spreadsheet tallying the burn rate and Hobbs meter hours is always on the computer at the nav station.  Coffee was especially good today and the sunrise enjoyable.  We once again settled into the relaxing and zoning out.  Mike noted that time is completely lost these days.  ",
     "miles": "",
     "images": [
       "images/1794434651695-IMG_4971_Original.jpeg",
       "images/1794434666068-IMG_0827.jpeg"
     ],
     "heroImage": true,
-    "route": [],
+    "route": [
+      [
+        21.05,
+        67.8
+      ]
+    ],
+    "startCoords": [
+      21.05,
+      67.8
+    ],
     "isPassage": true,
     "passageName": "Boston to Samana",
     "passageId": "boston-to-samana-2026-10-29"
