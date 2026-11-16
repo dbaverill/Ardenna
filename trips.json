@@ -778,6 +778,14 @@
     "date": "2026-11-12",
     "text": "",
     "miles": "",
+    "images": [
+      "images/1794834752134-IMG_4986.JPG",
+      "images/1794834753572-IMG_4991.JPG",
+      "images/1794834756400-IMG_4987.JPG",
+      "images/1794834758117-IMG_4984.JPG",
+      "images/1794834759764-IMG_4977.jpeg"
+    ],
+    "heroImage": true,
     "route": [
       [
         19.194072000633486,
