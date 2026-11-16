@@ -772,5 +772,25 @@
     "isPassage": true,
     "passageName": "Boston to Samana",
     "passageId": "boston-to-samana-2026-10-29"
+  },
+  {
+    "title": "Day 15 - Land ho for the final time",
+    "date": "2026-11-12",
+    "text": "",
+    "miles": "",
+    "route": [
+      [
+        19.194072000633486,
+        -69.354887008667
+      ]
+    ],
+    "startCoords": [
+      19.194072000633486,
+      -69.354887008667
+    ],
+    "isPassage": true,
+    "passageName": "Boston to Samana",
+    "passageId": "boston-to-samana-2026-10-29",
+    "passageEnd": true
   }
 ]
