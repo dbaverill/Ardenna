@@ -750,30 +750,6 @@
     "passageId": "boston-to-samana-2026-10-29"
   },
   {
-    "title": "Day 14 - Mahi Mahi on the line",
-    "date": "2026-11-11",
-    "text": "The started quietly other than the thrum of the engine which has been running for far too long.  The spreadsheet tallying the burn rate and Hobbs meter hours is always on the computer at the nav station.  Coffee was especially good today and the sunrise enjoyable.  We once again settled into the relaxing and zoning out.  Mike noted that time is completely lost these days.  ",
-    "miles": "",
-    "images": [
-      "images/1794434651695-IMG_4971_Original.jpeg",
-      "images/1794434666068-IMG_0827.jpeg"
-    ],
-    "heroImage": true,
-    "route": [
-      [
-        21.05,
-        -67.8
-      ]
-    ],
-    "startCoords": [
-      21.05,
-      -67.8
-    ],
-    "isPassage": true,
-    "passageName": "Boston to Samana",
-    "passageId": "boston-to-samana-2026-10-29"
-  },
-  {
     "title": "Day 15 - Land ho for the final time",
     "date": "2026-11-12",
     "text": "It started just past midnight when Marella woke Doug to ask how close a boat needs to be before I should worry. 😳 We knew the waters north of the DR would be busy, but this was a cruise ship superhighway. The Icon of the Seas (1,200 feet, 23 restaurants, a waterslide, a zip line, and an ice rink) came in with a predicted closest point of approach of 150 feet in 20 minutes. I hailed them on 16 and asked for their preferred working channel. By the time we switched to 06, they had already altered course to pass three-quarters of a mile astern. Super professional. Impressive.\n\nMorning came, and everyone started to internalize that the sailing part was almost over. We took turns at the helm, watching for the first glimpse of land. The north side of the DR is impressive, with steep cliffs, thick green vegetation, and puffy cloud banks. We rounded up into the bay and watched the depth drop from 2,500 feet to 75 feet. Wild. Mike took the helm while Doug started cleanup and organization, and then we were suddenly dealing with line squalls and blasts of rain. We kept opening and closing hatches to manage wetness and heat, and rainbows kept appearing and disappearing, a reminder of how lucky we were to have such an enjoyable passage.\n\nAbout ten miles out, we hailed Marina Puerto Bahia on 68 and 16 and got no response. Finally, I messaged them on WhatsApp, and the reply was instant: come to the marina and we’ll get you sorted. Arrival was easy, and customs was straightforward, albeit slow. I’m fairly certain there are a hundred photos of our passports on personal phones, but everyone was very friendly.\n\nThe rest of the day was beer, pool, pizza, and more beer, plus a few mojitos and lots of great conversations. This was an amazing trip with an amazing crew on a gem of a boat that was well prepared. Ardenna was ready for this trip and happy to stretch her legs for the first time in a long time, maybe ever.",
@@ -800,5 +776,29 @@
     "passageName": "Boston to Samana",
     "passageId": "boston-to-samana-2026-10-29",
     "passageEnd": true
+  },
+  {
+    "title": "Day 14 - Mahi Mahi on the line",
+    "date": "2026-11-11",
+    "text": "The started quietly other than the thrum of the engine which has been running for far too long.  The spreadsheet tallying the burn rate and Hobbs meter hours is always on the computer at the nav station.  Coffee was especially good today and the sunrise enjoyable.  We once again settled into the relaxing and zoning out.  Mike noted that time is completely lost these days.  \n\nAbout 9am the line went out again with the same dorado loking lure that snagged a fish yesterday.  Within an hour the call went out, 'fish on!' and a floppy, somewhat small, mahi mahi was recovered.  There was less blood than Marella expected and the filetting was pretty straight forward.  Despite doing it at an angle Doug didn't get any extra nicks or cuts - somewhat surprising.  Kathy wasn't sure about ceviche but came around to it as we passed the tortilla chips before dinner and each took a bite.",
+    "miles": "",
+    "images": [
+      "images/1794434651695-IMG_4971_Original.jpeg",
+      "images/1794434666068-IMG_0827.jpeg"
+    ],
+    "heroImage": true,
+    "route": [
+      [
+        21.05,
+        -67.8
+      ]
+    ],
+    "startCoords": [
+      21.05,
+      -67.8
+    ],
+    "isPassage": true,
+    "passageName": "Boston to Samana",
+    "passageId": "boston-to-samana-2026-10-29"
   }
 ]
